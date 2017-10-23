@@ -19,8 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{612CE42A-38B9-4A00-8813-C1FC2A4BFF2F}</ProjectGuid>
-    <RootNamespace>Messenger</RootNamespace>
+    <ProjectGuid>{E42B0E89-6F9F-49E4-AB30-C406C369E020}</ProjectGuid>
+    <RootNamespace>Client</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
