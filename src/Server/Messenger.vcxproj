@@ -77,12 +77,12 @@
     <LibraryPath>E:\Lib\boost_1_65_0\libs;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>E:\Lib\boost_1_65_0;$(IncludePath)</IncludePath>
-    <LibraryPath>E:\Lib\boost_1_65_0\libs;$(LibraryPath)</LibraryPath>
+    <IncludePath>E:\Lib\boost_1_60_0_x64;$(IncludePath)</IncludePath>
+    <LibraryPath>E:\Lib\boost_1_60_0_x64\libs;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>E:\Lib\boost_1_65_0;$(IncludePath)</IncludePath>
-    <LibraryPath>E:\Lib\boost_1_65_0\libs;$(LibraryPath)</LibraryPath>
+    <IncludePath>E:\Lib\boost_1_60_0_x64;$(IncludePath)</IncludePath>
+    <LibraryPath>E:\Lib\boost_1_60_0_x64\libs;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -101,7 +101,7 @@
       <SDLCheck>true</SDLCheck>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>E:\Lib\boost_1_65_0\stage\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>E:\Lib\boost_1_60_0_x64\lib64-msvc-14.0;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -129,7 +129,7 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>E:\Lib\boost_1_65_0\stage\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>E:\Lib\boost_1_60_0_x64\lib64-msvc-14.0;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
