@@ -1,7 +1,7 @@
 //#define _WIN32_WINNT
 
 #define _STATE_MESSAGE_
-
+#define _SCL_SECURE_NO_WARNINGS
 
 #include <iostream>
 #include <boost/asio.hpp>
@@ -9,6 +9,7 @@
 #include <boost/bind.hpp>
 #include <map>
 #include <string>
+
 #include <algorithm>
 //заменить на другую структуру данных
 #include <vector>
@@ -43,6 +44,7 @@ struct Client {
 	bool _LoggedIn = false;
 	ip::tcp::socket _Socket = ip::tcp::socket{ service };
 	boost::array<char, buffsize> _Buff;
+	boost::array<char, buffsize> _WriteBuff;
 	//+++++++++++
 	//если добавлять больше 1 потока, тут нужен будет мутекс
 };
@@ -156,6 +158,8 @@ struct Server {
 				break;
 
 			case 'm':
+				if (client->_LoggedIn)
+					_MessageToAccProcess(client,size);
 				//просто сообщение 
 				break;
 				
@@ -197,6 +201,16 @@ struct Server {
 		error_code error;
 		//регистрируем обработчик нового коннекта
 		acceptor.async_accept(new_Client->_Socket, boost::bind(&Server::AcceptClients, this, new_Client, _1), error);
+	}
+
+	void _WriteHandler(const error_code& err, size_t bytes)
+	{
+		if (!err) {
+			std::cout << "Sended ok\n";
+		}
+		else {
+			std::cout << "Send error\n";
+		}
 	}
 
 private:
@@ -245,40 +259,91 @@ private:
 		std::string message(client->_Buff.c_array(), client->_Buff.c_array() + size);
 
 		//в начале -a - знак авторизации
-		auto find_res = message.find("-a");
-		//string::npos - не нашло
+		
+		//string::npos - не найдено
 
-		if (find_res == 0) {
-			size_t space_after_login = message.find(" ", 4);
-			//не нашло
-			if (space_after_login == std::string::npos)
-				return;
-			std::string entered_login{ message.begin() + 3 , message.begin() + space_after_login };
-
-			size_t space_after_pass = message.find(" ", space_after_login + 1);
-			//не нашло
-			if (space_after_pass == std::string::npos)
-				return;
-			std::string entered_password{ message.begin() + space_after_login + 1,message.begin() + space_after_pass };
+		
+		size_t space_after_login = message.find(" ", 4);
+		//не нашло
+		if (space_after_login == std::string::npos)
+			return;
+		std::string entered_login{ message.begin() + 3 , message.begin() + space_after_login };
+		
+		size_t space_after_pass = message.find(" ", space_after_login + 1);
+		//не нашло
+		if (space_after_pass == std::string::npos)
+			return;
+		std::string entered_password{ message.begin() + space_after_login + 1,message.begin() + space_after_pass };
 
 			//логин
-			try
-			{
-				//логинимся
-				Login(client, entered_login, entered_password);
-				std::cout << client->_Account->_Login << " - online\n";
-			}
-			catch (...) {
-				//... это всё можно обработать и послать, например, клиенту подсказки
+		try
+		{
+			//логинимся
+			Login(client, entered_login, entered_password);
+			std::cout << client->_Account->_Login << " - online\n";
+		}
+		catch (...) {
+			//... это всё можно обработать и послать, например, клиенту подсказки
+			//но пока дефолтное сообщение
 #ifdef _STATE_MESSAGE_	
-				std::cout << *client << " - Wrong login or password\n";
+			std::cout << *client << " - Wrong login or password\n";
 #endif
-			}
-
 		}
 	}
+
+	
+	//тут clietn авторизован
+	void _MessageToAccProcess(Client* client, const size_t size)
+	{
+		//маленький размер
+		if (size < 3)
+			return;
+
+		std::string message(client->_Buff.c_array(), client->_Buff.c_array() + size);
+
+
+		size_t space_after_reciver_login = message.find(" ", 4);
+		//string::npos - не найдено
+		if (space_after_reciver_login == std::string::npos)
+			return;
+
+
+		std::string reciver{ message.begin() + 3 , message.begin() + space_after_reciver_login };
+		//ищем аккаунт по логину
+		auto res = Accounts.find(reciver);
+		//не найдено
+		if (res == Accounts.end())
+			return;
+
+		auto account = res->second;
+		
+		//добавить очередь сообщений
+
+		//пока что можно отправлять сообщения только тем, кто онлайн
+		if (account->_Online) {
+			error_code err;
+			std::string substring = message.substr(space_after_reciver_login);
+			std::string st = client->_Account->_Login + std::string{ ":" }+substring;
+			if (st.size() > buffsize + 20) {
+				std::cout << "Message too long\n";
+				return;
+			}
+			//client->_WriteBuff 
+			//std::copy()
+			//копируем
+			std::copy(st.begin(), st.end(), client->_WriteBuff.c_array());
+			account->_Client->_Socket.async_write_some(
+										buffer(client->_WriteBuff, st.size()),
+										boost::bind(&Server::_WriteHandler,this,_1,_2 ));
+		}
+
+	}
+
 };
 //таймеры
+
+//отредачить
+
 int main()
 {
 	Server server;
