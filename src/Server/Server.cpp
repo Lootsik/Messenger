@@ -33,16 +33,30 @@ std::ostream& operator<<(std::ostream& os, const Client& client)
 }
 
 
-Server::Server(boost::asio::io_service& service)
-	: _Service{ service },
-	_Acceptor{ service,ip::tcp::endpoint{ ip::tcp::v4(),port } }
+Server::Server(boost::asio::io_service& service, const unsigned short port) try
+	: _Service{ service }, _Port{ port },
+	_Acceptor{ service,ip::tcp::endpoint{ ip::tcp::v4(),_Port } },
+	//TODO: считывать эти значения с конфигов
+	_DB{ "tcp://127.0.0.1:3306", "root", "11JustLikeYou11" ,"messeger_server_db" ,"users" }
 {
-	boost::asio::ip::tcp::acceptor acceptor{ service,ip::tcp::endpoint{ ip::tcp::v4(),port } };
-	//позже сделать загрузку с файла, дб
-	_Accounts["Devid_nv"] = new Account{ std::string{ "Devid_nv" } ,std::string{ "1234" } };
-	_Accounts["Sanya228"] = new Account{ std::string{ "Sanya228" } ,std::string{ "3228" } };
+	boost::asio::ip::tcp::acceptor acceptor{ service,ip::tcp::endpoint{ ip::tcp::v4(),_Port } };
+	
+
+	//TODO: сделать с дб
+	std::vector<std::string> Logins = _DB.FillLogins();
+	//TODO: передалать это
+	size_t LoginsSize = Logins.size();
+	//поле уникальное, но желательно проверить, так как бд будут меняться
+	//TODO: сделать hash table для этого случая
+	for (size_t i = 0; i < LoginsSize; ++i) {
+		_Accounts[Logins[i]] = new Account{ std::move(Logins[i])};
+	}
+	
 }
-	//
+catch (...)
+{
+	std::cerr << "Fatal error\n";
+}
 
 
 void Server::Login(Client* client, const std::string& entered_login, const std::string& entered_password)
@@ -151,7 +165,7 @@ void Server::AcceptMessage(Client* client, const boost::system::error_code& err_
 void Server::AcceptClients(Client* client, const boost::system::error_code& err)
 {
 	//вывод информации о новом клиенте 
-	std::cout << "New client: " << client->_Socket.remote_endpoint().address().to_string() << ':' << client->_Socket.remote_endpoint().port() << '\n';
+	std::cout << "New client: " << *client << '\n';
 	//добавление асинхронной операции для принятого клиента(страшно, нужно упростить мб вывести в другую функцию)
 	client->_Socket.async_read_some(buffer(client->_Buff), boost::bind(&Server::AcceptMessage, this, client, _1, _2));
 	//добавление клиента в список (не  критично, тк вызовы для сокета уже забинджены)
@@ -192,7 +206,7 @@ void Server::_WriteHandler(const error_code& err, size_t bytes)
 bool Server::_PasswordCheck(const Account* account, const std::string& entered_login, const std::string& entered_password)
 {
 	//сравниваем
-	return account->_Password == entered_password;
+	return _DB.IsCorrect(entered_login,entered_password);
 }
 
 //можно добавить причину

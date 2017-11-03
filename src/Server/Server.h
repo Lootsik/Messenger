@@ -5,6 +5,7 @@
 #include <boost/array.hpp>
 #include <map>
 #include <string>
+#include "Database.h"
 //заменить на другую структуру данных
 
 
@@ -19,10 +20,9 @@ const size_t buffsize = 128;
 struct Client;
 
 struct Account {
-	Account(std::string& login, std::string& password)
-		:_Login{ login }, _Password{ password } {}
+	Account(std::string& login)
+		:_Login{ login } {}
 	std::string _Login;
-	std::string _Password;
 	bool _Online = false;
 	Client* _Client = nullptr;
 	//+++++++++++
@@ -40,30 +40,32 @@ struct Client {
 };
 std::ostream& operator<<(std::ostream& os, const Client& client);
 
+
 struct Server {
 	class ClientInAcc {};
 	class AccountAlreadyOnline {};
 	class WrongPassword {};
 	class WrongLogin {};
-	static const unsigned short port = 8021;
+	
 
 	boost::asio::io_service& _Service;
 
 	//дл€ клиетов лучше сделать список или что-то другое
 	std::vector<Client*> _Clients{};
 	//в идеале хеш таблица, но потом 
-	std::map<std::string, Account*> _Accounts;
+	unsigned short _Port;
+	//TODO: сделать отдельный класс, скрыть 
+	std::map < std::string, Account*> _Accounts;
 	boost::asio::ip::tcp::acceptor _Acceptor;
+	Database _DB;
 
-	Server(boost::asio::io_service& service);
-	
+	Server(boost::asio::io_service& service, const unsigned short port);
 
 	void Login(Client* client, const std::string& entered_login, const std::string& entered_password);
 	
 	void Logout(Client* client);
 	
 	//обработка сообщени€
-	void ProcessMessage(Client* client, size_t size);
 
 	void AcceptMessage(Client* client, const boost::system::error_code& err_code, size_t bytes);
 
@@ -71,9 +73,13 @@ struct Server {
 
 	void StartAccept();
 
-	void _WriteHandler(const boost::system::error_code& err, size_t bytes);
 
 private:
+
+	void ProcessMessage(Client* client, size_t size);
+	void _WriteHandler(const boost::system::error_code& err, size_t bytes);
+
+
 	//способ проверки можно изменить						оставл€ю дл€ дб
 	bool _PasswordCheck(const Account* account, const std::string& entered_login, const std::string& entered_password);
 
