@@ -81,7 +81,7 @@ void Database::NewUser(const std::string& login, const std::string& password)
 		_Prepared_NewUser->clearParameters();
 		_Prepared_NewUser->setString(1, login);
 		_Prepared_NewUser->setString(2, password);
-
+		
 		//при любой ошибке в этом запросе выбросится исключение
 		_Prepared_NewUser->execute();
 	}
