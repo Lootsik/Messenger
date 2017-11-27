@@ -11,7 +11,7 @@
 #include <cppconn/prepared_statement.h>
 //TODO: пофиксить размеры в полей, не сделать случайно case insesetive, сделать что-то с кодировками
 
-
+//пересоздать дб
 class Database {
 public:
 	Database(const std::string& hostname, const std::string& login, const std::string& password,
