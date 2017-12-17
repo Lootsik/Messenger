@@ -37,7 +37,6 @@ Server::Server(boost::asio::io_service& service)
 	: _Service{ service },
 	_Acceptor{ service}
 {
-
 }
 
 bool Server::SetPort(const unsigned short port)
@@ -57,28 +56,6 @@ bool Server::SetPort(const unsigned short port)
 
 
 
-void Server::_ProcessMessage(Client* client,size_t size)
-{
-	//using namespace MessageProcessor
-	switch (client->_Buff.Type()) {
-
-	case Message::MessageType::Login:
-	//	_OnLogin(client);
-		break;
-
-	case Message::MessageType::Logout:
-		//_OnLogout(client);
-		break;
-
-	case Message::MessageType::message_:
-		//_OnMessage(client);
-		break;
-	default:
-		//TODO: action to wrong message
-		return;
-	}
-}
-
 
 
 
@@ -93,13 +70,14 @@ void Server::AcceptMessage(Client* client, const boost::system::error_code& err_
 	}
 
 	//пока-что просто выведём на экран 
-	std::cout << "Message: " << client->_Buff.Buffer().c_array() << '\n';
+	std::cout << "Message: " << client->_ReadBuff.c_array() << '\n';
 
 
 	//обработка сообщения
-	_ProcessMessage(client, bytes);
-	//регистрируем следующее сообщение
-	client->_Socket.async_read_some(buffer(client->_Buff.Buffer()), boost::bind(&Server::AcceptMessage, this, client, _1, _2));
+	_MessagerEngine->AnalyzePacket(client, bytes);
+	//следующее сообщение
+	client->_Socket.async_read_some( buffer(client->_ReadBuff), 
+									boost::bind(&Server::AcceptMessage,this, client, _1, _2) );
 }
 
 
@@ -108,7 +86,7 @@ void Server::AcceptClients(Client* client, const boost::system::error_code& err)
 	//вывод информации о новом клиенте 
 	std::cout << "New client: " << *client << '\n';
 	//добавление асинхронной операции для принятого клиента(страшно, нужно упростить мб вывести в другую функцию)
-	client->_Socket.async_read_some(buffer(client->_Buff.Buffer()), boost::bind(&Server::AcceptMessage, this, client, _1, _2));
+	client->_Socket.async_read_some(buffer(client->_ReadBuff), boost::bind(&Server::AcceptMessage, this, client, _1, _2));
 	//добавление клиента в список (не  критично, тк вызовы для сокета уже забинджены)
 
 	_Clients.push_back(client);
@@ -168,7 +146,7 @@ void Server::_DeleteClient(Client* client)
 
 	//выходим с аккаунта
 	if (client->_LoggedIn)
-		_MessageEngine->Logout(client);
+		_MessagerEngine->Logout(client);
 
 	//ищем клиента в списке клиетов
 	auto res = find(_Clients.begin(), _Clients.end(), client);
@@ -192,7 +170,7 @@ void Server::_OnLoginMessage(Client* client, const size_t size)
 	try
 	{
 		//логинимся
-		_MessageEngine->Login(client, entered_login, entered_password);
+		_MessagerEngine->Login(client, entered_login, entered_password);
 		std::cout << client->_Account->_Login << " - online\n";
 	}
 	catch (...) {
@@ -206,7 +184,7 @@ void Server::_OnLoginMessage(Client* client, const size_t size)
 
 void Server::_OnLogoutMessage(Client* client, size_t size)
 {
-	_MessageEngine->Logout(client);
+	_MessagerEngine->Logout(client);
 }
 
 /*
@@ -217,7 +195,7 @@ void Server::_MessageToAccProcess(Client* client, const size_t size)
 	if (size < 3)
 		return;
 
-	std::string message(client->_Buff.Buffer().c_array(), client->_Buff.Buffer().c_array() + size);
+	std::string message(client->_ReadBuff.Buffer().c_array(), client->_ReadBuff.Buffer().c_array() + size);
 
 
 	size_t space_after_reciver_login = message.find(" ", 4);

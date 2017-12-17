@@ -1,6 +1,7 @@
 #include <vector>
 #include "MessengerEngine.h"
 #include "Server.h"
+#include "Deserialization.h"
 
 MessengerEngine::MessengerEngine(Server* server)
 		//считывать значения с конфигов
@@ -24,22 +25,22 @@ MessengerEngine::~MessengerEngine()
 }
 
 //TODO: пересмотреть причины и сделать ответы
-void MessengerEngine::Login(Client* client, const std::string& entered_login, const std::string& entered_password)
+bool MessengerEngine::Login(Client* client, const std::string& entered_login, const std::string& entered_password)
 {
 	auto res = _Accounts.find(entered_login);
 	//не нашли
 	if (res == _Accounts.end()) {
-		return;
+		return false;
 	}
 	//аккаунт найден
 	auto account = res->second;
 
 	//клиент не может быть подключён к 2 учётным записям одновременно
 	if (client->_LoggedIn)
-		return;
+		return false;
 	//пока что к одному аккаунту может быть подключён только 1 клиент
 	if (account->_Online) {
-		return;
+		return false;
 	}
 
 	//найдено, проверяем пароль
@@ -54,7 +55,7 @@ void MessengerEngine::Login(Client* client, const std::string& entered_login, co
 	}
 	else
 		//неправильный пароль
-		return;
+		return true;
 }
 
 void MessengerEngine::Logout(Client* client)
@@ -77,4 +78,35 @@ bool MessengerEngine::_PasswordCheck(const Account* account, const std::string& 
 {
 	//compare
 	return _DB.IsCorrect(entered_login, entered_password);
+}
+
+
+void MessengerEngine::AnalyzePacket(Client* client,size_t size)
+{
+	if (!Deserialization::PacketCheckup(client->_ReadBuff.c_array(), size))
+		//TODO: log
+		return;
+	//TODO: divide this
+	switch (Deserialization::PaketType(client->_ReadBuff.c_array(), size))
+	{
+	case (int)PacketType::Login: 
+	{
+		std::string GuessLogin;
+		std::string GuessPassword;
+		int res = Deserialization::OnLogin(client->_ReadBuff.c_array(), size, GuessLogin, GuessPassword);
+
+	}break;
+
+	case (int)PacketType::Logout:
+	{
+		//...
+		Deserialization::OnLogout();
+		Logout(client);
+	}
+		
+		break;
+
+	default:
+		break;
+	}
 }

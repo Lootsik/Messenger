@@ -15,6 +15,4 @@ int main()
 	server.StartAccept();
 		
 	service.run();
-
-	
 }

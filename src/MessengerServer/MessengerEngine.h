@@ -2,7 +2,7 @@
 #include <map>
 #include "Clients.h"
 #include "Database.h"
-class Server;
+struct Server;
 
 class MessengerEngine
 {
@@ -11,9 +11,10 @@ public:
 	~MessengerEngine();
 	//mores
 	//изменить сигнатуру
-	void Login(Client* client, const std::string& entered_login, const std::string& entered_password);
+	bool Login(Client* client, const std::string& entered_login, const std::string& entered_password);
 	void Logout(Client* client);
 	//void Message(Client* client);
+	void AnalyzePacket(Client* client, size_t size);
 
 private:
 	std::map <std::string, Account*> _Accounts;

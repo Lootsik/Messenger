@@ -5,7 +5,6 @@
 #include <boost/array.hpp>
 #include <map>
 #include <string>
-#include "Message.h"
 #include "Clients.h"
 #include "MessengerEngine.h"
 //заменить на другую структуру данных
@@ -21,12 +20,12 @@ struct Server {
 
 	std::vector<Client*> _Clients{};
 
-	MessengerEngine* _MessageEngine;
+	MessengerEngine* _MessagerEngine;
 
 	Server(boost::asio::io_service& service);
 	bool SetPort(const unsigned short port);
 	
-	void SetMessageEngine(MessengerEngine* me) { _MessageEngine = me; }
+	void SetMessageEngine(MessengerEngine* me) { _MessagerEngine = me; }
 	//обработка сообщения
 	//void SendMessageTo();
 
@@ -42,8 +41,7 @@ private:
 	void _OnLoginMessage(Client* client, size_t size);
 	void _OnLogoutMessage(Client* client, size_t size);
 	//void _OnDirectMessage(Client* client, size_t size);
-	
-	void _ProcessMessage(Client* client, size_t size);
+
 
 
 	void _WriteHandler(const boost::system::error_code& err, size_t bytes);

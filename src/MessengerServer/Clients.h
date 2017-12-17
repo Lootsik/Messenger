@@ -1,8 +1,9 @@
 #pragma once
 #include <string>
 #include <boost\asio.hpp>
-#include "Message.h"
+#include <boost\array.hpp>
 struct Client;
+
 
 struct Account {
 	Account(const std::string& login)
@@ -13,13 +14,16 @@ struct Account {
 	//+++++++++++
 };
 struct Client {
+	static const size_t Buffsize = 256;
+	using Storage = typename boost::array<char, Buffsize>;
+
 	Client(boost::asio::io_service& service) :_Socket{ service } {}
+
 	boost::asio::ip::tcp::socket _Socket;
 	Account* _Account = nullptr;
 	bool _LoggedIn = false;
-	Message _Buff;
-	Message _WriteBuff;
+	Storage _ReadBuff;
+	Storage _WriteBuf;
 	//стоит ввести сюда количество считаных/записаных байтов
-	//+++++++++++
-	//если добавлять больше 1 потока, тут нужен будет мутекс
+
 };
