@@ -89,7 +89,7 @@ void MessengerEngine::AnalyzePacket(Client* client,size_t size)
 	//TODO: divide this
 	switch (Deserialization::PaketType(client->_ReadBuff.c_array(), size))
 	{
-	case (int)PacketType::Login: 
+	case (int)PacketTypes::Login: 
 	{
 		std::string GuessLogin;
 		std::string GuessPassword;
@@ -97,7 +97,7 @@ void MessengerEngine::AnalyzePacket(Client* client,size_t size)
 
 	}break;
 
-	case (int)PacketType::Logout:
+	case (int)PacketTypes::Logout:
 	{
 		//...
 		Deserialization::OnLogout();
