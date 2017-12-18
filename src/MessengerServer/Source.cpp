@@ -1,7 +1,8 @@
 #include <iostream>
 #include "Server.h"
-#include "Serialization.h"
-#include "Deserialization.h"
+#include "..\PacketFormat\Serialization.h"
+#include "..\PacketFormat\Deserialization.h"
+
 
 int main()
 {

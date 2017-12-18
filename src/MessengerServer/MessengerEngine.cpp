@@ -1,7 +1,7 @@
 #include <vector>
 #include "MessengerEngine.h"
 #include "Server.h"
-#include "Deserialization.h"
+#include "..\PacketFormat\Deserialization.h"
 
 MessengerEngine::MessengerEngine(Server* server)
 		//считывать значения с конфигов

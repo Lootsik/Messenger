@@ -15,6 +15,7 @@ namespace Serialization
 		((_PacketMarkup*)packet)->DataSize = DataSize;
 
 		_LoginMarkup* LoginInfo = (_LoginMarkup*)(((_PacketMarkup*)packet)->Data);
+		//TODO: check string size before
 		LoginInfo->LoginSize = GuessLogin.size()+1;
 		LoginInfo->PassSize = GuessPass.size()+1;
 		//copy this
