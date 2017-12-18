@@ -3,22 +3,31 @@
 namespace Serialization
 {
 	//strings with last zero byte
-	int MakePacketLogin(char* packet,const  std::string& GuessLogin,const std::string& GuessPass)
+	int MakePacketLogin(char* packet,const std::string& GuessLogin,const std::string& GuessPass)
 	{
-		size_t DataSize = 4 + GuessLogin.size() + GuessPass.size() + 2;
+		//with zero terminators 
+		size_t LoginSize = GuessLogin.size() + 1;
+		size_t PassSize = GuessPass.size() + 1;
 
-		if (DataSize > MaxDataSize)
-			return (int)Result::WrongSizing;
+
+		//DANGER: possible owerflow
+		size_t PacketDataSize = LoginPacketHeaderSize + LoginSize + PassSize;
+
+		if (PacketDataSize > MaxLoginPacketDataSize)
+			//size of string is too big for packet
+			return (int)Result::StringTooLong;
 
 		//setup type
 		((_PacketMarkup*)packet)->Type = (uint16_t) PacketTypes::Login;
-		((_PacketMarkup*)packet)->DataSize = DataSize;
+		//is safe, becouse DataSize awlays larger that MaxLoginPacketDataSize 
+		((_PacketMarkup*)packet)->DataSize = PacketDataSize;
 
+		//working with LoginMarkup
 		_LoginMarkup* LoginInfo = (_LoginMarkup*)(((_PacketMarkup*)packet)->Data);
-		//TODO: check string size before
-		LoginInfo->LoginSize = GuessLogin.size()+1;
-		LoginInfo->PassSize = GuessPass.size()+1;
-		//copy this
+	
+		LoginInfo->LoginSize = LoginSize;
+		LoginInfo->PassSize = PassSize;
+		//copying string
 		memcpy(LoginInfo->Data, GuessLogin.c_str(), LoginInfo->LoginSize );
 		memcpy(LoginInfo->Data + LoginInfo->LoginSize , GuessPass.c_str(), LoginInfo->PassSize );
 

@@ -18,20 +18,18 @@ namespace Deserialization
 	}
 	int OnLogin(const char* packet, size_t size, std::string& LoginFrom, std::string& PassFrom)
 	{
-		//TODO: hide this 4
-		if (size < 4)
+		if (size < PacketMarkupHeaderSize)
 			return (int)Result::WrongSizing;
 
 
-
-		_PacketMarkup* Packet = (_PacketMarkup*)(packet);
+		_PacketMarkup* Packet = (_PacketMarkup*)packet;
 		_LoginMarkup* LoginInfo = (_LoginMarkup*)( Packet->Data );
 
 		uint16_t SizeLogin = LoginInfo->LoginSize;
 		uint16_t SizePass = LoginInfo->PassSize;
 		
 		//size of login and pass size
-		if ( 4 + SizePass + SizeLogin != Packet->DataSize)
+		if (LoginPacketHeaderSize + SizePass + SizeLogin != Packet->DataSize)
 			return (int)Result::WrongSizing;
 
 		//CHECK: end can be not in

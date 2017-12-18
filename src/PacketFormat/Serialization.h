@@ -7,7 +7,8 @@ namespace Serialization
 	enum class Result
 	{
 		Ok,
-		WrongSizing
+		WrongSizing,
+		StringTooLong
 	};
 
 	//size of packet data must be MaxPacketLenght

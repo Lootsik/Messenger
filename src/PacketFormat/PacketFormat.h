@@ -3,8 +3,9 @@
 
 //standart 2 byte uinteger used
 //little endian for now 
-//TODO: do smth with this
+//TODO: make portable to big endian 
 
+//READABILITY: will be good idea close up this big names with namespaces 
 enum class PacketTypes{
 	Message = 3,
 	Login = 4,
@@ -21,17 +22,25 @@ struct _PacketMarkup
 	char Data[1];
 };
 
+const size_t MaxPacketSize = 256;
+//its minimal size for packet for now
+const size_t PacketMarkupHeaderSize = sizeof(_PacketMarkup) - sizeof(_PacketMarkup::Data);
+const size_t MaxPacketDataSize = MaxPacketSize - PacketMarkupHeaderSize;
+
+//later it can be useful
+#if MaxPacketSize > UINT16_MAX
+#error "Max packet size larger that max value that may contained it"
+#endif
+
 struct _LoginMarkup 
 {
 	uint16_t LoginSize;
 	uint16_t PassSize;
 	char Data[1];
 };
+//its without packet header itself
+const size_t LoginPacketHeaderSize = sizeof(_LoginMarkup) - sizeof(_LoginMarkup::Data);
+const size_t MaxLoginPacketDataSize = MaxPacketDataSize - LoginPacketHeaderSize;
 struct _LogoutMarkup
 {
-	
 };
-
-const size_t MaxPacketLenght = 256;
-const size_t MaxDataSize = MaxPacketLenght
-	- sizeof(_PacketMarkup) - sizeof(_PacketMarkup::Data);

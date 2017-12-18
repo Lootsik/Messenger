@@ -4,6 +4,10 @@
 #include "..\PacketFormat\Deserialization.h"
 
 
+//TODO:
+//DANGER:
+//READABILITY:
+
 int main()
 {
 	char* data = new char[256];
