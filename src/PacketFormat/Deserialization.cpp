@@ -38,4 +38,20 @@ namespace Deserialization
 
 		return (int)Result::Ok;
 	}
+	int OnMessage(const char* packet, size_t size, uint32_t& from, uint32_t& to, uint32_t& MessageSize, char*& Message)
+	{
+		_PacketMarkup* Packet = (_PacketMarkup*)packet;
+
+		_MessageMarkup* MessageHeader = (_MessageMarkup*)(Packet->Data);
+
+		from = MessageHeader->IdFrom;
+		to = MessageHeader->IdTo ;
+		MessageSize = MessageHeader->MessageSize;
+
+		if (MessageSize + MessagePacketHeaderSize != Packet->DataSize)
+			return (int)Result::WrongSizing;
+
+		Message = MessageHeader->Data;
+		return (int)Result::Ok;
+	}
 }

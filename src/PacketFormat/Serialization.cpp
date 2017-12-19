@@ -15,7 +15,7 @@ namespace Serialization
 
 		if (PacketDataSize > MaxLoginPacketDataSize)
 			//size of string is too big for packet
-			return (int)Result::StringTooLong;
+			return (int)Result::TooBigSize;
 
 		//setup type
 		((_PacketMarkup*)packet)->Type = (uint16_t) PacketTypes::Login;
@@ -25,7 +25,7 @@ namespace Serialization
 		//working with LoginMarkup
 		_LoginMarkup* LoginInfo = (_LoginMarkup*)(((_PacketMarkup*)packet)->Data);
 	
-		LoginInfo->LoginSize = LoginSize;
+			LoginInfo->LoginSize = LoginSize;
 		LoginInfo->PassSize = PassSize;
 		//copying string
 		memcpy(LoginInfo->Data, GuessLogin.c_str(), LoginInfo->LoginSize );
@@ -39,5 +39,23 @@ namespace Serialization
 		((_PacketMarkup*)packet)->DataSize = 0;
 		return 0;
 	}
-}
+	int MakePacketMessage(char* packet, uint32_t from,uint32_t to, const char* message, uint16_t MessageSize)
+	{
+		int MessageDataSize = MessageSize + MessagePacketHeaderSize;
+		if (MessageDataSize > MaxPacketDataSize) {
+			return (int)Result::TooBigSize;
+		}
+		_PacketMarkup* Packet = (_PacketMarkup*)packet;
+		Packet->Type = (uint16_t)PacketTypes::Message;
+		Packet->DataSize = MessageDataSize;
 
+		_MessageMarkup* MessageHeader = (_MessageMarkup*) (Packet->Data);
+
+		MessageHeader->IdFrom = from;
+		MessageHeader->IdTo = to;
+		MessageHeader->MessageSize = MessageSize;
+
+		memcpy(MessageHeader->Data, message, MessageSize);
+		return (int)Result::Ok;
+	}
+}
