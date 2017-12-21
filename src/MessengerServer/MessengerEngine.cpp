@@ -3,10 +3,13 @@
 #include "Server.h"
 #include "..\PacketFormat\Deserialization.h"
 #include "..\PacketFormat\Serialization.h"
+
 MessengerEngine::MessengerEngine(Server* server)
-		//считывать значения с конфигов
-		:_DB{ "tcp://127.0.0.1:3306", "root", "11JustLikeYou11" ,"messeger_server_db" ,"users" },_Server{server}
+//считывать значения с конфигов
+	:_Server{ server }
 {
+	bool res = _DB.Connect("tcp://127.0.0.1:3306", "root", "11JustLikeYou11", "messeger_server_db", "users");
+	
 	//TODO: сделать с дб
 	auto Logins = _DB.FillLogins();
 	//TODO: передалать это

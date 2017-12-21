@@ -19,11 +19,14 @@ struct Server {
 	std::vector<Client*> _Clients{};
 	MessengerEngine* _MessagerEngine;
 
+	const char* ConfigFilename = "MessengerServer.cfg";
 
 	Server(boost::asio::io_service& service);
 	bool SetPort(const unsigned short port);
 	void SetMessageEngine(MessengerEngine* me) { _MessagerEngine = me; }
-	
+	bool LoadFromConfig();
+
+
 	void Start();
 
 	void Send(Client* client, size_t size);

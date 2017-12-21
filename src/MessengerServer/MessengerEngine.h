@@ -7,6 +7,8 @@ struct Server;
 class MessengerEngine
 {
 public:
+	const char* ConfigFilename = "Messenger.cfg";
+
 	MessengerEngine(Server* server);
 	~MessengerEngine();
 	//изменить сигнатуру
@@ -14,6 +16,9 @@ public:
 	void Logout(Client* client);
 	//void Message(Client* client);
 	void AnalyzePacket(Client* client, size_t size);
+	
+	bool SettingsFromConfig();
+
 private:
 	std::map <std::string, Account*> _Accounts;
 	Database _DB;

@@ -15,9 +15,10 @@
 //пересоздать дб
 class Database {
 public:
-	Database(const std::string& hostname, const std::string& login, const std::string& password,
-			 const std::string& schema, const std::string& table);
-
+	Database();
+	bool Connect(const std::string& hostname, const std::string& login, const std::string& password,
+									const std::string& schema, const std::string& table);
+	
 	//TODO: добавить set get методы и почистить код 
 	//запрещаем копирование и перемещение, это можно сделать, но нет надобности 
 	Database (const Database&) = delete;

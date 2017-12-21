@@ -2,39 +2,37 @@
 
 #include <string>
 
-
-
-Database::Database(const std::string& hostname, const std::string& login, const std::string& password,
+Database::Database()
+{}
+//TODO: check error codes
+bool Database::Connect(const std::string& hostname, const std::string& login, const std::string& password,
 				   const std::string& schema, const std::string& table)
-	:_Table{ table }
 {
+	_Table = table;
 	try
 	{
 		_Driver = get_driver_instance();
-		//обработка ошибок 
+	
 		try
 		{
-			//коннектимся
+			//connecting
 			_Connection = _Driver->connect(hostname, login, password);
 		}
 		catch (const std::bad_alloc&)
 		{
-			//не выделилась память
 			throw;
 		}
 		catch (...)
 		{
-			//другие ошибки, но память уже выделилась
+			//other errors but memory already allocated
 			delete _Connection;
 			throw;
 		}
-
-		//меняем схему
+		//change schema
 		_Connection->setSchema(schema);
 
 		try
 		{
-			//создаём выражение
 			_Statement = _Connection->createStatement();
 		}
 		catch (const std::bad_alloc&)
@@ -59,8 +57,11 @@ Database::Database(const std::string& hostname, const std::string& login, const 
 	}
 	catch (...)
 	{
-		throw;
+		//anyway, if we get error here, we will program
+		//so its not necessary release all resources
+		return false;
 	}
+	return true;
 }
 
 Database::~Database()
@@ -165,7 +166,7 @@ std::vector<std::pair<unsigned int , std::string> > Database::FillLogins()
 	{
 		_Result = _Statement->executeQuery("SELECT * FROM " + _Table + ";");
 		while (_Result->next()) {
-			Output.push_back(std::pair<unsigned int, std::string>{ _Result->getInt("Id"),_Result->getString("Login") });
+			Output.push_back(std::pair<unsigned int, std::string>{ _Result->getInt("id"),_Result->getString("Login") });
 		}
 	}
 	catch (...)

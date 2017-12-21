@@ -4,7 +4,7 @@
 #include <string>
 #include <algorithm>
 #include <vector>
-
+#include <fstream>
 
 #include <boost/asio.hpp>
 #include <boost/array.hpp>
@@ -36,8 +36,22 @@ std::ostream& operator<<(std::ostream& os, const Client& client)
 
 Server::Server(boost::asio::io_service& service)
 	: _Service{ service },
-	_Acceptor{ service}
+	_Acceptor{ service }
 {
+}
+
+//NOTE: add new settings to config
+bool Server::LoadFromConfig()
+{
+	std::ifstream ConfigFile{ ConfigFilename };
+	if (!ConfigFile.is_open())
+		return false;
+	
+	unsigned short port;
+	if (!(ConfigFile >> port))
+		return false;
+
+	return SetPort(port);
 }
 
 bool Server::SetPort(const unsigned short port)
