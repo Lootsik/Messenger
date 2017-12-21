@@ -157,15 +157,15 @@ bool Database::IsCorrect(const std::string& login, const std::string& password)
 	return RowCount > 0;
 }
 //TODO: обработать ошибки тут и по всему модулю
-std::vector<std::string> Database::FillLogins()
+std::vector<std::pair<unsigned int , std::string> > Database::FillLogins()
 {
-	std::vector<std::string> Output;
+	std::vector<std::pair<unsigned int,std::string> > Output;
 
 	try
 	{
-		_Result = _Statement->executeQuery("SELECT Login FROM " + _Table + ";");
+		_Result = _Statement->executeQuery("SELECT * FROM " + _Table + ";");
 		while (_Result->next()) {
-			Output.push_back(_Result->getString("Login"));
+			Output.push_back(std::pair<unsigned int, std::string>{ _Result->getInt("Id"),_Result->getString("Login") });
 		}
 	}
 	catch (...)

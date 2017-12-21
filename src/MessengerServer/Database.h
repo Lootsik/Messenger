@@ -35,7 +35,7 @@ public:
 	//TODO: заменить функцией sql
 	bool IsCorrect(const std::string& login, const std::string& password);
 
-	std::vector<std::string> FillLogins();
+	std::vector<std::pair<unsigned int, std::string>> FillLogins();
 
 private:
 	//TODO: заменить некоторые запросы функциями самой бд

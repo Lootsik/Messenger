@@ -2,19 +2,19 @@
 #include "MessengerEngine.h"
 #include "Server.h"
 #include "..\PacketFormat\Deserialization.h"
-
+#include "..\PacketFormat\Serialization.h"
 MessengerEngine::MessengerEngine(Server* server)
 		//считывать значения с конфигов
 		:_DB{ "tcp://127.0.0.1:3306", "root", "11JustLikeYou11" ,"messeger_server_db" ,"users" },_Server{server}
 {
 	//TODO: сделать с дб
-	std::vector<std::string> Logins = _DB.FillLogins();
+	auto Logins = _DB.FillLogins();
 	//TODO: передалать это
 	size_t LoginsSize = Logins.size();
 	//поле уникальное, но желательно проверить, так как бд будут меняться
 	//TODO: сделать hash table для этого случая
 	for (size_t i = 0; i < LoginsSize; ++i) {
-		_Accounts[Logins[i]] = new Account{ std::move(Logins[i]) };
+		_Accounts[Logins[i].second] = new Account{ Logins[i].first, std::move(Logins[i].second) };
 	}
 
 }
@@ -94,7 +94,9 @@ void MessengerEngine::AnalyzePacket(Client* client,size_t size)
 		std::string GuessLogin;
 		std::string GuessPassword;
 		int res = Deserialization::OnLogin(client->_ReadBuff.c_array(), size, GuessLogin, GuessPassword);
-
+		if (res == (int)Deserialization::Result::Ok)
+			//TODO: do smth with result
+			Login(client, GuessLogin, GuessPassword);
 	}break;
 
 	case (int)PacketTypes::Logout:
@@ -102,6 +104,34 @@ void MessengerEngine::AnalyzePacket(Client* client,size_t size)
 		//...
 		Deserialization::OnLogout();
 		Logout(client);
+	}
+
+	case (int)PacketTypes::Message:
+	{
+		uint32_t from, to,mess_size;
+		char* Message = NULL;
+
+		int res = Deserialization::OnMessage(client->_ReadBuff.c_array(), size, from, to, mess_size, &Message);
+		//TODO: offline message
+		if (res == (int)Deserialization::Result::Ok)
+		{
+			//TODO: rewrite this
+			std::string Login;
+			for (auto a : _Accounts) {
+				if (a.second->ID == to)
+					Login = a.second->_Login;
+			}
+
+			if (Login != "")
+				break;
+			else {
+				if (_Accounts[Login]->_Online) {
+					memcpy(_Accounts[Login]->_Client->_WriteBuf.c_array(), client->_ReadBuff.c_array(), size);
+					
+				}
+			}
+		}
+
 	}
 		
 		break;

@@ -28,7 +28,7 @@ int main()
 	Serialization::MakePacketMessage(data, from, to, "Shoot to thrill", 15);
 	unsigned int ofrom = 0, oto = 0, mess_size = 0;	
 	char* Mess = NULL;
-	Deserialization::OnMessage(data, MaxPacketSize, ofrom, to, mess_size, Mess);
+	Deserialization::OnMessage(data, MaxPacketSize, ofrom, to, mess_size, &Mess);
 	
 	std::cout << OutLogin << OutPass;
 
@@ -39,7 +39,7 @@ int main()
 	server.SetPort(8021);
 	MessengerEngine* engine = new MessengerEngine{ &server };
 	server.SetMessageEngine(engine);
-	server.StartAccept();
+	server.Start();
 		
 	service.run();
 }

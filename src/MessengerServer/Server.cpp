@@ -1,9 +1,6 @@
 #pragma once
-
-//TODO: можно сделать отдельный поток, где будет обработка сообщений
 #define _SCL_SECURE_NO_WARNINGS
 #include <iostream>
-#include <map>
 #include <string>
 #include <algorithm>
 #include <vector>
@@ -19,6 +16,8 @@
 using namespace boost::asio;
 using boost::system::error_code;
 
+//TODO: add some error checking
+
 
 std::ostream& operator<<(std::ostream& os, const Client& client)
 {
@@ -31,7 +30,9 @@ std::ostream& operator<<(std::ostream& os, const Client& client)
 
 	return os;
 }
-
+//*****************************
+//	Server settings
+//*****************************
 
 Server::Server(boost::asio::io_service& service)
 	: _Service{ service },
@@ -54,34 +55,41 @@ bool Server::SetPort(const unsigned short port)
 	return !err;
 }
 
+//*****************************
+//	Start server
+//*****************************
 
-
-
-
-
-
-void Server::AcceptMessage(Client* client, const boost::system::error_code& err_code, size_t bytes)
+//actually starts accept connections
+void Server::Start()
 {
-	//ошибка, нужно удалить клиента
-	if (err_code) {
-		//TODO: стоит определить план дейстивий для конкретного случая: принимать дальше сообщения или нет
-		_SolveProblemWithClient(client, err_code);
-		return;
-	}
-
-	//пока-что просто выведём на экран 
-	std::cout << "Message: " << client->_ReadBuff.c_array() << '\n';
-
-
-	//обработка сообщения
-	_MessagerEngine->AnalyzePacket(client, bytes);
-	//следующее сообщение
-	client->_Socket.async_read_some( buffer(client->_ReadBuff), 
-									boost::bind(&Server::AcceptMessage,this, client, _1, _2) );
+	Client* new_Client = new Client{ _Service };
+	error_code error;
+	//register new connection handler function
+	_Acceptor.async_accept(new_Client->_Socket, boost::bind(&Server::AcceptClients, this, new_Client, _1), error);
+	if (error)
+		throw;
 }
 
 
-void Server::AcceptClients(Client* client, const boost::system::error_code& err)
+//*****************************
+//	Sending messages
+//*****************************
+
+
+//message already in Write buffer
+void Server::Send(Client* client, size_t size)
+{
+	client->_Socket.async_write_some(
+		buffer(client->_WriteBuf, size),
+		boost::bind(&Server::WriteHandler, this, _1, _2));
+}
+
+//*******************************
+//	Accept message/cliet handlers
+//*******************************
+
+
+void CALLBACK Server::AcceptClients(Client* client, const boost::system::error_code& err)
 {
 	//вывод информации о новом клиенте 
 	std::cout << "New client: " << *client << '\n';
@@ -101,17 +109,32 @@ void Server::AcceptClients(Client* client, const boost::system::error_code& err)
 		throw;
 }
 
-void Server::StartAccept()
+void CALLBACK Server::AcceptMessage(Client* client, const boost::system::error_code& err_code, size_t bytes)
 {
-	Client* new_Client = new Client{ _Service };
-	error_code error;
-	//регистрируем обработчик нового коннекта
-	_Acceptor.async_accept(new_Client->_Socket, boost::bind(&Server::AcceptClients, this, new_Client, _1), error);
-	if (error)
-		throw;
+	//ошибка, нужно удалить клиента
+	if (err_code) {
+		//TODO: стоит определить план дейстивий для конкретного случая: принимать дальше сообщения или нет
+		SolveProblemWithClient(client, err_code);
+		return;
+	}
+
+	//пока-что просто выведём на экран 
+	std::cout << "Message from " << *client << ' ' << bytes << " bytes\n";
+
+	//обработка сообщения
+	_MessagerEngine->AnalyzePacket(client, bytes);
+	//следующее сообщение
+	//TODO: We need this?
+	client->_Socket.async_read_some( buffer(client->_ReadBuff), 
+									boost::bind(&Server::AcceptMessage,this, client, _1, _2) );
 }
 
-void Server::_WriteHandler(const error_code& err, size_t bytes)
+//*****************************
+//	Write handler
+//*****************************
+
+//TODO: add some
+void CALLBACK Server::WriteHandler(const error_code& err, size_t bytes)
 {
 	if (!err) {
 		std::cout << "Sended ok\n";
@@ -122,20 +145,22 @@ void Server::_WriteHandler(const error_code& err, size_t bytes)
 }
 
 
+//*****************************
+//	Managing connections
+//*****************************
 
-
-void Server::_SolveProblemWithClient(Client* client, const boost::system::error_code& err_code)
+void Server::SolveProblemWithClient(Client* client, const boost::system::error_code& err_code)
 {
-	//kick by default,TODO: add some action according to error 
-	_DeleteClient(client);
+	//TODO: add some action according to error 
+	//kick by default
+	DeleteClient(client);
 }
 
-void Server::_DeleteClient(Client* client)
+void Server::DeleteClient(Client* client)
 {
 #ifdef _STATE_MESSAGE_
 	std::cout << *client << " - disconnected\n";
 #endif // _STATE_MESSAGE
-
 
 	error_code err;
 	//останавливаем все операции чтения-записи для сокета
@@ -161,76 +186,3 @@ void Server::_DeleteClient(Client* client)
 	delete client;
 	return;
 }
-
-void Server::_OnLoginMessage(Client* client, const size_t size)
-{
-	std::string entered_login;
-	std::string entered_password;
-	//логин
-	try
-	{
-		//логинимся
-		_MessagerEngine->Login(client, entered_login, entered_password);
-		std::cout << client->_Account->_Login << " - online\n";
-	}
-	catch (...) {
-		//... это всё можно обработать и послать, например, клиенту подсказки
-		//но пока дефолтное сообщение
-#ifdef _STATE_MESSAGE_	
-		std::cout << *client << " - Wrong login or password\n";
-#endif
-	}
-}
-
-void Server::_OnLogoutMessage(Client* client, size_t size)
-{
-	_MessagerEngine->Logout(client);
-}
-
-/*
-	//тут clietn авторизован
-void Server::_MessageToAccProcess(Client* client, const size_t size)
-{
-	//маленький размер
-	if (size < 3)
-		return;
-
-	std::string message(client->_ReadBuff.Buffer().c_array(), client->_ReadBuff.Buffer().c_array() + size);
-
-
-	size_t space_after_reciver_login = message.find(" ", 4);
-	//string::npos - не найдено
-	if (space_after_reciver_login == std::string::npos)
-		return;
-
-
-	std::string reciver{ message.begin() + 3 , message.begin() + space_after_reciver_login };
-	//ищем аккаунт по логину
-	auto res = _Accounts.find(reciver);
-	//не найдено
-	if (res == _Accounts.end())
-		return;
-
-	auto account = res->second;
-
-	//добавить очередь сообщений
-
-	//пока что можно отправлять сообщения только тем, кто онлайн
-	if (account->_Online) {
-		error_code err;
-		std::string substring = message.substr(space_after_reciver_login);
-		std::string st = client->_Account->_Login + std::string{ ":" }+substring;
-		if (st.size() > Message::Buffsize + 20) {
-			std::cout << "Message too long\n";
-			return;
-		}
-		//client->_WriteBuff 
-		//std::copy()
-		//копируем
-		std::copy(st.begin(), st.end(), client->_WriteBuff.Buffer().c_array());
-		account->_Client->_Socket.async_write_some(
-			buffer(client->_WriteBuff.Buffer(), st.size()),
-			boost::bind(&Server::_WriteHandler, this, _1, _2));
-	}
-}
-*/

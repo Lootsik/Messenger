@@ -18,5 +18,5 @@ namespace Deserialization
 	int OnLogout();
 	int OnLogin(const char* paket, size_t size, std::string& LoginFrom, std::string& PassFrom );
 	//изменить аргументы
-	int OnMessage(const char* packet, size_t size, uint32_t& from, uint32_t& to, uint32_t& MessSize, char*& Message);
+	int OnMessage(const char* packet, size_t size, uint32_t& from, uint32_t& to, uint32_t& MessSize, char** Message);
 }

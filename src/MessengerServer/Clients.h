@@ -2,12 +2,14 @@
 #include <string>
 #include <boost\asio.hpp>
 #include <boost\array.hpp>
+#include <stdint.h>
 struct Client;
 
 
 struct Account {
-	Account(const std::string& login)
-		:_Login{ login } {}
+	Account(uint32_t id,const std::string& login)
+		:ID{ id },_Login {	login  } {}
+	uint32_t ID;
 	std::string _Login;
 	bool _Online = false;
 	Client* _Client = nullptr;
