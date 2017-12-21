@@ -3,6 +3,7 @@
 #include "..\PacketFormat\Serialization.h"
 #include "..\PacketFormat\Deserialization.h"
 
+//Do smth with debug and release env directories
 
 //TODO:
 //DANGER:
