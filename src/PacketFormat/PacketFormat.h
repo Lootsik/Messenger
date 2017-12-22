@@ -9,7 +9,8 @@
 enum class PacketTypes{
 	Message = 3,
 	Login = 4,
-	Logout = 5
+	LoginResult = 5,
+	Logout = 6
 };
 //take care of aligment
 
@@ -20,12 +21,12 @@ struct _PacketMarkup
 	uint16_t Type;
 	//Only data field size!
 	uint16_t DataSize;
-	char Data[1];
+	char Data[0];
 };
 
 const size_t MaxPacketSize = 512;
 //its minimal size for packet for now
-const size_t PacketMarkupHeaderSize = sizeof(_PacketMarkup) - sizeof(_PacketMarkup::Data);
+const size_t PacketMarkupHeaderSize = sizeof(_PacketMarkup) ;
 const size_t MaxPacketDataSize = MaxPacketSize - PacketMarkupHeaderSize;
 
 //later it can be useful
@@ -59,3 +60,21 @@ const size_t MaxMessageSize = MaxPacketDataSize - MessagePacketHeaderSize;
 struct _LogoutMarkup
 {
 };
+
+namespace LoginResult 
+{
+	enum class Result
+	{
+		Logged,
+		Wrong,
+		NoSuchUser
+	};
+
+	struct LoginResult 
+	{
+		uint32_t Result;
+		uint32_t ID;
+	};
+
+	const size_t PacketHeaderSize = 8;
+}

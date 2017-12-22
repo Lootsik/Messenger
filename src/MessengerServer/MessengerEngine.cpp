@@ -4,6 +4,15 @@
 #include "..\PacketFormat\Deserialization.h"
 #include "..\PacketFormat\Serialization.h"
 
+void BindClientToAcc(Client* client, Account* account)
+{
+	client->_Account = account;
+	account->_Client = client;
+
+	client->_LoggedIn = true;
+	account->_Online = true;
+}
+
 MessengerEngine::MessengerEngine(Server* server)
 //считывать значения с конфигов
 	:_Server{ server }
@@ -17,9 +26,8 @@ MessengerEngine::MessengerEngine(Server* server)
 	//поле уникальное, но желательно проверить, так как бд будут меняться
 	//TODO: сделать hash table для этого случая
 	for (size_t i = 0; i < LoginsSize; ++i) {
-		_Accounts[Logins[i].second] = new Account{ Logins[i].first, std::move(Logins[i].second) };
+		_Accounts[Logins[i].first] = new Account{ Logins[i].first, std::move(Logins[i].second) };
 	}
-
 }
 
 
@@ -30,7 +38,7 @@ MessengerEngine::~MessengerEngine()
 //TODO: пересмотреть причины и сделать ответы
 bool MessengerEngine::Login(Client* client, const std::string& entered_login, const std::string& entered_password)
 {
-	auto res = _Accounts.find(entered_login);
+	/*auto res = _Accounts.find(entered_login);
 	//не нашли
 	if (res == _Accounts.end()) {
 		return false;
@@ -44,21 +52,19 @@ bool MessengerEngine::Login(Client* client, const std::string& entered_login, co
 	//пока что к одному аккаунту может быть подключён только 1 клиент
 	if (account->_Online) {
 		return false;
-	}
+	}*/
 
-	//найдено, проверяем пароль
-	if (_PasswordCheck(res->second, entered_login, entered_password)) {
+	//TODO: this can only check, that pass is apply to login
+	//we can take more info forom this process
+	uint32_t FindId = CheckAccount(entered_login, entered_password);
+	
+	if ( FindId != INVALID_ID ) {
 		//"входим в аккаунт"
-		client->_Account = account;
-		account->_Client = client;
-
-		client->_LoggedIn = true;
-		account->_Online = true;
-
+		BindClientToAcc(client, _Accounts[FindId]);
 	}
 	else
 		//неправильный пароль
-		return true;
+		return false;
 }
 
 void MessengerEngine::Logout(Client* client)
@@ -77,10 +83,14 @@ void MessengerEngine::Logout(Client* client)
 
 
 
-bool MessengerEngine::_PasswordCheck(const Account* account, const std::string& entered_login, const std::string& entered_password)
+uint32_t MessengerEngine::CheckAccount(const std::string& entered_login, const std::string& entered_password)
 {
-	//compare
-	return _DB.IsCorrect(entered_login, entered_password);
+	size_t id =  _DB.FetchUser(entered_login, entered_password);
+	//fix this
+	if (id > UINT32_MAX)
+		throw;
+
+	return id;
 }
 
 

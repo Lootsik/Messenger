@@ -4,6 +4,8 @@
 #include "Database.h"
 struct Server;
 
+#define INVALID_ID 0
+
 class MessengerEngine
 {
 public:
@@ -19,11 +21,15 @@ public:
 	
 	bool SettingsFromConfig();
 
+	//void Response(Client* client);
+
+
 private:
-	std::map <std::string, Account*> _Accounts;
+	std::map <uint32_t, Account*> _Accounts;
 	Database _DB;
 	Server* _Server;
 
-	bool _PasswordCheck(const Account* account, const std::string& entered_login, const std::string& entered_password);
+	uint32_t CheckAccount(const std::string& entered_login, const std::string& entered_password);
+
 };
 

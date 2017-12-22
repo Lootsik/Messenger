@@ -58,4 +58,19 @@ namespace Serialization
 		memcpy(MessageHeader->Data, message, MessageSize);
 		return (int)Result::Ok;
 	}
+	//if result is not 
+	int MakePacketLoginResult(char* packet, const uint32_t result, const uint32_t ID)
+	{
+
+		_PacketMarkup* Packet = (_PacketMarkup*)packet;
+
+		Packet->Type = (uint16_t)PacketTypes::LoginResult;
+		Packet->DataSize = LoginResult::PacketHeaderSize;
+
+		LoginResult::LoginResult* ResultHeader = (LoginResult::LoginResult*)(Packet->Data);
+
+		ResultHeader->Result = result;
+		ResultHeader->ID = ID;
+		return (int)Result::Ok;
+	}
 }

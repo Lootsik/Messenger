@@ -54,4 +54,13 @@ namespace Deserialization
 		*Message = MessageHeader->Data;
 		return (int)Result::Ok;
 	}
+	int OnLoginResult(const char* packet, uint32_t& result, uint32_t& id)
+	{
+		_PacketMarkup* Packet = (_PacketMarkup*)packet;
+		LoginResult::LoginResult* Result = (LoginResult::LoginResult*)(Packet->Data);
+
+		result = Result->Result;
+		id = Result->ID;
+		return (int)Result::Ok;
+	}
 }

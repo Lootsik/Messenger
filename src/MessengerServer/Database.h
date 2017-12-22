@@ -34,7 +34,7 @@ public:
 	//проверка на существование пользователя с таким логином
 	bool IsExist(const std::string& login);
 	//TODO: заменить функцией sql
-	bool IsCorrect(const std::string& login, const std::string& password);
+	size_t FetchUser(const std::string& login, const std::string& password);
 
 	std::vector<std::pair<unsigned int, std::string>> FillLogins();
 

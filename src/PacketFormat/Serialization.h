@@ -16,4 +16,6 @@ namespace Serialization
 	int MakePacketLogin(char* packet, const  std::string& GuessLogin, const std::string& GuessPass);
 	int MakePacketLogout(char* packet);
 	int MakePacketMessage(char* packet, uint32_t from, uint32_t to, const char* message, uint16_t MessageSize);
+	
+	int MakePacketLoginResult(char* packet, const uint32_t result, const uint32_t ID);
 }

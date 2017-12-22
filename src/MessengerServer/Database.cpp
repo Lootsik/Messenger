@@ -2,6 +2,7 @@
 
 #include <string>
 
+
 Database::Database()
 {}
 //TODO: check error codes
@@ -137,14 +138,14 @@ bool Database::IsExist(const std::string& login)
 }
 	
 //TODO: заменить функцией sql, заменить название
-bool Database::IsCorrect(const std::string& login, const std::string& password)
+size_t Database::FetchUser(const std::string& login, const std::string& password)
 {
 	try
 	{
 		_Prepared_IsCorrect->clearParameters();
 		_Prepared_IsCorrect->setString(1, login);
 		_Prepared_IsCorrect->setString(2, password);
-		//открыто для иньекции, сделать что-то
+
 		_Result = _Prepared_IsCorrect->executeQuery();
 	}
 	//TODO: обработать
@@ -152,10 +153,13 @@ bool Database::IsCorrect(const std::string& login, const std::string& password)
 	{
 		throw;
 	}
-	size_t RowCount = _Result->rowsCount();
+	if (!_Result->rowsCount())
+		return 0;
+	
+	size_t id = _Result->getInt64("id");
 	delete _Result;
 	//если 
-	return RowCount > 0;
+	return id;
 }
 //TODO: обработать ошибки тут и по всему модулю
 std::vector<std::pair<unsigned int , std::string> > Database::FillLogins()
@@ -164,7 +168,7 @@ std::vector<std::pair<unsigned int , std::string> > Database::FillLogins()
 
 	try
 	{
-		_Result = _Statement->executeQuery("SELECT * FROM " + _Table + ";");
+		_Result = _Statement->executeQuery("SELECT id, Login FROM " + _Table + ";");
 		while (_Result->next()) {
 			Output.push_back(std::pair<unsigned int, std::string>{ _Result->getInt("id"),_Result->getString("Login") });
 		}
