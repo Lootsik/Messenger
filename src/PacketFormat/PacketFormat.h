@@ -1,6 +1,8 @@
 #pragma once
 #include <stdint.h>
 
+//TODO: manage namespaces
+
 //standart 2 byte uinteger used
 //little endian for now 
 //TODO: make portable to big endian 
@@ -65,7 +67,7 @@ namespace LoginResult
 {
 	enum class Result
 	{
-		Logged,
+		Success,
 		Wrong,
 		NoSuchUser
 	};

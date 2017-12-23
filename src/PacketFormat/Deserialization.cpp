@@ -4,7 +4,7 @@ namespace Deserialization
 {
 	bool PacketCheckup(const char* paket, size_t size)
 	{
-		return ((_PacketMarkup*)paket)->DataSize + 4 == size;
+		return ((_PacketMarkup*)paket)->DataSize + PacketMarkupHeaderSize == size;
 	}
 
 	int PaketType(const char* paket, size_t size)
@@ -32,9 +32,9 @@ namespace Deserialization
 		if (LoginPacketHeaderSize + SizePass + SizeLogin != Packet->DataSize)
 			return (int)Result::WrongSizing;
 
-		//CHECK: end can be not in
-		LoginFrom = std::string{ LoginInfo->Data , LoginInfo->Data + SizeLogin  };
-		PassFrom = std::string{ LoginInfo->Data + SizeLogin , LoginInfo->Data + SizeLogin + SizePass  };
+		//becouse last - zero 
+		LoginFrom = std::string{ LoginInfo->Data , LoginInfo->Data + SizeLogin - 1 };
+		PassFrom = std::string{ LoginInfo->Data + SizeLogin , LoginInfo->Data + SizeLogin + SizePass -1   };
 
 		return (int)Result::Ok;
 	}

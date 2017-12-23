@@ -153,9 +153,11 @@ size_t Database::FetchUser(const std::string& login, const std::string& password
 	{
 		throw;
 	}
-	if (!_Result->rowsCount())
+	size_t rows = _Result->rowsCount();
+	if (rows == 0)
 		return 0;
-	
+
+	_Result->next();
 	size_t id = _Result->getInt64("id");
 	delete _Result;
 	//если 

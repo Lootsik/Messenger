@@ -29,7 +29,7 @@ struct Server {
 
 	void Start();
 
-	void Send(Client* client, size_t size);
+	void Send(Client* client);
 private:
 	//for internal use only
 

@@ -91,11 +91,11 @@ void Server::Start()
 
 
 //message already in Write buffer
-void Server::Send(Client* client, size_t size)
+void Server::Send(Client* client)
 {
 	client->_Socket.async_write_some(
-		buffer(client->_WriteBuf, size),
-		boost::bind(&Server::WriteHandler, this, _1, _2));
+			buffer(client->_WriteBuf, client->BytesWrite),
+			boost::bind(&Server::WriteHandler, this, _1, _2));
 }
 
 //*******************************
@@ -131,6 +131,8 @@ void CALLBACK Server::AcceptMessage(Client* client, const boost::system::error_c
 		SolveProblemWithClient(client, err_code);
 		return;
 	}
+
+	client->BytesRead = bytes;
 
 	//пока-что просто выведём на экран 
 	std::cout << "Message from " << *client << ' ' << bytes << " bytes\n";

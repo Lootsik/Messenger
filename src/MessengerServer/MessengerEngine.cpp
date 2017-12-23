@@ -4,13 +4,18 @@
 #include "..\PacketFormat\Deserialization.h"
 #include "..\PacketFormat\Serialization.h"
 
-void BindClientToAcc(Client* client, Account* account)
+static void BindClientToAcc(Client* client, Account* account)
 {
 	client->_Account = account;
 	account->_Client = client;
 
 	client->_LoggedIn = true;
 	account->_Online = true;
+}
+
+static bool PreBindChecks(Client* client, Account* account)
+{
+	return  !(client->_LoggedIn || account->_Online);
 }
 
 MessengerEngine::MessengerEngine(Server* server)
@@ -36,42 +41,40 @@ MessengerEngine::~MessengerEngine()
 }
 
 //TODO: пересмотреть причины и сделать ответы
-bool MessengerEngine::Login(Client* client, const std::string& entered_login, const std::string& entered_password)
+void MessengerEngine::Login(Client* client, const std::string& entered_login, const std::string& entered_password)
 {
-	/*auto res = _Accounts.find(entered_login);
-	//не нашли
-	if (res == _Accounts.end()) {
-		return false;
-	}
-	//аккаунт найден
-	auto account = res->second;
-
-	//клиент не может быть подключён к 2 учётным записям одновременно
-	if (client->_LoggedIn)
-		return false;
-	//пока что к одному аккаунту может быть подключён только 1 клиент
-	if (account->_Online) {
-		return false;
-	}*/
-
 	//TODO: this can only check, that pass is apply to login
 	//we can take more info forom this process
 	uint32_t FindId = CheckAccount(entered_login, entered_password);
-	
-	if ( FindId != INVALID_ID ) {
-		//"входим в аккаунт"
-		BindClientToAcc(client, _Accounts[FindId]);
+
+	int Result = (int)LoginResult::Result::Wrong;
+	int Id = 0;
+		
+	if (FindId != INVALID_ID) {
+		Account* Acc = _Accounts[FindId];
+
+		if (PreBindChecks(client, Acc)) 
+		{
+			BindClientToAcc(client, Acc);
+
+			Result = (int)LoginResult::Result::Success;
+			Id = FindId;
+		}
 	}
-	else
-		//неправильный пароль
-		return false;
+			
+	//need to hide this
+	Serialization::MakePacketLoginResult(client->_WriteBuf.c_array(), Result, FindId);
+	//send result
+	Response(client); 
 }
+
 
 void MessengerEngine::Logout(Client* client)
 {
 #ifdef _STATE_MESSAGE_
 	std::cout << client->_Account->_Login << "- logged out\n";
 #endif // _STATE_MESSAGE_
+
 	//возможно, когда-то стоит изменить последовательность
 	client->_Account->_Client = nullptr;
 	client->_Account->_Online = false;
@@ -93,23 +96,25 @@ uint32_t MessengerEngine::CheckAccount(const std::string& entered_login, const s
 	return id;
 }
 
-
-void MessengerEngine::AnalyzePacket(Client* client,size_t size)
+void MessengerEngine::AnalyzePacket(Client* client, size_t size)
 {
-	if (!Deserialization::PacketCheckup(client->_ReadBuff.c_array(), size))
+	if (!Deserialization::PacketCheckup(client->_ReadBuff.c_array(), size)){
 		//TODO: log
+#ifdef _STATE_MESSAGE_
+		std::cout << "Packet from " << *client << " failed\n";
+#endif
 		return;
+	}
+	//not logined already
+	if (Deserialization::PaketType(client->_ReadBuff.c_array(), size) != (int)PacketTypes::Login && !client->_LoggedIn)
+		return;
+
 	//TODO: divide this
 	switch (Deserialization::PaketType(client->_ReadBuff.c_array(), size))
 	{
 	case (int)PacketTypes::Login: 
 	{
-		std::string GuessLogin;
-		std::string GuessPassword;
-		int res = Deserialization::OnLogin(client->_ReadBuff.c_array(), size, GuessLogin, GuessPassword);
-		if (res == (int)Deserialization::Result::Ok)
-			//TODO: do smth with result
-			Login(client, GuessLogin, GuessPassword);
+		OnLogin(client);
 	}break;
 
 	case (int)PacketTypes::Logout:
@@ -117,39 +122,70 @@ void MessengerEngine::AnalyzePacket(Client* client,size_t size)
 		//...
 		Deserialization::OnLogout();
 		Logout(client);
-	}
+	}break;
 
 	case (int)PacketTypes::Message:
 	{
-		uint32_t from, to,mess_size;
-		char* Message = NULL;
-
-		int res = Deserialization::OnMessage(client->_ReadBuff.c_array(), size, from, to, mess_size, &Message);
-		//TODO: offline message
-		if (res == (int)Deserialization::Result::Ok)
-		{
-			//TODO: rewrite this
-			std::string Login;
-			for (auto a : _Accounts) {
-				if (a.second->ID == to)
-					Login = a.second->_Login;
-			}
-
-			if (Login != "")
-				break;
-			else {
-				if (_Accounts[Login]->_Online) {
-					memcpy(_Accounts[Login]->_Client->_WriteBuf.c_array(), client->_ReadBuff.c_array(), size);
-					
-				}
-			}
-		}
-
-	}
-		
-		break;
+		OnMessage(client);
+	}break;
 
 	default:
 		break;
+	}
+}
+
+//calculate size of message and send it
+void MessengerEngine::Response(Client* client)
+{
+	client->BytesWrite = Serialization::CountSize(client->_WriteBuf.c_array());
+	_Server->Send(client);
+}
+
+void MessengerEngine::OnLogin(Client* client)
+{
+	std::string GuessLogin;
+	std::string GuessPassword;
+	int res = Deserialization::OnLogin(client->_ReadBuff.c_array(), client->BytesRead,
+										GuessLogin, GuessPassword);
+
+	if (res == (int)Deserialization::Result::Ok)
+		//TODO: do smth with result
+		Login(client, GuessLogin, GuessPassword);
+}
+
+//TODO: notification, that message reached the addressee
+void MessengerEngine::OnMessage(Client* client)
+{
+	uint32_t from, to, mess_size;
+	char* Message = NULL;
+
+	int res = Deserialization::OnMessage(client->_ReadBuff.c_array(),
+										 client->BytesRead,
+										 from, to, mess_size, &Message);
+
+	if (from != client->_Account->ID)
+	{
+#ifdef _STATE_MESSAGE_
+		std::cout << *client << ": Wrong id in message: " << from << "\n";
+#endif
+		return;
+	}
+
+	//TODO: offline message
+	if (res == (int)Deserialization::Result::Ok)
+	{
+		if (_Accounts.find(to) == _Accounts.end())
+		{
+#ifdef _STATE_MESSAGE_
+			std::cout << *client << ": Message to ID: " << to << "\nError ID not found\n";
+#endif
+			return;
+		}
+		auto Acc = _Accounts[to];
+		if (Acc->_Online) {
+			memcpy(Acc->_Client->_WriteBuf.c_array(), client->_ReadBuff.c_array(), client->BytesRead);
+			
+			Response(Acc->_Client);
+		}
 	}
 }

@@ -2,14 +2,17 @@
 
 namespace Serialization
 {
+	size_t CountSize(char* packet)
+	{
+		return ((_PacketMarkup*)packet)->DataSize + PacketMarkupHeaderSize;
+	}
 	//strings with last zero byte
 	int MakePacketLogin(char* packet,const std::string& GuessLogin,const std::string& GuessPass)
 	{
 		//with zero terminators 
 		size_t LoginSize = GuessLogin.size() + 1;
 		size_t PassSize = GuessPass.size() + 1;
-
-
+		
 		//DANGER: possible owerflow
 		size_t PacketDataSize = LoginPacketHeaderSize + LoginSize + PassSize;
 
@@ -59,7 +62,7 @@ namespace Serialization
 		return (int)Result::Ok;
 	}
 	//if result is not 
-	int MakePacketLoginResult(char* packet, const uint32_t result, const uint32_t ID)
+	int MakePacketLoginResult(char* packet, const uint32_t result, const uint32_t ID )
 	{
 
 		_PacketMarkup* Packet = (_PacketMarkup*)packet;
