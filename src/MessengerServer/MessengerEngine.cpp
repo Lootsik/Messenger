@@ -47,7 +47,7 @@ void MessengerEngine::Login(Client* client, const std::string& entered_login, co
 	//we can take more info forom this process
 	uint32_t FindId = CheckAccount(entered_login, entered_password);
 
-	int Result = (int)LoginResult::Result::Wrong;
+	int Result = (int)Packet::LoginResult::Result::Wrong;
 	int Id = 0;
 		
 	if (FindId != INVALID_ID) {
@@ -57,7 +57,7 @@ void MessengerEngine::Login(Client* client, const std::string& entered_login, co
 		{
 			BindClientToAcc(client, Acc);
 
-			Result = (int)LoginResult::Result::Success;
+			Result = (int)Packet::LoginResult::Result::Success;
 			Id = FindId;
 		}
 	}
@@ -106,25 +106,25 @@ void MessengerEngine::AnalyzePacket(Client* client, size_t size)
 		return;
 	}
 	//not logined already
-	if (Deserialization::PaketType(client->_ReadBuff.c_array(), size) != (int)PacketTypes::Login && !client->_LoggedIn)
+	if (Deserialization::PaketType(client->_ReadBuff.c_array(), size) != (int)Packet::Types::Login && !client->_LoggedIn)
 		return;
 
 	//TODO: divide this
 	switch (Deserialization::PaketType(client->_ReadBuff.c_array(), size))
 	{
-	case (int)PacketTypes::Login: 
+	case (int)Packet::Types::Login: 
 	{
 		OnLogin(client);
 	}break;
 
-	case (int)PacketTypes::Logout:
+	case (int)Packet::Types::Logout:
 	{
 		//...
 		Deserialization::OnLogout();
 		Logout(client);
 	}break;
 
-	case (int)PacketTypes::Message:
+	case (int)Packet::Types::Message:
 	{
 		OnMessage(client);
 	}break;

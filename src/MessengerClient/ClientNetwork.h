@@ -32,7 +32,7 @@ public:
 	bool WaitResponse()
 	{
 		boost::system::error_code err;
-		size_t readed = sock.read_some(buffer(readbuff, 512), err);
+		size_t readed = sock.read_some(buffer(readbuff, Packet::MaxSize), err);
 		if (err) {
 			//Log
 			return false;
@@ -41,7 +41,7 @@ public:
 		uint32_t id;
 		Deserialization::OnLoginResult(readbuff, res, id);
 		ID = id;
-		return  res == (int)LoginResult::Result::Success;
+		return  res == (int)Packet::LoginResult::Result::Success;
 	}
 
 	bool Authentication(const std::string& Login, const std::string& Pass)
@@ -74,7 +74,7 @@ public:
 	{
 		while (1) {
 			boost::system::error_code err;
-			size_t readed = sock.read_some(buffer(readbuff, 512),err);
+			size_t readed = sock.read_some(buffer(readbuff, Packet::MaxSize),err);
 			err;
 			if (err)
 				return;
@@ -89,13 +89,13 @@ public:
 	
 
 	bool ReadyToRead = false;
-	char WaitBuff[512];
+	char WaitBuff[Packet::MaxSize];
 	size_t size;
 		
 
 	boost::thread reader;
-	char buff[512];
-	char readbuff[512];
+	char buff[Packet::MaxSize];
+	char readbuff[Packet::MaxSize];
 	io_service service;
 	uint32_t ID;
 	ip::tcp::endpoint ep;

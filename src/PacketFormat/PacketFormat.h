@@ -2,84 +2,86 @@
 #include <stdint.h>
 
 //TODO: manage namespaces
-
-//standart 2 byte uinteger used
-//little endian for now 
-//TODO: make portable to big endian 
+namespace Packet {
+	//little endian for now 
+	//TODO: make portable to big endian 
 #pragma warning( push )
 #pragma warning( disable : 4200)
 // Your function
 //READABILITY: will be good idea close up this big names with namespaces 
-enum class PacketTypes{
-	Message = 3,
-	Login = 4,
-	LoginResult = 5,
-	Logout = 6
-};
-//take care of aligment
+	enum class Types {
+		Message = 3,
+		Login = 4,
+		LoginResult = 5,
+		Logout = 6
+	};
+	//take care of aligment
 
-//core of packet, in Data contained some data	
-struct _PacketMarkup
-{
-	//will be necessery to add some field there later
-	uint16_t Type;
-	//Only data field size!
-	uint16_t DataSize;
-	char Data[0];
-};
+	//core of packet, in Data contained some data	
+	struct Header
+	{
+		//will be necessery to add some field there later
+		uint16_t Type;
+		//Only data field size!
+		uint16_t DataSize;
+		char Data[0];
+	};
 
-const size_t MaxPacketSize = 512;
-//its minimal size for packet for now
-const size_t PacketMarkupHeaderSize = sizeof(_PacketMarkup) ;
-const size_t MaxPacketDataSize = MaxPacketSize - PacketMarkupHeaderSize;
+	const size_t MaxSize = 512;
+	//its minimal size for packet for now
+	const size_t HeaderSize = sizeof(Header);
+	const size_t MaxDataSize = MaxSize - HeaderSize;
 
-//later it can be useful
-#if MaxPacketSize > UINT16_MAX
-	#error "Max packet size larger that max value that may contained it"
+	//later it can be useful
+#if Packet::MaxSize > UINT16_MAX
+#error "Max packet size larger that max value that may contained it"
 #endif
-
-struct _LoginMarkup 
-{
-	uint16_t LoginSize;
-	uint16_t PassSize;
-	char Data[0];
-};
-
-//its without packet header itself
-const size_t LoginPacketHeaderSize = sizeof( uint16_t) * 2;
-const size_t MaxLoginPacketDataSize = MaxPacketDataSize - LoginPacketHeaderSize;
-
-struct _MessageMarkup 
-{
-	uint32_t IdFrom;
-	uint32_t IdTo;
-	uint16_t MessageSize;
-	char Data[0];
-};
-const size_t MessagePacketHeaderSize = 10;
-const size_t MaxMessageSize = MaxPacketDataSize - MessagePacketHeaderSize;
-
+	namespace Login {
+		struct Header
+		{
+			uint16_t LoginSize;
+			uint16_t PassSize;
+			char Data[0];
+		};
+		//its without packet header itself
+		const size_t HeaderSize = sizeof(Header);
+		const size_t MaxDataSize = Packet::MaxDataSize - HeaderSize;
+	}
+	namespace Messagee {
+		struct Header
+		{
+			uint32_t IdFrom;
+			uint32_t IdTo;
+			uint16_t MessageSize;
+			uint16_t _unused;
+			char Data[0];
+		};
+		const size_t HeaderSize = sizeof(Header);
+		const size_t MaxDataSize = Packet::MaxDataSize - HeaderSize;
+	}
 #pragma warning( pop ) 
 
+	namespace Logout {
+		struct Header
+		{
+		};
+	}
 
-struct _LogoutMarkup
-{
-};
-
-namespace LoginResult 
-{
-	enum class Result
+	namespace LoginResult
 	{
-		Success,
-		Wrong,
-		NoSuchUser
-	};
+		enum class Result
+		{
+			Success,
+			Wrong,
+			NoSuchUser
+		};
 
-	struct LoginResult 
-	{
-		uint32_t Result;
-		uint32_t ID;
-	};
+		struct Header
+		{
+			uint32_t Result;
+			uint32_t ID;
+		};
 
-	const size_t PacketHeaderSize = 8;
+		const size_t PacketHeaderSize = sizeof(Header);
+	}
 }

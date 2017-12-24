@@ -21,7 +21,7 @@ struct Account {
 };
 
 struct Client {
-	static const size_t Buffsize = MaxPacketSize;
+	static const size_t Buffsize = Packet::MaxSize;
 	using Storage = typename boost::array<char, Buffsize>;
 
 	Client(boost::asio::io_service& service) :_Socket{ service } {}
