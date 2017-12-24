@@ -6,7 +6,9 @@
 //standart 2 byte uinteger used
 //little endian for now 
 //TODO: make portable to big endian 
-
+#pragma warning( push )
+#pragma warning( disable : 4200)
+// Your function
 //READABILITY: will be good idea close up this big names with namespaces 
 enum class PacketTypes{
 	Message = 3,
@@ -57,6 +59,7 @@ struct _MessageMarkup
 const size_t MessagePacketHeaderSize = 10;
 const size_t MaxMessageSize = MaxPacketDataSize - MessagePacketHeaderSize;
 
+#pragma warning( pop ) 
 
 
 struct _LogoutMarkup
