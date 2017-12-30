@@ -27,7 +27,7 @@ struct Server {
 	bool LoadFromConfig();
 
 
-	void Start();
+	bool Start();
 
 	void Send(Client* client);
 private:

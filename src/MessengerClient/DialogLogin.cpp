@@ -53,6 +53,7 @@ void DialogLogin::OnBnClickedOk()
 	Port = GetDlgItemInt(EditPort, 0, 0);
 	IPEdit.GetAddress(Address);
 	
+	//TODO: проверить на допустимые знаки и буквы
 	if (!UnicodeToAnci(Login, AnciLogin))
 	{
 		MessageBox(L"Only english letters", L"Error", 0);

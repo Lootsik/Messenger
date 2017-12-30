@@ -131,11 +131,13 @@
   <ItemGroup>
     <ClInclude Include="Clients.h" />
     <ClInclude Include="Database.h" />
+    <ClInclude Include="Logger.h" />
     <ClInclude Include="MessengerEngine.h" />
     <ClInclude Include="Server.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Database.cpp" />
+    <ClCompile Include="Logger.cpp" />
     <ClCompile Include="MessengerEngine.cpp" />
     <ClCompile Include="Server.cpp" />
     <ClCompile Include="Source.cpp" />
