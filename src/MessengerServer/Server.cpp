@@ -1,5 +1,7 @@
 #pragma once
 #define _SCL_SECURE_NO_WARNINGS
+
+
 #include <string>
 #include <algorithm>
 #include <vector>
@@ -13,23 +15,24 @@
 #include "Server.h"
 #include "MessengerEngine.h"
 #include "Logger.h"
+
+
 using namespace boost::asio;
 using boost::system::error_code;
 using namespace Logger;
 //TODO: add some error checking
 const char* LogFilename = "Server.log";
 
-std::ostream& operator<<(std::ostream& os, const Client& client)
+std::string ClientString(const Client* client)
 {
-	//в зависимости от того, ввошёл ли клиент в аккаунт, выводим либо логин, либо адрес
-	if (client._LoggedIn)
-		os << client._Account->_Login;
+	if (client->_LoggedIn)
+		return client->_Account->_Login;
 	else
-		os << client._Socket.remote_endpoint().address().to_string() << ':'
-		<< client._Socket.remote_endpoint().port();
-
-	return os;
+		return client->_Socket.remote_endpoint().address().to_string() +
+				":" + std::to_string(client->_Socket.remote_endpoint().port());
 }
+
+
 //*****************************
 //	Server settings
 //*****************************
@@ -38,7 +41,7 @@ Server::Server(boost::asio::io_service& service)
 	: _Service{ service },
 	_Acceptor{ service }
 {
-#ifdef _STATE_MESSAGE_
+#if _STATE_MESSAGE_
 	OpenLogFile(LogFilename);
 #endif
 }
@@ -50,7 +53,7 @@ bool Server::LoadFromConfig()
 	std::ifstream ConfigFile{ ConfigFilename };
 	if (!ConfigFile.is_open())
 	{
-#ifdef _STATE_MESSAGE_
+#if _STATE_MESSAGE_
 		LogBoth(Error, "Configs cannot be loaded");
 #endif 
 		return false;
@@ -59,7 +62,7 @@ bool Server::LoadFromConfig()
 	unsigned short port = 0;
 	if (!(ConfigFile >> port))
 	{
-#ifdef _STATE_MESSAGE_
+#if _STATE_MESSAGE_
 		LogBoth(Error, "Configs cannot be loaded");
 #endif 
 		return false;
@@ -67,7 +70,7 @@ bool Server::LoadFromConfig()
 	}
 
 	bool res = SetPort(port);
-#ifdef _STATE_MESSAGE_
+#if _STATE_MESSAGE_
 	if (res)
 		LogBoth(Success, "Configs successfully loaded.");
 	else
@@ -105,9 +108,9 @@ bool Server::Start()
 	//register new connection handler function
 	_Acceptor.async_accept(new_Client->_Socket, boost::bind(&Server::AcceptClients, this, new_Client, _1), error);
 	
-#ifdef _STATE_MESSAGE_
+#if _STATE_MESSAGE_
 	if (!error)
-		LogBoth(Success, "Server start working on %s:%5d", _Acceptor.local_endpoint().address().to_string().c_str(),
+		LogBoth(Success, "Server start working on %s:%d", _Acceptor.local_endpoint().address().to_string().c_str(),
 			_Acceptor.local_endpoint().port());
 	else
 		LogBoth(Error, "Server cannot start accept: #%d:%s", error.value(), error.message().c_str());
@@ -134,13 +137,16 @@ void Server::Send(Client* client)
 //*******************************
 
 
-void CALLBACK Server::AcceptClients(Client* client, const boost::system::error_code& err)
+void  Server::AcceptClients(Client* client, const boost::system::error_code& err)
 {
-	//вывод информации о новом клиенте 
-	std::cout << "New client: " << *client << '\n';
 	//добавление асинхронной операции для принятого клиента(страшно, нужно упростить мб вывести в другую функцию)
 	client->_Socket.async_read_some(buffer(client->_ReadBuff), boost::bind(&Server::AcceptMessage, this, client, _1, _2));
 	//добавление клиента в список (не  критично, тк вызовы для сокета уже забинджены)
+
+#if _STATE_MESSAGE_
+	Log(Action, "New connection: %s:%d", client->_Socket.local_endpoint().address().to_string().c_str(),
+										 client->_Socket.local_endpoint().port());
+#endif
 
 	_Clients.push_back(client);
 
@@ -150,12 +156,15 @@ void CALLBACK Server::AcceptClients(Client* client, const boost::system::error_c
 	error_code error;
 	//регистрируем обработчик нового коннекта
 	_Acceptor.async_accept(new_Client->_Socket, boost::bind(&Server::AcceptClients, this, new_Client, _1), error);
+	//TODO: fix this
 	if (error)
 		throw;
 }
 
-void CALLBACK Server::AcceptMessage(Client* client, const boost::system::error_code& err_code, size_t bytes)
+//TODO: rewrite this
+void  Server::AcceptMessage(Client* client, const boost::system::error_code& err_code, size_t bytes)
 {
+	
 	//ошибка, нужно удалить клиента
 	if (err_code) {
 		//TODO: стоит определить план дейстивий для конкретного случая: принимать дальше сообщения или нет
@@ -165,9 +174,15 @@ void CALLBACK Server::AcceptMessage(Client* client, const boost::system::error_c
 
 	client->BytesRead = bytes;
 
-	//пока-что просто выведём на экран 
-	std::cout << "Message from " << *client << ' ' << bytes << " bytes\n";
-
+#if (_STATE_MESSAGE_) && (_PACKET_TRACE_)
+	if(!err_code)
+		Log(Action, "[%s] - message %Iu recived", ClientString(client).c_str(),
+												  bytes);
+	else 
+		Log(Mistake, "[%s] - on message error: #%d: %s", ClientString(client).c_str(),
+														 err_code.value(), 
+														 err_code.message().c_str());
+#endif
 	//обработка сообщения
 	_MessagerEngine->AnalyzePacket(client, bytes);
 	//следующее сообщение
@@ -181,14 +196,16 @@ void CALLBACK Server::AcceptMessage(Client* client, const boost::system::error_c
 //*****************************
 
 //TODO: add some
-void CALLBACK Server::WriteHandler(const error_code& err, size_t bytes)
+void  Server::WriteHandler(const error_code& err, size_t bytes)
 {
-	if (!err) {
-		std::cout << "Sended ok\n";
+#if (_STATE_MESSAGE_) && (_PACKET_TRACE_)
+	if (err)
+	{
+		Log(Mistake, "Packet cannot be sended: %d: %s", err.value(), err.message().c_str());
 	}
-	else {
-		std::cout << "Send error\n";
-	}
+	else 
+		Log(Action, "Packet is sended");
+#endif
 }
 
 
@@ -203,10 +220,12 @@ void Server::SolveProblemWithClient(Client* client, const boost::system::error_c
 	DeleteClient(client);
 }
 
+//check 
 void Server::DeleteClient(Client* client)
 {
 #ifdef _STATE_MESSAGE_
-	std::cout << *client << " - disconnected\n";
+	//TODO: its not kicked by server actually, change this
+	Log(Action, "[%s] - kicked by server", ClientString(client).c_str());
 #endif // _STATE_MESSAGE
 
 	error_code err;

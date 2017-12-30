@@ -1,5 +1,6 @@
 #pragma once
-#define _STATE_MESSAGE_
+#define _STATE_MESSAGE_ 1
+#define _PACKET_TRACE_ 0
 
 #include <boost/asio.hpp>
 #include <boost/array.hpp>
@@ -8,7 +9,6 @@
 #include "Clients.h"
 #include "MessengerEngine.h"
 
-std::ostream& operator<<(std::ostream& os, const Client& client);
 
 struct Server {
 	unsigned short _Port;
@@ -26,16 +26,15 @@ struct Server {
 	void SetMessageEngine(MessengerEngine* me) { _MessagerEngine = me; }
 	bool LoadFromConfig();
 
-
 	bool Start();
 
 	void Send(Client* client);
 private:
 	//for internal use only
 
-	void CALLBACK AcceptMessage(Client* client, const boost::system::error_code& err_code, size_t bytes);
-	void CALLBACK AcceptClients(Client* client, const boost::system::error_code& err);
-	void CALLBACK WriteHandler(const boost::system::error_code& err, size_t bytes);
+	void AcceptMessage(Client* client, const boost::system::error_code& err_code, size_t bytes);
+	void AcceptClients(Client* client, const boost::system::error_code& err);
+	void WriteHandler(const boost::system::error_code& err, size_t bytes);
 
 	void SolveProblemWithClient(Client* client, const boost::system::error_code& err_code);
 	void DeleteClient(Client* client);	

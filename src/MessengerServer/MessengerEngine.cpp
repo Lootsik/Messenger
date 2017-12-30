@@ -18,12 +18,15 @@ static bool PreBindChecks(Client* client, Account* account)
 	return  !(client->_LoggedIn || account->_Online);
 }
 
+//TODO: преписать это
 MessengerEngine::MessengerEngine(Server* server)
 //считывать значения с конфигов
 	:_Server{ server }
 {
 	bool res = _DB.Connect("tcp://127.0.0.1:3306", "root", "11JustLikeYou11", "messeger_server_db", "users");
 	
+	
+
 	//TODO: сделать с дб
 	auto Logins = _DB.FillLogins();
 	//TODO: передалать это
@@ -72,7 +75,7 @@ void MessengerEngine::Login(Client* client, const std::string& entered_login, co
 void MessengerEngine::Logout(Client* client)
 {
 #ifdef _STATE_MESSAGE_
-	std::cout << client->_Account->_Login << "- logged out\n";
+	//std::cout << client->_Account->_Login << "- logged out\n";
 #endif // _STATE_MESSAGE_
 
 	//возможно, когда-то стоит изменить последовательность
@@ -88,12 +91,12 @@ void MessengerEngine::Logout(Client* client)
 
 uint32_t MessengerEngine::CheckAccount(const std::string& entered_login, const std::string& entered_password)
 {
-	size_t id =  _DB.FetchUser(entered_login, entered_password);
+	size_t id = _DB.FetchUser(entered_login, entered_password);
 	//fix this
 	if (id > UINT32_MAX)
 		throw;
 
-	return id;
+	return static_cast<uint32_t>(id);
 }
 
 void MessengerEngine::AnalyzePacket(Client* client, size_t size)
@@ -101,7 +104,7 @@ void MessengerEngine::AnalyzePacket(Client* client, size_t size)
 	if (!Deserialization::PacketCheckup(client->_ReadBuff.c_array(), size)){
 		//TODO: log
 #ifdef _STATE_MESSAGE_
-		std::cout << "Packet from " << *client << " failed\n";
+	//	std::cout << "Packet from " << *client << " failed\n";
 #endif
 		return;
 	}
@@ -166,7 +169,7 @@ void MessengerEngine::OnMessage(Client* client)
 	if (from != client->_Account->ID)
 	{
 #ifdef _STATE_MESSAGE_
-		std::cout << *client << ": Wrong id in message: " << from << "\n";
+		//std::cout << *client << ": Wrong id in message: " << from << "\n";
 #endif
 		return;
 	}
@@ -177,7 +180,7 @@ void MessengerEngine::OnMessage(Client* client)
 		if (_Accounts.find(to) == _Accounts.end())
 		{
 #ifdef _STATE_MESSAGE_
-			std::cout << *client << ": Message to ID: " << to << "\nError ID not found\n";
+			//std::cout << *client << ": Message to ID: " << to << "\nError ID not found\n";
 #endif
 			return;
 		}

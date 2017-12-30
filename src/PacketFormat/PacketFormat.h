@@ -33,9 +33,7 @@ namespace Packet {
 	const size_t MaxDataSize = MaxSize - HeaderSize;
 
 	//later it can be useful
-#if Packet::MaxSize > UINT16_MAX
-#error "Max packet size larger that max value that may contained it"
-#endif
+
 	namespace Login {
 		struct Header
 		{

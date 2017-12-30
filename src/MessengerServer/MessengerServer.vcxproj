@@ -142,11 +142,6 @@
     <ClCompile Include="Server.cpp" />
     <ClCompile Include="Source.cpp" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\PacketFormat\PacketFormat.vcxproj">
-      <Project>{3cc3f95c-f1af-48e8-8799-72cc387bfa78}</Project>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

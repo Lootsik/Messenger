@@ -1,7 +1,15 @@
+#pragma warning(push)
+#pragma warning( disable : 4251 )
+#include "mysql_connection.h"
+
+#include <cppconn/driver.h>
+#include <cppconn/exception.h>
+#include <cppconn/resultset.h>
+#include <cppconn/statement.h>
+#include <cppconn/prepared_statement.h>
+#pragma warning(pop)
+
 #include "Database.h"
-
-#include <string>
-
 
 Database::Database()
 {}
@@ -88,7 +96,7 @@ void Database::NewUser(const std::string& login, const std::string& password)
 		_Prepared_NewUser->execute();
 	}
 	//TODO: обработать
-	catch (sql::SQLException &e) {
+	catch (sql::SQLException &) {
 		/*cout << "# ERR: SQLException in " << __FILE__;
 		cout << "(" << __FUNCTION__ << ") on line " << __LINE__ << endl;
 		cout << "# ERR: " << e.what();
