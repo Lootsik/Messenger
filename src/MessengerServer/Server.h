@@ -9,6 +9,7 @@
 #include "Clients.h"
 #include "MessengerEngine.h"
 
+std::string ClientString(const Client* client);
 
 struct Server {
 	unsigned short _Port;
@@ -19,12 +20,10 @@ struct Server {
 	std::vector<Client*> _Clients{};
 	MessengerEngine* _MessagerEngine;
 
-	const char* ConfigFilename = "MessengerServer.cfg";
-
 	Server(boost::asio::io_service& service);
 	bool SetPort(const unsigned short port);
 	void SetMessageEngine(MessengerEngine* me) { _MessagerEngine = me; }
-	bool LoadFromConfig();
+	bool LoadFromConfig(const char*  ConfigFilename );
 
 	bool Start();
 

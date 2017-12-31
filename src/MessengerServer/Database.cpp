@@ -9,65 +9,56 @@
 #include <cppconn/prepared_statement.h>
 #pragma warning(pop)
 
+#include "Logger.h" 
 #include "Database.h"
 
 Database::Database()
-{}
-//TODO: check error codes
-bool Database::Connect(const std::string& hostname, const std::string& login, const std::string& password,
-				   const std::string& schema, const std::string& table)
 {
-	_Table = table;
+}
+//TODO: check error codes
+bool Database::Connect(const std::string& hostname, const std::string& login, const std::string& password)
+{
 	try
 	{
 		_Driver = get_driver_instance();
-	
-		try
-		{
-			//connecting
-			_Connection = _Driver->connect(hostname, login, password);
-		}
-		catch (const std::bad_alloc&)
-		{
-			throw;
-		}
-		catch (...)
-		{
-			//other errors but memory already allocated
-			delete _Connection;
-			throw;
-		}
-		//change schema
+		_Connection = _Driver->connect(hostname, login, password);
+	}
+	catch (sql::SQLException& e)
+	{
+		Logger::LogBoth(Logger::Error, "SQLException thrown on connection to db. Error # %d: %s", e.getErrorCode(), e.what());
+		return false;
+	}
+	catch (std::exception &e) 
+	{
+		Logger::LogBoth(Logger::Error, "Exeption thrown on connection to db: %s", e.what());
+		return false;
+	}
+	return true;
+}
+
+bool Database::CreatePrepared(const std::string& schema, const std::string& table)
+{
+	_Table = table;
+
+	try
+	{
 		_Connection->setSchema(schema);
+		
+		_Statement = _Connection->createStatement();
 
-		try
-		{
-			_Statement = _Connection->createStatement();
-		}
-		catch (const std::bad_alloc&)
-		{
-			//ошибка выделения памяти, освобождаем Connection так как на него уже выделена память
-			delete _Connection;
-			throw;
-		}
-		catch (...)
-		{
-			//любые другие ошибки 
-			delete _Statement;
-			delete _Connection;
-			throw;
-		}
-
-		//TODO: тут тоже могут вылезти исключения, нужно обработать
 		_Prepared_NewUser = _Connection->prepareStatement("CALL NewUser(?,?);");
 		_Prepared_DeleteUser = _Connection->prepareStatement("CALL DeleteUser(?);");
 		_Prepared_IsExist = _Connection->prepareStatement("SELECT id FROM " + _Table + " WHERE Login = ?;");
 		_Prepared_IsCorrect = _Connection->prepareStatement("SELECT id FROM " + _Table + " WHERE Login = ? AND Password = ?;");
 	}
-	catch (...)
+	catch (sql::SQLException& e)
 	{
-		//anyway, if we get error here, we will program
-		//so its not necessary release all resources
+		Logger::LogBoth(Logger::Error, "SQLException thrown on creating prepared. Error # %d: %s", __func__,e.getErrorCode(), e.what());
+		return false;
+	}
+	catch (std::exception &e)
+	{
+		Logger::LogBoth(Logger::Error, "Exeption thrown on creating prepared: %s", e.what());
 		return false;
 	}
 	return true;

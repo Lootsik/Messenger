@@ -11,7 +11,6 @@
 #include <boost/array.hpp>
 #include <boost/bind.hpp>
 
-
 #include "Server.h"
 #include "MessengerEngine.h"
 #include "Logger.h"
@@ -21,12 +20,11 @@ using namespace boost::asio;
 using boost::system::error_code;
 using namespace Logger;
 //TODO: add some error checking
-const char* LogFilename = "Server.log";
 
 std::string ClientString(const Client* client)
 {
 	if (client->_LoggedIn)
-		return client->_Account->_Login;
+		return std::to_string(client->_Account->ID) + ":" + client->_Account->_Login;
 	else
 		return client->_Socket.remote_endpoint().address().to_string() +
 				":" + std::to_string(client->_Socket.remote_endpoint().port());
@@ -41,14 +39,12 @@ Server::Server(boost::asio::io_service& service)
 	: _Service{ service },
 	_Acceptor{ service }
 {
-#if _STATE_MESSAGE_
-	OpenLogFile(LogFilename);
-#endif
+
 }
 
 //TODO: rewrite this
 //NOTE: add new settings to config
-bool Server::LoadFromConfig()
+bool Server::LoadFromConfig(const char* ConfigFilename)
 {
 	std::ifstream ConfigFile{ ConfigFilename };
 	if (!ConfigFile.is_open())
@@ -110,8 +106,7 @@ bool Server::Start()
 	
 #if _STATE_MESSAGE_
 	if (!error)
-		LogBoth(Success, "Server start working on %s:%d", _Acceptor.local_endpoint().address().to_string().c_str(),
-			_Acceptor.local_endpoint().port());
+		LogBoth(Success, "Server start working on port %d", _Acceptor.local_endpoint().port());
 	else
 		LogBoth(Error, "Server cannot start accept: #%d:%s", error.value(), error.message().c_str());
 #endif

@@ -9,10 +9,11 @@ struct Server;
 class MessengerEngine
 {
 public:
-	const char* ConfigFilename = "Messenger.cfg";
-
 	MessengerEngine(Server* server);
-	~MessengerEngine();
+
+	bool LoadFromConfig(const char* Filename);
+	void FillAccountInfo();
+
 	//изменить сигнатуру
 	void Login(Client* client, const std::string& entered_login, const std::string& entered_password);
 	void Logout(Client* client);
@@ -20,12 +21,8 @@ public:
 	void AnalyzePacket(Client* client, size_t size);
 	void OnLogin(Client* client);
 	void OnMessage(Client* client);
-
-	bool SettingsFromConfig();
-
 	//Packet already in WriteBuff
 	void Response(Client* client);
-
 
 private:
 	std::map <uint32_t, Account*> _Accounts;

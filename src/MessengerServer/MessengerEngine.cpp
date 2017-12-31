@@ -3,6 +3,9 @@
 #include "Server.h"
 #include "..\PacketFormat\Deserialization.h"
 #include "..\PacketFormat\Serialization.h"
+#include "Logger.h"
+
+using namespace Logger;
 
 static void BindClientToAcc(Client* client, Account* account)
 {
@@ -23,11 +26,19 @@ MessengerEngine::MessengerEngine(Server* server)
 //считывать значения с конфигов
 	:_Server{ server }
 {
-	bool res = _DB.Connect("tcp://127.0.0.1:3306", "root", "11JustLikeYou11", "messeger_server_db", "users");
-	
-	
+}
 
-	//TODO: сделать с дб
+//TODO: smth with db initialization
+//TODO: add actually load from config this
+bool MessengerEngine::LoadFromConfig(const char* Filename)
+{
+	return !(!_DB.Connect("tcp://127.0.0.1:3306", "root", "11JustLikeYou11") ||
+				!_DB.CreatePrepared("messeger_server_db", "users"));
+}
+
+//TODO: rewrite this
+void MessengerEngine::FillAccountInfo()
+{
 	auto Logins = _DB.FillLogins();
 	//TODO: передалать это
 	size_t LoginsSize = Logins.size();
@@ -38,10 +49,6 @@ MessengerEngine::MessengerEngine(Server* server)
 	}
 }
 
-
-MessengerEngine::~MessengerEngine()
-{
-}
 
 //TODO: пересмотреть причины и сделать ответы
 void MessengerEngine::Login(Client* client, const std::string& entered_login, const std::string& entered_password)
@@ -67,6 +74,15 @@ void MessengerEngine::Login(Client* client, const std::string& entered_login, co
 			
 	//need to hide this
 	Serialization::MakePacketLoginResult(client->_WriteBuf.c_array(), Result, FindId);
+
+#ifdef _STATE_MESSAGE_
+	if (Result == (int)Packet::LoginResult::Result::Success)
+		LogBoth(Action, "[%s] - Logged in", ClientString(client).c_str());
+	else
+		Log(Mistake, "[%s] - Failed login", ClientString(client).c_str());
+
+#endif 
+
 	//send result
 	Response(client); 
 }
@@ -75,7 +91,7 @@ void MessengerEngine::Login(Client* client, const std::string& entered_login, co
 void MessengerEngine::Logout(Client* client)
 {
 #ifdef _STATE_MESSAGE_
-	//std::cout << client->_Account->_Login << "- logged out\n";
+	LogBoth(Action, "[%s] - Logout", ClientString(client).c_str());
 #endif // _STATE_MESSAGE_
 
 	//возможно, когда-то стоит изменить последовательность
@@ -103,8 +119,8 @@ void MessengerEngine::AnalyzePacket(Client* client, size_t size)
 {
 	if (!Deserialization::PacketCheckup(client->_ReadBuff.c_array(), size)){
 		//TODO: log
-#ifdef _STATE_MESSAGE_
-	//	std::cout << "Packet from " << *client << " failed\n";
+#if _STATE_MESSAGE_ && _PACKET_TRACE_
+		Log(Action, "[%s] - Packet %ud bytes", ClientString(client).c_str(), size);
 #endif
 		return;
 	}
@@ -169,7 +185,7 @@ void MessengerEngine::OnMessage(Client* client)
 	if (from != client->_Account->ID)
 	{
 #ifdef _STATE_MESSAGE_
-		//std::cout << *client << ": Wrong id in message: " << from << "\n";
+		Log(Action, "[%s] - Message wrong addresat ID: %ud", ClientString(client).c_str(), to);
 #endif
 		return;
 	}
@@ -180,7 +196,7 @@ void MessengerEngine::OnMessage(Client* client)
 		if (_Accounts.find(to) == _Accounts.end())
 		{
 #ifdef _STATE_MESSAGE_
-			//std::cout << *client << ": Message to ID: " << to << "\nError ID not found\n";
+			Log(Action, "[%s] message %d bytes to ID: %ud",ClientString(client).c_str(),client->BytesRead, to);
 #endif
 			return;
 		}
