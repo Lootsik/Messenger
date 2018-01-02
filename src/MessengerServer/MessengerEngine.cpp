@@ -71,11 +71,10 @@ void MessengerEngine::Login(Client* client, const std::string& entered_login, co
 			Id = FindId;
 		}
 	}
-			
 	//need to hide this
 	Serialization::MakePacketLoginResult(client->_WriteBuf.c_array(), Result, FindId);
 
-#ifdef _STATE_MESSAGE_
+#if _STATE_MESSAGE_
 	if (Result == (int)Packet::LoginResult::Result::Success)
 		LogBoth(Action, "[%s] - Logged in", ClientString(client).c_str());
 	else
@@ -90,7 +89,7 @@ void MessengerEngine::Login(Client* client, const std::string& entered_login, co
 
 void MessengerEngine::Logout(Client* client)
 {
-#ifdef _STATE_MESSAGE_
+#if _STATE_MESSAGE_
 	LogBoth(Action, "[%s] - Logout", ClientString(client).c_str());
 #endif // _STATE_MESSAGE_
 
@@ -120,7 +119,7 @@ void MessengerEngine::AnalyzePacket(Client* client, size_t size)
 	if (!Deserialization::PacketCheckup(client->_ReadBuff.c_array(), size)){
 		//TODO: log
 #if _STATE_MESSAGE_ && _PACKET_TRACE_
-		Log(Action, "[%s] - Packet %ud bytes", ClientString(client).c_str(), size);
+		Log(Action, "[%s] - Packet %Iu bytes", ClientString(client).c_str(), size);
 #endif
 		return;
 	}
@@ -184,8 +183,8 @@ void MessengerEngine::OnMessage(Client* client)
 
 	if (from != client->_Account->ID)
 	{
-#ifdef _STATE_MESSAGE_
-		Log(Action, "[%s] - Message wrong addresat ID: %ud", ClientString(client).c_str(), to);
+#if _STATE_MESSAGE_
+		Log(Action, "[%s] - Message wrong addresser ID: %Iu", ClientString(client).c_str(), from);
 #endif
 		return;
 	}
@@ -195,15 +194,17 @@ void MessengerEngine::OnMessage(Client* client)
 	{
 		if (_Accounts.find(to) == _Accounts.end())
 		{
-#ifdef _STATE_MESSAGE_
-			Log(Action, "[%s] message %d bytes to ID: %ud",ClientString(client).c_str(),client->BytesRead, to);
+#if _STATE_MESSAGE_
+			Log(Action, "[%s] - Message wrong addresat ID: %Iu", ClientString(client).c_str(), to);
 #endif
 			return;
 		}
 		auto Acc = _Accounts[to];
 		if (Acc->_Online) {
 			memcpy(Acc->_Client->_WriteBuf.c_array(), client->_ReadBuff.c_array(), client->BytesRead);
-			
+#if _STATE_MESSAGE_
+			Log(Action, "[%s] message %d bytes to ID: %Iu",ClientString(client).c_str(),client->BytesRead, to);
+#endif 			
 			Response(Acc->_Client);
 		}
 	}

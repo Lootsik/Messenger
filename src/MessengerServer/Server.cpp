@@ -86,7 +86,7 @@ bool Server::SetPort(const unsigned short port)
 	_Acceptor.bind(point, err);
 	_Acceptor.listen();
 	/*
-#ifdef _STATE_MESSAGE_
+#if _STATE_MESSAGE_
 	Log(Success, "Port set to %d", port);
 #endif*/
 	return !err;
@@ -218,7 +218,7 @@ void Server::SolveProblemWithClient(Client* client, const boost::system::error_c
 //check 
 void Server::DeleteClient(Client* client)
 {
-#ifdef _STATE_MESSAGE_
+#if _STATE_MESSAGE_
 	//TODO: its not kicked by server actually, change this
 	Log(Action, "[%s] - kicked by server", ClientString(client).c_str());
 #endif // _STATE_MESSAGE

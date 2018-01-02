@@ -11,7 +11,7 @@ public:
 	ClientNetwork& client;
 	bool connected = false;
 	// Dialog Data
-#ifdef AFX_DESIGN_TIME
+#if AFX_DESIGN_TIME
 	enum { IDD = IDDialogLogin};
 #endif
 

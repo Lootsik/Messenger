@@ -26,7 +26,6 @@ namespace Packet {
 		uint16_t DataSize;
 		alignas(4) char Data[0];
 	};
-	size_t a = sizeof(Header);
 
 	const size_t MaxSize = 512;
 	//its minimal size for packet for now
