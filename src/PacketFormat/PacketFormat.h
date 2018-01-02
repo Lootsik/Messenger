@@ -24,8 +24,9 @@ namespace Packet {
 		uint16_t Type;
 		//Only data field size!
 		uint16_t DataSize;
-		char Data[0];
+		alignas(4) char Data[0];
 	};
+	size_t a = sizeof(Header);
 
 	const size_t MaxSize = 512;
 	//its minimal size for packet for now
@@ -39,7 +40,7 @@ namespace Packet {
 		{
 			uint16_t LoginSize;
 			uint16_t PassSize;
-			char Data[0];
+			alignas(4) char Data[0];
 		};
 		//its without packet header itself
 		const size_t HeaderSize = sizeof(Header);
@@ -51,8 +52,7 @@ namespace Packet {
 			uint32_t IdFrom;
 			uint32_t IdTo;
 			uint16_t MessageSize;
-			uint16_t _unused;
-			char Data[0];
+			alignas(4) char Data[0];
 		};
 		const size_t HeaderSize = sizeof(Header);
 		const size_t MaxDataSize = Packet::MaxDataSize - HeaderSize;

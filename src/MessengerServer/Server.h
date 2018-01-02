@@ -30,7 +30,6 @@ struct Server {
 	void Send(Client* client);
 private:
 	//for internal use only
-
 	void AcceptMessage(Client* client, const boost::system::error_code& err_code, size_t bytes);
 	void AcceptClients(Client* client, const boost::system::error_code& err);
 	void WriteHandler(const boost::system::error_code& err, size_t bytes);
