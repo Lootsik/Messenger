@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
-
+#include <GlobalInfo.h>
 namespace sql {
 	class Driver;
 	class Connection;
@@ -13,20 +13,20 @@ namespace sql {
 //TODO: пофиксить размеры в полей, не сделать случайно case insesetive, сделать что-то с кодировками
 
 //пересоздать дб
-class Database {
+class AccountStorage {
 public:
-	Database();
+	AccountStorage();
 	bool Connect(const std::string& hostname, const std::string& login, const std::string& password);
 	bool CreatePrepared(const std::string& schema, const std::string& table);
 
 	//TODO: добавить set get методы и почистить код 
 	//запрещаем копирование и перемещение, это можно сделать, но нет надобности 
-	Database (const Database&) = delete;
-	Database& operator=(const Database&) = delete;
-	Database (Database&&) = delete;
-	Database& operator=(Database &&) = delete;
+	AccountStorage (const AccountStorage&) = delete;
+	AccountStorage& operator=(const AccountStorage&) = delete;
+	AccountStorage (AccountStorage&&) = delete;
+	AccountStorage& operator=(AccountStorage &&) = delete;
 
-	~Database();
+	~AccountStorage();
 	//добавление нового пользовател€
 	void NewUser(const std::string& login, const std::string& password);
 	//удаление пользовател€
@@ -36,7 +36,15 @@ public:
 	//TODO: заменить функцией sql
 	size_t FetchUser(const std::string& login, const std::string& password);
 
+	uint32_t GetID(const std::string& login);
+
 	std::vector<std::pair<unsigned int, std::string>> FillLogins();
+
+	std::string GetLogin(ID_t ID);
+	void RecordLogin(ID_t ID);
+	void RecordLogout(ID_t ID);
+	bool Online(ID_t ID); 
+
 
 private:
 	//TODO: заменить некоторые запросы функци€ми самой бд
@@ -45,10 +53,11 @@ private:
 	sql::Driver* _Driver;
 	sql::Connection* _Connection;
 	sql::Statement* _Statement;
-	sql::ResultSet* _Result;
 	//Prepared
 	sql::PreparedStatement* _Prepared_NewUser;
 	sql::PreparedStatement* _Prepared_DeleteUser;
 	sql::PreparedStatement* _Prepared_IsExist;
 	sql::PreparedStatement* _Prepared_IsCorrect;
+	sql::PreparedStatement* _Prepared_GetId;
+	sql::PreparedStatement* _Prepared_GetLogin;
 };

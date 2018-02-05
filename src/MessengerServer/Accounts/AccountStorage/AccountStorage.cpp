@@ -9,14 +9,15 @@
 #include <cppconn/prepared_statement.h>
 #pragma warning(pop)
 
-#include "Logger.h" 
-#include "Database.h"
+#include <Logger/Logger.h>
+#include "AccountStorage.h"
 
-Database::Database()
+
+AccountStorage::AccountStorage()
 {
 }
 //TODO: check error codes
-bool Database::Connect(const std::string& hostname, const std::string& login, const std::string& password)
+bool AccountStorage::Connect(const std::string& hostname, const std::string& login, const std::string& password)
 {
 	try
 	{
@@ -36,7 +37,7 @@ bool Database::Connect(const std::string& hostname, const std::string& login, co
 	return true;
 }
 
-bool Database::CreatePrepared(const std::string& schema, const std::string& table)
+bool AccountStorage::CreatePrepared(const std::string& schema, const std::string& table)
 {
 	_Table = table;
 
@@ -50,6 +51,8 @@ bool Database::CreatePrepared(const std::string& schema, const std::string& tabl
 		_Prepared_DeleteUser = _Connection->prepareStatement("CALL DeleteUser(?);");
 		_Prepared_IsExist = _Connection->prepareStatement("SELECT id FROM " + _Table + " WHERE Login = ?;");
 		_Prepared_IsCorrect = _Connection->prepareStatement("SELECT id FROM " + _Table + " WHERE Login = ? AND Password = ?;");
+		_Prepared_GetId = _Connection->prepareStatement("SELECT GetId(?);");
+		_Prepared_GetLogin = _Connection->prepareStatement("SELECT GetLogin(?);");
 	}
 	catch (sql::SQLException& e)
 	{
@@ -64,7 +67,7 @@ bool Database::CreatePrepared(const std::string& schema, const std::string& tabl
 	return true;
 }
 
-Database::~Database()
+AccountStorage::~AccountStorage()
 {
 	delete _Prepared_NewUser;
 	delete  _Prepared_DeleteUser;
@@ -75,7 +78,7 @@ Database::~Database()
 	delete _Connection;
 }
 	
-void Database::NewUser(const std::string& login, const std::string& password)
+void AccountStorage::NewUser(const std::string& login, const std::string& password)
 {
 	try
 	{
@@ -97,7 +100,7 @@ void Database::NewUser(const std::string& login, const std::string& password)
 	}
 }
 
-bool Database::DeleteUser(const std::string& login)
+bool AccountStorage::DeleteUser(const std::string& login)
 {
 	try
 	{
@@ -115,14 +118,16 @@ bool Database::DeleteUser(const std::string& login)
 	return false;
 }
 
-bool Database::IsExist(const std::string& login)
+bool AccountStorage::IsExist(const std::string& login)
 {
+	boost::scoped_ptr<sql::ResultSet> _Result;
+
 	try
 	{
 		_Prepared_IsExist->clearParameters();
 		_Prepared_IsExist->setString(1, login);
 		//выполяем
-		_Result = _Prepared_IsExist->executeQuery();
+		_Result.reset(  _Prepared_IsExist->executeQuery());
 	}
 	//TODO: обработать
 	catch (...)
@@ -131,21 +136,22 @@ bool Database::IsExist(const std::string& login)
 	}
 	//количество строк в выходной таблице
 	size_t rows = _Result->rowsCount();
-	delete _Result;
 	//rows всегда будет 1 или 2, тк поле Login уникальное
 	return rows > 0;
 }
 	
 //TODO: заменить функцией sql, заменить название
-size_t Database::FetchUser(const std::string& login, const std::string& password)
+size_t AccountStorage::FetchUser(const std::string& login, const std::string& password)
 {
+	boost::scoped_ptr<sql::ResultSet> _Result;
+
 	try
 	{
 		_Prepared_IsCorrect->clearParameters();
 		_Prepared_IsCorrect->setString(1, login);
 		_Prepared_IsCorrect->setString(2, password);
 
-		_Result = _Prepared_IsCorrect->executeQuery();
+		_Result.reset( _Prepared_IsCorrect->executeQuery());
 	}
 	//TODO: обработать
 	catch (...)
@@ -154,22 +160,24 @@ size_t Database::FetchUser(const std::string& login, const std::string& password
 	}
 	size_t rows = _Result->rowsCount();
 	if (rows == 0)
+	{
 		return 0;
-
+	}
 	_Result->next();
-	size_t id = _Result->getInt64("id");
-	delete _Result;
+	uint32_t id = _Result->getInt("id");
 	//если 
 	return id;
 }
 //TODO: обработать ошибки тут и по всему модулю
-std::vector<std::pair<unsigned int , std::string> > Database::FillLogins()
+std::vector<std::pair<unsigned int , std::string> > AccountStorage::FillLogins()
 {
 	std::vector<std::pair<unsigned int,std::string> > Output;
 
+	boost::scoped_ptr<sql::ResultSet> _Result;
+
 	try
 	{
-		_Result = _Statement->executeQuery("SELECT id, Login FROM " + _Table + ";");
+		_Result.reset(_Statement->executeQuery("SELECT id, Login FROM " + _Table + ";"));
 		while (_Result->next()) {
 			Output.push_back(std::pair<unsigned int, std::string>{ _Result->getInt("id"),_Result->getString("Login") });
 		}
@@ -179,4 +187,66 @@ std::vector<std::pair<unsigned int , std::string> > Database::FillLogins()
 		throw;
 	}
 	return Output;
+}
+
+ID_t AccountStorage::GetID(const std::string& login)
+{
+	boost::scoped_ptr<sql::ResultSet> _Result;
+	try
+	{
+		_Prepared_GetId->clearParameters();
+		_Prepared_GetId->setString(1, login);
+		//выполяем
+		_Result.reset( _Prepared_GetId->executeQuery());
+	}
+	catch (...)
+	{
+		throw;
+	}
+	if (_Result->next())
+		return  _Result->getInt("id");
+	else
+		return INVALID_ID;
+}
+std::string AccountStorage::GetLogin(ID_t ID)
+{
+	boost::scoped_ptr<sql::ResultSet> _Result;
+
+	try
+	{
+		_Result.reset(_Statement->executeQuery("SELECT Login FROM " + _Table + " WHERE id=" + std::to_string(ID) + ';'));
+	}
+	catch (...)
+	{
+		throw;
+	}
+	if (_Result->next())
+		return _Result->getString("Login");
+		
+	return "";
+}
+void AccountStorage::RecordLogin(ID_t ID)
+{
+	_Statement->executeUpdate("UPDATE " + _Table + " SET Online=1 WHERE id = " + std::to_string(ID) + ';');
+}
+void AccountStorage::RecordLogout(ID_t ID)
+{
+	_Statement->executeUpdate("UPDATE " + _Table + " SET Online=0 WHERE id = " + std::to_string(ID) + ';');
+}
+bool AccountStorage::Online(ID_t ID)
+{
+	boost::scoped_ptr<sql::ResultSet> _Result;
+	try
+	{
+		_Result.reset(_Statement->executeQuery("SELECT Online FROM " + _Table + " WHERE id = " + std::to_string(ID) + ';'));
+		size_t count  = _Result->rowsCount();
+		while (_Result->next()) {
+			return static_cast<bool>(_Result->getInt("Online"));
+		}
+	}
+	catch (...)
+	{
+		throw;
+	}
+	return false;
 }

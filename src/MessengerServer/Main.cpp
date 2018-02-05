@@ -1,5 +1,5 @@
-#include "Server.h"
-#include "Logger.h"
+#include <Server/Server.h>
+#include <Logger/Logger.h>
 //Do smth with debug and release env directories
 
 //TODO:
@@ -9,7 +9,7 @@ const char* LogFilename = "Server.log";
 
 int main()
 {
-#if _STATE_MESSAGE_
+#if _LOGGING_
 	Logger::OpenLogFile(LogFilename);
 #endif
 
@@ -26,7 +26,7 @@ int main()
 	if (!engine.LoadFromConfig(""))
 		return 1;
 
-	engine.FillAccountInfo();
+	//engine.FillAccountInfo();
 
 
 	server.SetMessageEngine(&engine);

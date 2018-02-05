@@ -12,8 +12,7 @@
 #include <boost/bind.hpp>
 
 #include "Server.h"
-#include "MessengerEngine.h"
-#include "Logger.h"
+#include <Logger/Logger.h>
 
 
 using namespace boost::asio;
@@ -21,13 +20,11 @@ using boost::system::error_code;
 using namespace Logger;
 //TODO: add some error checking
 
-std::string ClientString(const Client* client)
+//todo add ID
+std::string ConnectionString(const Connection* connection)
 {
-	if (client->_LoggedIn)
-		return std::to_string(client->_Account->ID) + ":" + client->_Account->_Login;
-	else
-		return client->_Socket.remote_endpoint().address().to_string() +
-				":" + std::to_string(client->_Socket.remote_endpoint().port());
+	return connection->_Socket.remote_endpoint().address().to_string() +
+				":" + std::to_string(connection->_Socket.remote_endpoint().port());
 }
 
 
@@ -39,7 +36,6 @@ Server::Server(boost::asio::io_service& service)
 	: _Service{ service },
 	_Acceptor{ service }
 {
-
 }
 
 //TODO: rewrite this
@@ -49,7 +45,7 @@ bool Server::LoadFromConfig(const char* ConfigFilename)
 	std::ifstream ConfigFile{ ConfigFilename };
 	if (!ConfigFile.is_open())
 	{
-#if _STATE_MESSAGE_
+#if _LOGGING_
 		LogBoth(Error, "Configs cannot be loaded");
 #endif 
 		return false;
@@ -58,7 +54,7 @@ bool Server::LoadFromConfig(const char* ConfigFilename)
 	unsigned short port = 0;
 	if (!(ConfigFile >> port))
 	{
-#if _STATE_MESSAGE_
+#if _LOGGING_
 		LogBoth(Error, "Configs cannot be loaded");
 #endif 
 		return false;
@@ -66,7 +62,7 @@ bool Server::LoadFromConfig(const char* ConfigFilename)
 	}
 
 	bool res = SetPort(port);
-#if _STATE_MESSAGE_
+#if _LOGGING_
 	if (res)
 		LogBoth(Success, "Configs successfully loaded.");
 	else
@@ -85,10 +81,10 @@ bool Server::SetPort(const unsigned short port)
 
 	_Acceptor.bind(point, err);
 	_Acceptor.listen();
-	/*
-#if _STATE_MESSAGE_
+
+#if _LOGGING_
 	Log(Success, "Port set to %d", port);
-#endif*/
+#endif
 	return !err;
 }
 
@@ -99,12 +95,12 @@ bool Server::SetPort(const unsigned short port)
 //actually starts accept connections
 bool Server::Start()
 {
-	Client* new_Client = new Client{ _Service };
+	Connection* new_Connection = new Connection{ _Service };
 	error_code error;
-	//register new connection handler function
-	_Acceptor.async_accept(new_Client->_Socket, boost::bind(&Server::AcceptClients, this, new_Client, _1), error);
+	//register new Server/Connection.handler function
+	_Acceptor.async_accept(new_Connection->_Socket, boost::bind(&Server::AcceptConnections, this, new_Connection, _1), error);
 	
-#if _STATE_MESSAGE_
+#if _LOGGING_
 	if (!error)
 		LogBoth(Success, "Server start working on port %d", _Acceptor.local_endpoint().port());
 	else
@@ -120,10 +116,10 @@ bool Server::Start()
 
 
 //message already in Write buffer
-void Server::Send(Client* client)
+void Server::_Send(Connection* connection)
 {
-	client->_Socket.async_write_some(
-			buffer(client->_WriteBuf, client->BytesWrite),
+	connection->_Socket.async_write_some(
+			buffer(connection->_WriteBuf, connection->BytesWrite),
 			boost::bind(&Server::WriteHandler, this, _1, _2));
 }
 
@@ -132,58 +128,60 @@ void Server::Send(Client* client)
 //*******************************
 
 
-void  Server::AcceptClients(Client* client, const boost::system::error_code& err)
+void Server::AcceptConnections(Connection* connection, const boost::system::error_code& err)
 {
 	//добавление асинхронной операции для принятого клиента(страшно, нужно упростить мб вывести в другую функцию)
-	client->_Socket.async_read_some(buffer(client->_ReadBuff), boost::bind(&Server::AcceptMessage, this, client, _1, _2));
+	connection->_Socket.async_read_some(buffer(connection->_ReadBuff), boost::bind(&Server::AcceptMessage, this, connection, _1, _2));
 	//добавление клиента в список (не  критично, тк вызовы для сокета уже забинджены)
 
-#if _STATE_MESSAGE_
-	Log(Action, "New connection: %s:%d", client->_Socket.local_endpoint().address().to_string().c_str(),
-										 client->_Socket.local_endpoint().port());
+#if _LOGGING_
+	Log(Action, "New connection: %s:%d", connection->_Socket.remote_endpoint().address().to_string().c_str(),
+										 connection->_Socket.remote_endpoint().port());
 #endif
 
-	_Clients.push_back(client);
+	_Connections.push_back(connection);
 
 	//создаём нового клиента
-	Client* new_Client = new Client{ _Service };
+	Connection* new_Connection = new Connection{ _Service };
 
 	error_code error;
 	//регистрируем обработчик нового коннекта
-	_Acceptor.async_accept(new_Client->_Socket, boost::bind(&Server::AcceptClients, this, new_Client, _1), error);
+
+	_Acceptor.async_accept(new_Connection->_Socket, boost::bind(&Server::AcceptConnections, this, new_Connection, _1), error);
+
 	//TODO: fix this
 	if (error)
 		throw;
 }
 
 //TODO: rewrite this
-void  Server::AcceptMessage(Client* client, const boost::system::error_code& err_code, size_t bytes)
+void  Server::AcceptMessage(Connection* connection, const boost::system::error_code& err_code, size_t bytes)
 {
 	
 	//ошибка, нужно удалить клиента
 	if (err_code) {
 		//TODO: стоит определить план дейстивий для конкретного случая: принимать дальше сообщения или нет
-		SolveProblemWithClient(client, err_code);
+		SolveProblemWithConnection(connection, err_code);
 		return;
 	}
 
-	client->BytesRead = bytes;
+	connection->BytesRead = bytes;
 
-#if (_STATE_MESSAGE_) && (_PACKET_TRACE_)
+#if (_LOGGING_) && (_PACKET_TRACE_)
 	if(!err_code)
-		Log(Action, "[%s] - message %Iu recived", ClientString(client).c_str(),
+		Log(Action, "[%s] - message %Iu recived", ConnectionString(Connection).c_str(),
 												  bytes);
 	else 
-		Log(Mistake, "[%s] - on message error: #%d: %s", ClientString(client).c_str(),
+		Log(Mistake, "[%s] - on message error: #%d: %s", ConnectionString(Connection).c_str(),
 														 err_code.value(), 
 														 err_code.message().c_str());
 #endif
-	//обработка сообщения
-	_MessagerEngine->AnalyzePacket(client, bytes);
-	//следующее сообщение
 	//TODO: We need this?
-	client->_Socket.async_read_some( buffer(client->_ReadBuff), 
-									boost::bind(&Server::AcceptMessage,this, client, _1, _2) );
+	connection->_Socket.async_read_some( buffer(connection->_ReadBuff),
+									boost::bind(&Server::AcceptMessage,this, connection, _1, _2) );
+
+	connection->BytesRead = bytes;
+	_MessagerEngine->AnalyzePacket(connection);
 }
 
 //*****************************
@@ -193,7 +191,7 @@ void  Server::AcceptMessage(Client* client, const boost::system::error_code& err
 //TODO: add some
 void  Server::WriteHandler(const error_code& err, size_t bytes)
 {
-#if (_STATE_MESSAGE_) && (_PACKET_TRACE_)
+#if (_LOGGING_) && (_PACKET_TRACE_)
 	if (err)
 	{
 		Log(Mistake, "Packet cannot be sended: %d: %s", err.value(), err.message().c_str());
@@ -208,42 +206,52 @@ void  Server::WriteHandler(const error_code& err, size_t bytes)
 //	Managing connections
 //*****************************
 
-void Server::SolveProblemWithClient(Client* client, const boost::system::error_code& err_code)
+void Server::SolveProblemWithConnection(Connection* connection, const boost::system::error_code& err_code)
 {
-	//TODO: add some action according to error 
 	//kick by default
-	DeleteClient(client);
+	switch (err_code.value())
+	{
+	case error::connection_reset:
+#if _LOGGING_
+		Log(Action, "[%s] - Disconnected", ConnectionString(connection).c_str());
+#endif // _STATE_MESSAGE
+		DeleteConnection(connection);
+		break;
+		
+	default:
+#if _LOGGING_
+		Log(Mistake, "[%s] - Drop connection: #%d: %s", ConnectionString(connection).c_str(), err_code.value(), err_code.message());
+#endif // _STATE_MESSAGE
+		DeleteConnection(connection);
+		break;
+	}
 }
 
 //check 
-void Server::DeleteClient(Client* client)
+void Server::DeleteConnection(Connection* connection)
 {
-#if _STATE_MESSAGE_
-	//TODO: its not kicked by server actually, change this
-	Log(Action, "[%s] - kicked by server", ClientString(client).c_str());
-#endif // _STATE_MESSAGE
-
 	error_code err;
 	//останавливаем все операции чтения-записи для сокета
-	client->_Socket.shutdown(ip::tcp::socket::shutdown_both, err);
+	connection->_Socket.shutdown(ip::tcp::socket::shutdown_both, err);
 	//assert нужно заменить
-	//пока не знаю как правильно обрабатывать такие ситуации
+	//не знаю как правильно обрабатывать такие ситуации
 	assert(!err);
 
-	//выходим с аккаунта
-	if (client->_LoggedIn)
-		_MessagerEngine->Logout(client);
+	//TODO: change this
+	if ( connection->Account.Online() )
+		_MessagerEngine->OnLogout(connection);
 
 	//ищем клиента в списке клиетов
-	auto res = find(_Clients.begin(), _Clients.end(), client);
+	auto res = find(_Connections.begin(), _Connections.end(), connection);
 	//если этого клиента в списке нет, что-то пошло не так
-	assert(res != _Clients.end());
+	if (res == _Connections.end())
+		throw;
 
 	//удаляем клиента со списка
-	_Clients.erase(res);
+	_Connections.erase(res);
 
 	//закрываем сокет
-	client->_Socket.close();
-	delete client;
+	connection->_Socket.close();
+	delete connection;
 	return;
 }

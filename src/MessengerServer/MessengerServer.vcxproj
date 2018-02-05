@@ -69,7 +69,9 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -85,7 +87,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>E:\Lib\Mysql C++ connector 1.1.9 x64\include;E:\Lib\boost_1_60_0_x64;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)src\MessengerServer;E:\Lib\Mysql C++ connector 1.1.9 x64\include;E:\Lib\boost_1_60_0_x64</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_WIN32_WINNT=0x0501;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
@@ -129,18 +131,42 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Clients.h" />
-    <ClInclude Include="Database.h" />
-    <ClInclude Include="Logger.h" />
-    <ClInclude Include="MessengerEngine.h" />
-    <ClInclude Include="Server.h" />
+    <ClInclude Include="Accounts\AccountManager.h" />
+    <ClInclude Include="Accounts\AccountStorage\AccountStorage.h" />
+    <ClInclude Include="Accounts\Logout.h" />
+    <ClInclude Include="GlobalInfo.h" />
+    <ClInclude Include="Logger\Logger.h" />
+    <ClInclude Include="Engine\Engine.h" />
+    <ClInclude Include="Messages\Chat.h" />
+    <ClInclude Include="Messages\Message.h" />
+    <ClInclude Include="Messages\MessageManager.h" />
+    <ClInclude Include="Messages\MessageRequest.h" />
+    <ClInclude Include="Messages\Speakers.h" />
+    <ClInclude Include="Message\Message.h" />
+    <ClInclude Include="PacketFormat\Deserialization.h" />
+    <ClInclude Include="PacketFormat\PacketFormat.h" />
+    <ClInclude Include="PacketFormat\Serialization.h" />
+    <ClInclude Include="Server\Connection.h" />
+    <ClInclude Include="Server\Server.h" />
+    <ClInclude Include="Accounts\AuthenticationResult.h" />
+    <ClInclude Include="TransferableType\Serializable.h" />
+    <ClInclude Include="Accounts\AuthenticationData.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Database.cpp" />
-    <ClCompile Include="Logger.cpp" />
-    <ClCompile Include="MessengerEngine.cpp" />
-    <ClCompile Include="Server.cpp" />
-    <ClCompile Include="Source.cpp" />
+    <ClCompile Include="Accounts\AccountManager.cpp" />
+    <ClCompile Include="Accounts\AccountStorage\AccountStorage.cpp" />
+    <ClCompile Include="Logger\Logger.cpp" />
+    <ClCompile Include="Engine\Engine.cpp" />
+    <ClCompile Include="Messages\Chat.cpp" />
+    <ClCompile Include="Messages\Message.cpp" />
+    <ClCompile Include="Messages\MessageManager.cpp" />
+    <ClCompile Include="Messages\MessageRequest.cpp" />
+    <ClCompile Include="PacketFormat\Deserialization.cpp" />
+    <ClCompile Include="PacketFormat\Serialization.cpp" />
+    <ClCompile Include="Server\Server.cpp" />
+    <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Accounts\AuthenticationData.cpp" />
+    <ClCompile Include="Accounts\AuthenticationResult.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

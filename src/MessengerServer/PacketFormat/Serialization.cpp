@@ -2,12 +2,12 @@
 
 namespace Serialization
 {
-	size_t CountSize(char* packet)
+	size_t CountSize(BYTE* packet)
 	{
 		return ((Packet::Header*)packet)->DataSize + Packet::HeaderSize;
 	}
 
-	int MakePacketLogin(char* packet,const std::string& GuessLogin,const std::string& GuessPass)
+	int MakePacketLogin(BYTE* packet,const std::string& GuessLogin,const std::string& GuessPass)
 	{
 		size_t LoginSize = GuessLogin.size();
 		size_t PassSize = GuessPass.size();
@@ -36,13 +36,13 @@ namespace Serialization
 
 		return 0;
 	}
-	int MakePacketLogout(char* packet)
+	int MakePacketLogout(BYTE* packet)
 	{
 		((Packet::Header*)packet)->Type = (uint16_t)Packet::Types::Logout;
 		((Packet::Header*)packet)->DataSize = 0;
 		return 0;
 	}
-	int MakePacketMessage(char* packet, uint32_t from,uint32_t to, const char* message, uint16_t MessageSize)
+	int MakePacketMessage(BYTE* packet, uint32_t from,uint32_t to, uint32_t index, const BYTE* message, uint16_t MessageSize)
 	{
 		int MessageDataSize = Packet::Messagee::HeaderSize + MessageSize;
 		if (MessageDataSize > Packet::Messagee::MaxDataSize) {
@@ -57,15 +57,15 @@ namespace Serialization
 
 		MessageHeader->IdFrom = from;
 		MessageHeader->IdTo = to;
+		MessageHeader->Index = index;
 		MessageHeader->MessageSize = MessageSize;
 
 		memcpy(MessageHeader->Data, message, MessageSize);
 		return (int)Result::Ok;
 	}
 	//if result is not 
-	int MakePacketLoginResult(char* packet, const uint32_t result, const uint32_t ID )
+	int MakePacketLoginResult(BYTE* packet, const uint32_t result, const uint32_t ID )
 	{
-
 		Packet::Header* Packet = (Packet::Header*)packet;
 
 		Packet->Type = (uint16_t)Packet::Types::LoginResult;
@@ -77,4 +77,12 @@ namespace Serialization
 		ResultHeader->ID = ID;
 		return (int)Result::Ok;
 	}
+	int MakePacketUncheckedEvent(BYTE* packet)
+	{
+		Packet::Header* Packet = (Packet::Header*)packet;
+		Packet->Type = (uint16_t)Packet::Types::LoginResult;
+		Packet->DataSize = 0;
+		return (int)Result::Ok;
+	}
+
 }
