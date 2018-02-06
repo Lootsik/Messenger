@@ -35,7 +35,11 @@ private:
 	template<typename T>
 	bool _MakePacket(Connection* connection,const T& Item)
 	{
-		return Item.ToBuffer(connection->WriteBuf());
+		if (!Item.ToBuffer(connection->WriteBuf()))
+			return false;
+	
+		connection->BytesWrite = Item.GetSerializedSize();
+		return true;
 	}
 	void _Send(Connection* connection);
 	AccountManager _AccountManager;

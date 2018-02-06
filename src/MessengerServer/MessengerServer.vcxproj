@@ -137,11 +137,6 @@
     <ClInclude Include="GlobalInfo.h" />
     <ClInclude Include="Logger\Logger.h" />
     <ClInclude Include="Engine\Engine.h" />
-    <ClInclude Include="Messages\Chat.h" />
-    <ClInclude Include="Messages\Message.h" />
-    <ClInclude Include="Messages\MessageManager.h" />
-    <ClInclude Include="Messages\MessageRequest.h" />
-    <ClInclude Include="Messages\Speakers.h" />
     <ClInclude Include="Message\Message.h" />
     <ClInclude Include="PacketFormat\Deserialization.h" />
     <ClInclude Include="PacketFormat\PacketFormat.h" />
@@ -157,10 +152,6 @@
     <ClCompile Include="Accounts\AccountStorage\AccountStorage.cpp" />
     <ClCompile Include="Logger\Logger.cpp" />
     <ClCompile Include="Engine\Engine.cpp" />
-    <ClCompile Include="Messages\Chat.cpp" />
-    <ClCompile Include="Messages\Message.cpp" />
-    <ClCompile Include="Messages\MessageManager.cpp" />
-    <ClCompile Include="Messages\MessageRequest.cpp" />
     <ClCompile Include="PacketFormat\Deserialization.cpp" />
     <ClCompile Include="PacketFormat\Serialization.cpp" />
     <ClCompile Include="Server\Server.cpp" />

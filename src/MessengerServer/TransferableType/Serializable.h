@@ -8,23 +8,24 @@
 #define TRANSFERABLETEMPLATE_H
 #include <GlobalInfo.h>
 
-//in derived classes must be inmplemented
-//_DataSize, _FromBuffer, ToBuffer methods
 
-// _FromBuffer in derived need to check, valid his part of packet or not
-// buffer passed to _ToBuffer already have needed capacity, dont need checksnames
+
 namespace SerializableTypes {
 
-enum Types {
+enum MessageTypes {
 	NotType = 0,
-	Message = 3,
+	TextMessage = 3,
 	AuthenticationData = 4,
 	AuthenticationResult = 5,
 	Logout = 6,
 	UncheckedEvent
 };
 }
+//in derived classes must be inmplemented
+//_DataSize, _FromBuffer, ToBuffer methods
 
+// _FromBuffer in derived need to check, valid his part of packet or not
+// buffer passed to _ToBuffer already have needed capacity, dont need checksnames
 template<typename T, uint16_t MessageTypeID>
 class Serializable {
 	//TODO: data below almost uselles, mb i should delete it???
@@ -59,7 +60,6 @@ class Serializable {
     void _InputHeader(const Marking* Buffer);
     void _OutputHeader(Marking* Buffer) const;
 public:
-
     //Getters
     uint16_t GetType() const { return _Type; }
     uint16_t AdditionalDataSize() const { return _AdditionalDataSize; }
@@ -67,6 +67,10 @@ public:
     static uint16_t GetSerializedType(const BYTE* HeaderBegin){
         return ((Marking*)HeaderBegin)->Type;
     }
+	//check, that buffer with this size can fit data
+	static bool BasickSizeCheck(size_t size) {
+		return size >= HeaderSize;
+	}
 	
 	enum Types {
 		NotType = 0,
@@ -76,10 +80,35 @@ public:
 		Logout = 6,
 		UncheckedEvent
 	};
+	//size, needed to pack to buffer
+	bool GetSerializedSize()const {
+		return HeaderSize + static_cast<const T*>(this)->_DataSize();
+	}
     //Serialization/deserialization   
     bool FromBuffer(const BYTE* Buffer, uint32_t recived);
     bool ToBuffer(BYTE* Buffer)const;    
 };
+
+
+namespace SerializableTypes {
+	//just easy to write
+	class Types : public Serializable<Types, 0> {
+	public:
+		static bool InitialSizeCheck(size_t size) {
+			return BasickSizeCheck(size);
+		}
+		static uint16_t SerializedType(const BYTE* Buffer) {
+			return GetSerializedType(Buffer);
+		}
+
+		size_t _DataSize()const { return 0; }
+		bool _FromBuffer(const BYTE* Buffer, uint32_t recived) { return true; }
+		bool _ToBuffer(BYTE* Buffer)const { return true; }
+	};
+}
+
+
+
 
 /*
     Serialization/deserialization   

@@ -60,21 +60,6 @@
     <ClInclude Include="Accounts\Logout.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Messages\Chat.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Messages\Message.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Messages\MessageManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Messages\Speakers.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Messages\MessageRequest.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Logger\Logger.cpp">
@@ -105,18 +90,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Accounts\AuthenticationData.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Messages\Chat.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Messages\Message.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Messages\MessageManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Messages\MessageRequest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

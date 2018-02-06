@@ -1,11 +1,10 @@
 #include <vector>
 #include <Server\Server.h>
-#include <PacketFormat\Deserialization.h>
-#include <PacketFormat\Serialization.h>
-#include <Logger/Logger.h>
-//#include <Messages\Message.h>
-#include <Accounts/AuthenticationData.h>
+#include <PacketFormat\PacketFormat.h>
+#include <Accounts\AuthenticationData.h>
+#include <Logger\Logger.h>
 #include "Engine.h"
+
 using namespace Logger;
 
 static void LogLogin(const Connection* connection, const AuthenticationResult& Result)
@@ -33,38 +32,36 @@ bool MessengerEngine::LoadFromConfig(const char* Filename)
 
 /*
 	+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-							Parser 
 	+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 */
 void MessengerEngine::AnalyzePacket(Connection* connection)
 {
-	if (!Deserialization::PacketCheckup(connection->_ReadBuff.c_array(), connection->BytesRead)){
+	if (!SerializableTypes::Types::BasickSizeCheck(connection->BytesRead)){
 #if _LOGGING_ 
-		Log(Mistake, "[%s] - Packet wrong marking. Size %Iu bytes", ConnectionString(connection).c_str(), connection->BytesRead);
+		Log(Mistake, "[%s] - Packet wrong marking. Size %Iu bytes",
+					ConnectionString(connection).c_str(), connection->BytesRead);
 #endif
 		return;
 	}
 
 	//TODO: divide this
-	switch (Deserialization::PaketType(connection->_ReadBuff.c_array(),
-									   connection->BytesRead))
+	switch (SerializableTypes::Types::SerializedType( connection->ReadBuf()) )
 	{
 
-	case (int)Packet::Types::Login: 
+	case SerializableTypes::AuthenticationData:
 	{
 		OnLogin(connection);
 	}break;
 
-	case (int)Packet::Types::Logout:
+	case SerializableTypes::Logout:
 	{
-		//...
 		OnLogout(connection);
 	}break;
 
-	case (int)Packet::Types::Message:
+	/*case (int)Packet::Types::Message:
 	{
 		//OnMessage(connection);
-	}break;
+	}break;*/
 
 	default:
 		break;
@@ -100,10 +97,10 @@ void MessengerEngine::OnLogout(Connection* connection)
 #endif // _LOGGING_
 }
 
+//TODO: rewrite according to changes
 //calculate size of message and _Send it
 void MessengerEngine::_Send(Connection* Connection)
 {
-	Connection->BytesWrite = Serialization::CountSize(Connection->_WriteBuf.c_array());
 	_Server->_Send(Connection);
 }
 

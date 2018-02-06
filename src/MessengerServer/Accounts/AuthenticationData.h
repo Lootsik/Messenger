@@ -11,8 +11,8 @@
 #include <string>
 class AuthenticationData : public Serializable<AuthenticationData, SerializableTypes::AuthenticationData>{
 	
-	std::string _Login;
-	std::string _Password;
+	std::string _Login{};
+	std::string _Password{};
 
 	struct DataMarking
 	{
@@ -27,7 +27,8 @@ class AuthenticationData : public Serializable<AuthenticationData, SerializableT
 	bool _EnoughSpace(const size_t LoginSize, const size_t PassSize, uint16_t Size);
 
 public: 
-	AuthenticationData(const std::string& login = {}, const std::string& password = {})
+	AuthenticationData() {}
+	AuthenticationData(const std::string& login, const std::string& password )
 				:_Login{ login }, _Password{ password } {}
 	
 	const std::string& GetLogin() const {return _Login;}	

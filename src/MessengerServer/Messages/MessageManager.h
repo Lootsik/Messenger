@@ -1,24 +1,19 @@
 #pragma once
 #include <GlobalInfo.h>
-#include <map>
+#include <unordered_map>
 #include <Messages\Chat.h>
 #include <Accounts\AccountManager.h>
 #include <Server\Server.h>
-//dummy for now
+
+//just interface for now
 class Engine;
 struct MessageManager
 {
-	const ID_t SingleChat = 1;
-
-	MessageManager(MessengerEngine& engine):_Engine{engine}
-	{
-		Chats[SingleChat] = Chat(SingleChat, 9, 7);
-	}
+	MessageManager(MessengerEngine& engine) :_Engine{ engine } {}
 	void SendMessageUser(ID_t ID_from, ID_t ID_to, std::wstring Mes);
 	void GetMessageUser(Connection* connection, size_t index);
 	//_Send message
 	//Get Message
 private:
 	MessengerEngine & _Engine;
-	std::map<ID_t, Chat> Chats;
 };
