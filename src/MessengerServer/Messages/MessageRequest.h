@@ -15,6 +15,6 @@ public:
 	Speakers& const Speakers() { return _Speakers; }
 	uint32_t Type() { return _Type; }
 
-	bool ToBuffer(BYTE* Buffer)const;
+	bool ToBuffer(Byte* Buffer)const;
 	bool FromBuffer(const BYTE* Buffer, const uint32_t recived );
 };

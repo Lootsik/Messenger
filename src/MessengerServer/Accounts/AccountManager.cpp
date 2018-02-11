@@ -1,19 +1,18 @@
 #include <Accounts\AccountStorage\AccountStorage.h>
+
 #include <Server\Connection.h>
-#include <Accounts\AuthenticationData.h>
+
+#include <Protocol\LoginRequest.h>
+#include <Protocol\LoginResponse.h>
+
 #include "AccountManager.h"
 
 //CRITICAL: login and logout is non 'atomic' operation in term of system, so
 //we need that chek pass and login will be one operation, before add new threads or servers
 
-AccountManager::AccountManager()
-{
-	if ((!_AccountStorage.Connect("tcp://127.0.0.1:3306", "root", "11JustLikeYou11") ||
-			!_AccountStorage.CreatePrepared("messeger_server_db", "users")))
-		throw;
-}
+AccountManager::AccountManager(){}
 
-ID_t AccountManager::VerifyAccount(const AuthenticationData& AuthData)
+ID_t AccountManager::VerifyAccount(const LoginRequest& AuthData)
 {
 	size_t id = _AccountStorage.FetchUser(AuthData.GetLogin(), AuthData.GetPassword());
 	//TODO: smth with this
@@ -24,22 +23,22 @@ ID_t AccountManager::VerifyAccount(const AuthenticationData& AuthData)
 	return static_cast<uint32_t>(id);
 }
 
-AuthenticationResult AccountManager::Login( const AuthenticationData& AuthData )
+LoginResponse AccountManager::Login( const LoginRequest& AuthData )
 {
 	//TODO: AccountStorage action
 	ID_t id = VerifyAccount(AuthData);
 	//wrong pass or login
 	if (id == INVALID_ID)
-		return AuthenticationResult{ (int)Packet::LoginResult::Result::Wrong };
+		return LoginResponse{ LoginResponse::Wrong };
 
 	//check online
 	if (_AccountStorage.Online(id))
-		return AuthenticationResult{ (int)Packet::LoginResult::Result::AccInUse };
+		return LoginResponse{ LoginResponse::AccInUse };
 
 	//Actually change database
 	_AccountStorage.RecordLogin(id);
 	
-	return AuthenticationResult{ (int)Packet::LoginResult::Result::Success, id };
+	return LoginResponse{ LoginResponse::Success, id };
 }
 //no check, pure database change
 void AccountManager::Logout( ID_t& ID)

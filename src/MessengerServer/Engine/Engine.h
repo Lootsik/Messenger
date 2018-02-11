@@ -1,11 +1,10 @@
 #pragma once
 #include <map>
-#include "Server/Connection.h"
+#include <Server/Connection.h>
 #include <Accounts/AccountStorage/AccountStorage.h>
 #include <Accounts/AccountManager.h>
 #include <GlobalInfo.h>
-#include <PacketFormat/PacketFormat.h>
-struct Server;
+class Server;
 
 //class Message;
 class MessengerEngine
@@ -27,7 +26,7 @@ public:
 	*/
 
 
-	void SendLoginResponce(Connection* connection, const AuthenticationResult& Result);
+	void SendLoginResponce(Connection* connection, const LoginResponse& Result);
 	//void SendMessageUser(Connection* connection, ID_t from, size_t messageNum, Message* mes);
 	//void SendNewEventNotification(ID_t ID);
 private:
@@ -38,7 +37,7 @@ private:
 		if (!Item.ToBuffer(connection->WriteBuf()))
 			return false;
 	
-		connection->BytesWrite = Item.GetSerializedSize();
+		connection->BytesWrite = Item.NeededSize();
 		return true;
 	}
 	void _Send(Connection* connection);

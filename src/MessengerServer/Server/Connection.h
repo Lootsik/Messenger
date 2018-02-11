@@ -3,7 +3,6 @@
 #include <boost\asio.hpp>
 #include <boost\array.hpp>
 #include <stdint.h>
-#include "../PacketFormat/PacketFormat.h"
 #include <GlobalInfo.h>
 
 struct AccountInfo
@@ -18,14 +17,14 @@ struct AccountInfo
 
 struct Connection {
 	Connection(boost::asio::io_service& service) :_Socket{ service } {}
-	static const size_t Buffsize = Packet::MaxSize;
-	using Storage = boost::array<BYTE, Buffsize>;
+	static const size_t Buffsize = PacketMaxSize;
+	using Storage = boost::array<Byte, Buffsize>;
 
-	BYTE* ReadBuf()
+	Byte* ReadBuf()
 	{
 		return _ReadBuff.data();
 	}
-	BYTE* WriteBuf()
+	Byte* WriteBuf()
 	{
 		return _WriteBuf.data();
 	}
@@ -37,6 +36,5 @@ struct Connection {
 	Storage _WriteBuf;
 	
 	boost::asio::ip::tcp::socket _Socket;
-
 	AccountInfo Account;
 };

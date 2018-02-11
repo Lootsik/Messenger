@@ -1,6 +1,6 @@
 #pragma once
 #include <stdint.h>
-typedef  uint8_t BYTE;
+typedef  uint8_t Byte;
 
 using ID_t = uint32_t;
 

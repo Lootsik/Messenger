@@ -1,21 +1,25 @@
 #include <vector>
 #include <Server\Server.h>
-#include <PacketFormat\PacketFormat.h>
-#include <Accounts\AuthenticationData.h>
+#include <Protocol\BaseHeader.h>
+#include <Protocol\LoginRequest.h>
+#include <Protocol\LoginResponse.h>
+#include <Protocol\Types.h>
+#include <Protocol\SerializationError.h>
+//#include <PacketFormat\PacketFormat.h>
 #include <Logger\Logger.h>
 #include "Engine.h"
 
 using namespace Logger;
 
-static void LogLogin(const Connection* connection, const AuthenticationResult& Result)
+static void LogLogin(const Connection* connection, const LoginResponse& Result)
 {
-	if(Result.GetValue() == (int)Packet::LoginResult::Result::Success)
+	if(Result.GetValue() == LoginResponse::Success)
 		LogBoth(Action, "[%s] - Logged in", ConnectionString(connection).c_str());
 	else 
 		Log(Mistake, "[%s] - Failed login", ConnectionString(connection).c_str());
 }
 
-//TODO: преписать это
+//TODO: rewrite this
 MessengerEngine::MessengerEngine(Server* server)
 //считывать значения с конфигов
 	:_Server{ server }
@@ -36,7 +40,8 @@ bool MessengerEngine::LoadFromConfig(const char* Filename)
 */
 void MessengerEngine::AnalyzePacket(Connection* connection)
 {
-	if (!SerializableTypes::Types::BasickSizeCheck(connection->BytesRead)){
+	
+	if (!BaseHeader::MinimumCheck(connection->BytesRead)){
 #if _LOGGING_ 
 		Log(Mistake, "[%s] - Packet wrong marking. Size %Iu bytes",
 					ConnectionString(connection).c_str(), connection->BytesRead);
@@ -45,15 +50,15 @@ void MessengerEngine::AnalyzePacket(Connection* connection)
 	}
 
 	//TODO: divide this
-	switch (SerializableTypes::Types::SerializedType( connection->ReadBuf()) )
+	switch (BaseHeader::BufferType( connection->ReadBuf()) )
 	{
 
-	case SerializableTypes::AuthenticationData:
+	case Types::LoginRequest:
 	{
 		OnLogin(connection);
 	}break;
 
-	case SerializableTypes::Logout:
+	case Types::Logout:
 	{
 		OnLogout(connection);
 	}break;
@@ -70,23 +75,24 @@ void MessengerEngine::AnalyzePacket(Connection* connection)
 
 void MessengerEngine::OnLogin(Connection* connection)
 {
-	using namespace Packet;
-	AuthenticationData AuthData;
+	LoginRequest Request;
 
-	if (!AuthData.FromBuffer(connection->ReadBuf(), connection->BytesRead))
-	{
+	uint32_t err = Request.FromBuffer(connection->ReadBuf(), connection->BytesRead);
+	if(err){
 		//TODO: do smth with result
+		return;
 	}
-	AuthenticationResult Result = _AccountManager.Login(AuthData);
+
+	LoginResponse Response = _AccountManager.Login(Request);
 	//TODO: CHANHE THIS ZERO
-	if (Result.GetValue() == Packet::LoginResult::Success)
+	if (Response.GetValue() == LoginResponse::Success)
 	{
-		connection->Account.ID = Result.GetId();
+		connection->Account.ID = Response.GetId();
 	}
 #if _LOGGING_
-	LogLogin(connection, Result);
+	LogLogin(connection, Response);
 #endif
-	SendLoginResponce(connection, Result);
+	SendLoginResponce(connection, Response);
 }
 
 void MessengerEngine::OnLogout(Connection* connection)
@@ -101,10 +107,10 @@ void MessengerEngine::OnLogout(Connection* connection)
 //calculate size of message and _Send it
 void MessengerEngine::_Send(Connection* Connection)
 {
-	_Server->_Send(Connection);
+	_Server->Send(Connection);
 }
 
-void MessengerEngine::SendLoginResponce(Connection* connection, const AuthenticationResult& Result)
+void MessengerEngine::SendLoginResponce(Connection* connection, const LoginResponse& Result)
 {
 	_MakePacket(connection, Result);
 	//_Send result

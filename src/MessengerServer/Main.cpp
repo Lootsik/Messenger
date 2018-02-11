@@ -1,5 +1,7 @@
 #include <Server/Server.h>
+#include <Database/Database.h>
 #include <Logger/Logger.h>
+
 //Do smth with debug and release env directories
 
 //TODO:
@@ -13,8 +15,13 @@ int main()
 	Logger::OpenLogFile(LogFilename);
 #endif
 
+	if (!Database::Connect("tcp://127.0.0.1:3306",  "messeger_server_db", "root", "11JustLikeYou11"))
+	{
+		//Log
+		return 1;
+	}
+	
 	boost::asio::io_service service;
-
 	Server server{ service };
 
 	if (!server.LoadFromConfig(ConfigFilename))
@@ -34,5 +41,4 @@ int main()
 		return 1;
 		
 	service.run();
-
 }

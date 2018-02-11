@@ -15,16 +15,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Logger\Logger.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Server\Server.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Engine.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Message\Message.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Accounts\AccountStorage\AccountStorage.h">
@@ -39,32 +33,38 @@
     <ClInclude Include="Accounts\AccountManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PacketFormat\Deserialization.h">
+    <ClInclude Include="Logger\Logger.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PacketFormat\Serialization.h">
+    <ClInclude Include="Protocol\BaseHeader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PacketFormat\PacketFormat.h">
+    <ClInclude Include="Protocol\LoginRequest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="TransferableType\Serializable.h">
+    <ClInclude Include="Protocol\LoginResponse.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Accounts\AuthenticationResult.h">
+    <ClInclude Include="Protocol\Logout.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Accounts\AuthenticationData.h">
+    <ClInclude Include="Protocol\SerializationError.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Accounts\Logout.h">
+    <ClInclude Include="Protocol\TransferredData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Protocol\Types.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Database\MySqlDB.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Database\Database.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Logger\Logger.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Server\Server.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -80,16 +80,25 @@
     <ClCompile Include="Accounts\AccountManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="PacketFormat\Deserialization.cpp">
+    <ClCompile Include="Logger\Logger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="PacketFormat\Serialization.cpp">
+    <ClCompile Include="Protocol\BaseHeader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Accounts\AuthenticationResult.cpp">
+    <ClCompile Include="Protocol\LoginRequest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Accounts\AuthenticationData.cpp">
+    <ClCompile Include="Protocol\LoginResponse.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Protocol\Logout.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Database\MySqlDB.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Database\Database.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

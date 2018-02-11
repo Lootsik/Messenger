@@ -1,5 +1,7 @@
 #pragma once
 
+
+
 namespace Logger {
 
 enum LogType

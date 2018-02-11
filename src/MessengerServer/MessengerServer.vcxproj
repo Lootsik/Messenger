@@ -92,7 +92,7 @@
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>PacketFormat.lib;mysqlcppconn.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>mysqlcppconn.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)$(Platform)\$(Configuration);E:\Lib\boost_1_60_0_x64\lib64-msvc-14.0;E:\Lib\Mysql C++ connector 1.1.9 x64\vc17 Debug MDD</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -133,31 +133,34 @@
   <ItemGroup>
     <ClInclude Include="Accounts\AccountManager.h" />
     <ClInclude Include="Accounts\AccountStorage\AccountStorage.h" />
-    <ClInclude Include="Accounts\Logout.h" />
+    <ClInclude Include="Database\Database.h" />
+    <ClInclude Include="Database\MySqlDB.h" />
     <ClInclude Include="GlobalInfo.h" />
     <ClInclude Include="Logger\Logger.h" />
     <ClInclude Include="Engine\Engine.h" />
-    <ClInclude Include="Message\Message.h" />
-    <ClInclude Include="PacketFormat\Deserialization.h" />
-    <ClInclude Include="PacketFormat\PacketFormat.h" />
-    <ClInclude Include="PacketFormat\Serialization.h" />
+    <ClInclude Include="Protocol\BaseHeader.h" />
+    <ClInclude Include="Protocol\LoginRequest.h" />
+    <ClInclude Include="Protocol\LoginResponse.h" />
+    <ClInclude Include="Protocol\Logout.h" />
+    <ClInclude Include="Protocol\SerializationError.h" />
+    <ClInclude Include="Protocol\TransferredData.h" />
+    <ClInclude Include="Protocol\Types.h" />
     <ClInclude Include="Server\Connection.h" />
     <ClInclude Include="Server\Server.h" />
-    <ClInclude Include="Accounts\AuthenticationResult.h" />
-    <ClInclude Include="TransferableType\Serializable.h" />
-    <ClInclude Include="Accounts\AuthenticationData.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Accounts\AccountManager.cpp" />
     <ClCompile Include="Accounts\AccountStorage\AccountStorage.cpp" />
+    <ClCompile Include="Database\Database.cpp" />
+    <ClCompile Include="Database\MySqlDB.cpp" />
     <ClCompile Include="Logger\Logger.cpp" />
     <ClCompile Include="Engine\Engine.cpp" />
-    <ClCompile Include="PacketFormat\Deserialization.cpp" />
-    <ClCompile Include="PacketFormat\Serialization.cpp" />
+    <ClCompile Include="Protocol\BaseHeader.cpp" />
+    <ClCompile Include="Protocol\LoginRequest.cpp" />
+    <ClCompile Include="Protocol\LoginResponse.cpp" />
+    <ClCompile Include="Protocol\Logout.cpp" />
     <ClCompile Include="Server\Server.cpp" />
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="Accounts\AuthenticationData.cpp" />
-    <ClCompile Include="Accounts\AuthenticationResult.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

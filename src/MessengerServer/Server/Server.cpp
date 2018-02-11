@@ -1,7 +1,6 @@
 #pragma once
 #define _SCL_SECURE_NO_WARNINGS
 
-
 #include <string>
 #include <algorithm>
 #include <vector>
@@ -11,8 +10,8 @@
 #include <boost/array.hpp>
 #include <boost/bind.hpp>
 
-#include "Server.h"
 #include <Logger/Logger.h>
+#include "Server.h"
 
 
 using namespace boost::asio;
@@ -34,9 +33,8 @@ std::string ConnectionString(const Connection* connection)
 
 Server::Server(boost::asio::io_service& service)
 	: _Service{ service },
-	_Acceptor{ service }
-{
-}
+	_Acceptor{ service }{}
+
 
 //TODO: rewrite this
 //NOTE: add new settings to config
@@ -58,7 +56,6 @@ bool Server::LoadFromConfig(const char* ConfigFilename)
 		LogBoth(Error, "Configs cannot be loaded");
 #endif 
 		return false;
-
 	}
 
 	bool res = SetPort(port);
@@ -73,19 +70,27 @@ bool Server::LoadFromConfig(const char* ConfigFilename)
 
 bool Server::SetPort(const unsigned short port)
 {
-	_Port = port;
-
 	ip::tcp::endpoint point{ ip::tcp::v4(),port };
 	_Acceptor.open(point.protocol());
 	error_code err;
-
+	//trying 
 	_Acceptor.bind(point, err);
+	if (err)
+	{
+#if _LOGGING_
+		Log(Error, "Cannot change port to  %d. Code: %d, Message: %s",
+							port,err.value(),err.message());
+#endif
+		return false;
+	}
+	
 	_Acceptor.listen();
+	_Port = port;
 
 #if _LOGGING_
 	Log(Success, "Port set to %d", port);
 #endif
-	return !err;
+	return true;
 }
 
 //*****************************
@@ -98,7 +103,7 @@ bool Server::Start()
 	Connection* new_Connection = new Connection{ _Service };
 	error_code error;
 	//register new Server/Connection.handler function
-	_Acceptor.async_accept(new_Connection->_Socket, boost::bind(&Server::AcceptConnections, this, new_Connection, _1), error);
+	_Acceptor.async_accept(new_Connection->_Socket, boost::bind(&Server::_AcceptConnections, this, new_Connection, _1), error);
 	
 #if _LOGGING_
 	if (!error)
@@ -114,13 +119,12 @@ bool Server::Start()
 //	Sending messages
 //*****************************
 
-
 //message already in Write buffer
-void Server::_Send(Connection* connection)
+void Server::Send(Connection* connection)
 {
 	connection->_Socket.async_write_some(
-			buffer(connection->_WriteBuf, connection->BytesWrite),
-			boost::bind(&Server::WriteHandler, this, _1, _2));
+				buffer(connection->_WriteBuf, connection->BytesWrite),
+				boost::bind(&Server::_WriteHandler, this, _1, _2));
 }
 
 //*******************************
@@ -128,10 +132,10 @@ void Server::_Send(Connection* connection)
 //*******************************
 
 
-void Server::AcceptConnections(Connection* connection, const boost::system::error_code& err)
+void Server::_AcceptConnections(Connection* connection, const boost::system::error_code& err)
 {
 	//добавление асинхронной операции для принятого клиента(страшно, нужно упростить мб вывести в другую функцию)
-	connection->_Socket.async_read_some(buffer(connection->_ReadBuff), boost::bind(&Server::AcceptMessage, this, connection, _1, _2));
+	connection->_Socket.async_read_some(buffer(connection->_ReadBuff), boost::bind(&Server::_AcceptMessage, this, connection, _1, _2));
 	//добавление клиента в список (не  критично, тк вызовы для сокета уже забинджены)
 
 #if _LOGGING_
@@ -147,7 +151,7 @@ void Server::AcceptConnections(Connection* connection, const boost::system::erro
 	error_code error;
 	//регистрируем обработчик нового коннекта
 
-	_Acceptor.async_accept(new_Connection->_Socket, boost::bind(&Server::AcceptConnections, this, new_Connection, _1), error);
+	_Acceptor.async_accept(new_Connection->_Socket, boost::bind(&Server::_AcceptConnections, this, new_Connection, _1), error);
 
 	//TODO: fix this
 	if (error)
@@ -155,13 +159,12 @@ void Server::AcceptConnections(Connection* connection, const boost::system::erro
 }
 
 //TODO: rewrite this
-void  Server::AcceptMessage(Connection* connection, const boost::system::error_code& err_code, size_t bytes)
+void  Server::_AcceptMessage(Connection* connection, const boost::system::error_code& err_code, size_t bytes)
 {
-	
 	//ошибка, нужно удалить клиента
 	if (err_code) {
 		//TODO: стоит определить план дейстивий для конкретного случая: принимать дальше сообщения или нет
-		SolveProblemWithConnection(connection, err_code);
+		_SolveProblemWithConnection(connection, err_code);
 		return;
 	}
 
@@ -178,7 +181,7 @@ void  Server::AcceptMessage(Connection* connection, const boost::system::error_c
 #endif
 	//TODO: We need this?
 	connection->_Socket.async_read_some( buffer(connection->_ReadBuff),
-									boost::bind(&Server::AcceptMessage,this, connection, _1, _2) );
+									boost::bind(&Server::_AcceptMessage,this, connection, _1, _2) );
 
 	connection->BytesRead = bytes;
 	_MessagerEngine->AnalyzePacket(connection);
@@ -189,7 +192,7 @@ void  Server::AcceptMessage(Connection* connection, const boost::system::error_c
 //*****************************
 
 //TODO: add some
-void  Server::WriteHandler(const error_code& err, size_t bytes)
+void  Server::_WriteHandler(const error_code& err, size_t bytes)
 {
 #if (_LOGGING_) && (_PACKET_TRACE_)
 	if (err)
@@ -206,7 +209,7 @@ void  Server::WriteHandler(const error_code& err, size_t bytes)
 //	Managing connections
 //*****************************
 
-void Server::SolveProblemWithConnection(Connection* connection, const boost::system::error_code& err_code)
+void Server::_SolveProblemWithConnection(Connection* connection, const boost::system::error_code& err_code)
 {
 	//kick by default
 	switch (err_code.value())
@@ -215,20 +218,20 @@ void Server::SolveProblemWithConnection(Connection* connection, const boost::sys
 #if _LOGGING_
 		Log(Action, "[%s] - Disconnected", ConnectionString(connection).c_str());
 #endif // _STATE_MESSAGE
-		DeleteConnection(connection);
+		_DeleteConnection(connection);
 		break;
 		
 	default:
 #if _LOGGING_
 		Log(Mistake, "[%s] - Drop connection: #%d: %s", ConnectionString(connection).c_str(), err_code.value(), err_code.message());
 #endif // _STATE_MESSAGE
-		DeleteConnection(connection);
+		_DeleteConnection(connection);
 		break;
 	}
 }
 
 //check 
-void Server::DeleteConnection(Connection* connection)
+void Server::_DeleteConnection(Connection* connection)
 {
 	error_code err;
 	//останавливаем все операции чтения-записи для сокета

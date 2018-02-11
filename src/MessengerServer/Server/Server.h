@@ -11,15 +11,8 @@
 
 std::string ConnectionString(const Connection* Connection);
 
-struct Server {
-	unsigned short _Port;
-
-	boost::asio::io_service& _Service;
-	boost::asio::ip::tcp::acceptor _Acceptor;
-
-	std::vector<Connection*> _Connections{};
-	MessengerEngine* _MessagerEngine;
-
+class Server {
+public:
 	Server(boost::asio::io_service& service);
 	bool SetPort(const unsigned short port);
 	void SetMessageEngine(MessengerEngine* me) { _MessagerEngine = me; }
@@ -27,18 +20,21 @@ struct Server {
 
 	bool Start();
 
-	template<typename T>
-	void _Send(Connection* connection,T Item)
-	{
-		
-	}
-	void _Send(Connection* connection);
+	void Send(Connection* connection);
 private:
-	//for internal use only
-	void AcceptMessage(Connection* connection, const boost::system::error_code& err_code, size_t bytes);
-	void AcceptConnections(Connection* connection, const boost::system::error_code& err);
-	void WriteHandler(const boost::system::error_code& err, size_t bytes);
+	unsigned short _Port;
+	boost::asio::io_service& _Service;
+	boost::asio::ip::tcp::acceptor _Acceptor;
 
-	void SolveProblemWithConnection(Connection* connection, const boost::system::error_code& err_code);
-	void DeleteConnection(Connection* connection);
+	std::vector<Connection*> _Connections{};
+	MessengerEngine* _MessagerEngine;
+
+	//for internal use only
+	void _AcceptMessage(Connection* connection, const boost::system::error_code& err_code, size_t bytes);
+	void _AcceptConnections(Connection* connection, const boost::system::error_code& err);
+	void _WriteHandler(const boost::system::error_code& err, size_t bytes);
+
+	void _SolveProblemWithConnection(Connection* connection, const boost::system::error_code& err_code);
+	void _DeleteConnection(Connection* connection);
+
 };
