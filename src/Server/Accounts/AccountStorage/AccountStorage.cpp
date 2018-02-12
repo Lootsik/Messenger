@@ -87,7 +87,6 @@ bool AccountStorage::DeleteUser(const std::string& login)
         throw;
     }
 
-    return false;
 }
 
 bool AccountStorage::IsExist(const std::string& login)

@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="BaseHeader.h" />
+    <ClInclude Include="LoginRequest.h" />
+    <ClInclude Include="LoginResponse.h" />
+    <ClInclude Include="Logout.h" />
+    <ClInclude Include="SerializationError.h" />
+    <ClInclude Include="Types.h" />
+    <ClInclude Include="TransferredData.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="BaseHeader.cpp" />
+    <ClCompile Include="LoginResponse.cpp" />
+    <ClCompile Include="LoginRequest.cpp" />
+    <ClCompile Include="Logout.cpp" />
+  </ItemGroup>
+</Project>
