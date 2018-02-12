@@ -9,6 +9,9 @@
 
 uint32_t BaseHeader::HeaderCheck(const BaseHeaderDesc* data, const size_t size)const
 {
+	if (data->FrameSize < _MinTypeFrameSize)
+		return SerializationError::LowFrameSizeForType;
+
     if( data->FrameSize == size)
         return SerializationError::Ok;
     else

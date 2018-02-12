@@ -51,7 +51,8 @@ protected:
     //we need pass type in constructor,
     //next call SetFrameSize with
     //return of directly called class::CalculateSize  
-    BaseHeader(uint32_t type): TData{0,type}{}
+	BaseHeader(uint32_t type, uint32_t MinTypeFrameSize) 
+					: TData{ 0,type }, _MinTypeFrameSize{ _MinTypeFrameSize } {}
     
     /*
       used in construction derived objects
@@ -68,6 +69,8 @@ protected:
 
 private:
     //. transferred data
-    BaseHeaderDesc TData;   
+    BaseHeaderDesc TData;
+	//used in header check
+	uint32_t _MinTypeFrameSize;
 };
 #endif

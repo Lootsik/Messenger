@@ -10,7 +10,7 @@
 #include "LoginResponse.h"
 
 LoginResponse::LoginResponse(uint32_t Response,ID_t id)
-        :BaseHeader(Types::LoginResponse), _Response{Response},ID{id}
+        :BaseHeader(Types::LoginResponse,sizeof(LoginResponseDesc)), _Response{Response},ID{id}
 {
     SetFrameSize(CalculateSize());
 }

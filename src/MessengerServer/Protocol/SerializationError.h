@@ -13,7 +13,8 @@ enum SerializationError
     Ok = 0,
     InvalidHeader,
     InvalidData,
-    InvalidBufferSize
+    InvalidBufferSize,
+	LowFrameSizeForType
 };
 
 

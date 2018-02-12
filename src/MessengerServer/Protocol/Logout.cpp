@@ -7,7 +7,8 @@
 #include <Protocol\Types.h>
 #include "Logout.h"
 
-Logout::Logout():BaseHeader(Types::Logout)
+Logout::Logout():
+		BaseHeader(Types::Logout,sizeof( BaseHeaderDesc))
 {
     SetFrameSize(CalculateSize());
 }
