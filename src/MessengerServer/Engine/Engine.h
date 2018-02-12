@@ -34,7 +34,8 @@ private:
 	template<typename T>
 	bool _MakePacket(Connection* connection,const T& Item)
 	{
-		if (!Item.ToBuffer(connection->WriteBuf()))
+		uint32_t err = Item.ToBuffer(connection->WriteBuf());
+		if ( err )
 			return false;
 	
 		connection->BytesWrite = Item.NeededSize();

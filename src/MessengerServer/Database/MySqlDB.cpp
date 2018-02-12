@@ -26,6 +26,7 @@ bool MySqlDB::Connect(const std::string& hostname, const std::string schema,
 		_Driver = get_driver_instance();
 		_Connection = _Driver->connect(hostname, login, password);
 		_Connection->setSchema(schema);
+		_Statement = _Connection->createStatement();
 	}
 	catch (sql::SQLException& e)
 	{

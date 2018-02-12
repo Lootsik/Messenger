@@ -11,13 +11,13 @@
 #include "LoginRequest.h"
 
 LoginRequest::LoginRequest(const std::string& Login, const std::string& Password)
-        :BaseHeader(Types::Message,sizeof(LoginRequestDesc)),_Login{Login},_Password{Password}
+        :BaseHeader(Types::LoginRequest,sizeof(LoginRequestDesc)),_Login{Login},_Password{Password}
 {
     SetFrameSize(CalculateSize());
 }
 
 LoginRequest::LoginRequest()
-		:BaseHeader(Types::Message, sizeof(LoginRequestDesc))
+		:BaseHeader(Types::LoginRequest, sizeof(LoginRequestDesc))
 {
 	SetFrameSize(CalculateSize());
 }

@@ -52,7 +52,7 @@ protected:
     //next call SetFrameSize with
     //return of directly called class::CalculateSize  
 	BaseHeader(uint32_t type, uint32_t MinTypeFrameSize) 
-					: TData{ 0,type }, _MinTypeFrameSize{ _MinTypeFrameSize } {}
+					: TData{ 0,type }, _MinTypeFrameSize{ MinTypeFrameSize } {}
     
     /*
       used in construction derived objects

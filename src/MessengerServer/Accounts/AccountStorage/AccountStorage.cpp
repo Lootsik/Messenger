@@ -17,6 +17,7 @@ const std::string AccountStorage::_UsersTable = "users";
 
 AccountStorage::AccountStorage()
 {
+	CreatePrepared();
 }
 
 bool AccountStorage::CreatePrepared()

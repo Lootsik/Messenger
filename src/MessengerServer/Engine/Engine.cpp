@@ -112,7 +112,11 @@ void MessengerEngine::_Send(Connection* Connection)
 
 void MessengerEngine::SendLoginResponce(Connection* connection, const LoginResponse& Result)
 {
-	_MakePacket(connection, Result);
+	if (!_MakePacket(connection, Result))
+	{
+		Log(Mistake, "Packet not cannot be sended");
+		return;
+	}
 	//_Send result
 	_Send(connection);
 }
