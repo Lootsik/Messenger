@@ -21,6 +21,7 @@ uint32_t LoginResponse::ToBuffer(Byte* Buffer) const
         return err;
     
 	((LoginResponseDesc*)Buffer)->Response = _Response;
+	((LoginResponseDesc*)Buffer)->ID = ID;
     return  SerializationError::Ok;
 }
 uint32_t LoginResponse::FromBuffer(const Byte* Buffer, const size_t Capacity)
@@ -29,6 +30,7 @@ uint32_t LoginResponse::FromBuffer(const Byte* Buffer, const size_t Capacity)
 	if (err)
 		return err;
 
-	((LoginResponseDesc*)Buffer)->Response = _Response;
+	_Response = ((LoginResponseDesc*)Buffer)->Response;
+	ID= ((LoginResponseDesc*)Buffer)->ID;
     return SerializationError::Ok;
 }

@@ -26,7 +26,7 @@
     <ClCompile Include="Engine\Engine.cpp" />
     <ClCompile Include="Logger\Logger.cpp" />
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="Server\Server.cpp" />
+    <ClCompile Include="Network\Network.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Accounts\AccountManager.h" />
@@ -35,8 +35,13 @@
     <ClInclude Include="Database\MySqlDB.h" />
     <ClInclude Include="Engine\Engine.h" />
     <ClInclude Include="Logger\Logger.h" />
-    <ClInclude Include="Server\Connection.h" />
-    <ClInclude Include="Server\Server.h" />
+    <ClInclude Include="Network\Connection.h" />
+    <ClInclude Include="Network\Network.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Protocol\Protocol.vcxproj">
+      <Project>{9ace21e4-1ea9-4e6c-a4c3-e63e1a1fac75}</Project>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

@@ -1,6 +1,6 @@
 #include <Accounts\AccountStorage\AccountStorage.h>
 
-#include <Server\Connection.h>
+#include <Network\Connection.h>
 
 #include <Protocol\LoginRequest.h>
 #include <Protocol\LoginResponse.h>

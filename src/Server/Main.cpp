@@ -1,13 +1,9 @@
-#include <Server/Server.h>
+#include <Network/Network.h>
 #include <Database/Database.h>
 #include <Logger/Logger.h>
 
-//Do smth with debug and release env directories
-
-//TODO:
-//DANGER:
 const char* ConfigFilename = "MessengerServer.cfg";
-const char* LogFilename = "Server.log";
+const char* LogFilename = "Network.log";
 
 int main()
 {
@@ -22,7 +18,7 @@ int main()
 	}
 	
 	boost::asio::io_service service;
-	Server server{ service };
+	Network server{ service };
 
 	if (!server.LoadFromConfig(ConfigFilename))
 	{

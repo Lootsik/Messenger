@@ -22,7 +22,13 @@
     <ClCompile Include="MessengerAPI.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Query.h" />
     <ClInclude Include="MessengerAPI.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Protocol\Protocol.vcxproj">
+      <Project>{9ace21e4-1ea9-4e6c-a4c3-e63e1a1fac75}</Project>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
@@ -121,7 +127,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalLibraryDirectories>E:\Lib\boost_1_60_0_x64\lib64-msvc-14.0;</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>E:\Lib\boost_1_60_0_x64\lib64-msvc-14.0;$(SolutionDir)build\$(Platform)\$(Configuration);</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Protocol.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -161,7 +168,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalLibraryDirectories>E:\Lib\boost_1_60_0_x64\lib64-msvc-14.0;</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>E:\Lib\boost_1_60_0_x64\lib64-msvc-14.0;$(SolutionDir)build\$(Platform)\$(Configuration);</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Protocol.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

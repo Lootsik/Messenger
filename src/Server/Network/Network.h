@@ -6,14 +6,14 @@
 #include <boost/array.hpp>
 #include <map>
 #include <string>
-#include <Server/Connection.h>
+#include <Network/Connection.h>
 #include <Engine/Engine.h>
 
 std::string ConnectionString(const Connection* Connection);
 
-class Server {
+class Network {
 public:
-	Server(boost::asio::io_service& service);
+	Network(boost::asio::io_service& service);
 	bool SetPort(const unsigned short port);
 	void SetMessageEngine(MessengerEngine* me) { _MessagerEngine = me; }
 	bool LoadFromConfig(const char*  ConfigFilename );

@@ -1,16 +1,16 @@
 #pragma once
 #include <map>
-#include <Server/Connection.h>
+#include <Network/Connection.h>
 #include <Accounts/AccountStorage/AccountStorage.h>
 #include <Accounts/AccountManager.h>
 #include <GlobalInfo.h>
-class Server;
+class Network;
 
 //class Message;
 class MessengerEngine
 {
 public:
-	MessengerEngine(Server* server);
+	MessengerEngine(Network* server);
 	bool LoadFromConfig(const char* Filename);
 	AccountManager& Accounts(){	return _AccountManager;}
 	/*	
@@ -43,5 +43,5 @@ private:
 	}
 	void _Send(Connection* connection);
 	AccountManager _AccountManager;
-	Server* _Server;
+	Network* _Server;
 };

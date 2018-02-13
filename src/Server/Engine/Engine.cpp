@@ -1,5 +1,5 @@
 #include <vector>
-#include <Server\Server.h>
+#include <Network\Network.h>
 #include <Protocol\BaseHeader.h>
 #include <Protocol\LoginRequest.h>
 #include <Protocol\LoginResponse.h>
@@ -20,7 +20,7 @@ static void LogLogin(const Connection* connection, const LoginResponse& Result)
 }
 
 //TODO: rewrite this
-MessengerEngine::MessengerEngine(Server* server)
+MessengerEngine::MessengerEngine(Network* server)
 //считывать значения с конфигов
 	:_Server{ server }
 {

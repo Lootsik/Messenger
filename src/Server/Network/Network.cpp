@@ -11,7 +11,7 @@
 #include <boost/bind.hpp>
 
 #include <Logger/Logger.h>
-#include "Server.h"
+#include "Network.h"
 
 
 using namespace boost::asio;
@@ -28,17 +28,17 @@ std::string ConnectionString(const Connection* connection)
 
 
 //*****************************
-//	Server settings
+//	Network settings
 //*****************************
 
-Server::Server(boost::asio::io_service& service)
+Network::Network(boost::asio::io_service& service)
 	: _Service{ service },
 	_Acceptor{ service }{}
 
 
 //TODO: rewrite this
 //NOTE: add new settings to config
-bool Server::LoadFromConfig(const char* ConfigFilename)
+bool Network::LoadFromConfig(const char* ConfigFilename)
 {
 	std::ifstream ConfigFile{ ConfigFilename };
 	if (!ConfigFile.is_open())
@@ -68,7 +68,7 @@ bool Server::LoadFromConfig(const char* ConfigFilename)
 	return res;
 }
 
-bool Server::SetPort(const unsigned short port)
+bool Network::SetPort(const unsigned short port)
 {
 	ip::tcp::endpoint point{ ip::tcp::v4(),port };
 	_Acceptor.open(point.protocol());
@@ -98,12 +98,12 @@ bool Server::SetPort(const unsigned short port)
 //*****************************
 
 //actually starts accept connections
-bool Server::Start()
+bool Network::Start()
 {
 	Connection* new_Connection = new Connection{ _Service };
 	error_code error;
-	//register new Server/Connection.handler function
-	_Acceptor.async_accept(new_Connection->_Socket, boost::bind(&Server::_AcceptConnections, this, new_Connection, _1), error);
+	//register new Network/Connection.handler function
+	_Acceptor.async_accept(new_Connection->_Socket, boost::bind(&Network::_AcceptConnections, this, new_Connection, _1), error);
 	
 #if _LOGGING_
 	if (!error)
@@ -120,11 +120,11 @@ bool Server::Start()
 //*****************************
 
 //message already in Write buffer
-void Server::Send(Connection* connection)
+void Network::Send(Connection* connection)
 {
 	connection->_Socket.async_write_some(
 				buffer(connection->_WriteBuf, connection->BytesWrite),
-				boost::bind(&Server::_WriteHandler, this, _1, _2));
+				boost::bind(&Network::_WriteHandler, this, _1, _2));
 }
 
 //*******************************
@@ -132,10 +132,10 @@ void Server::Send(Connection* connection)
 //*******************************
 
 
-void Server::_AcceptConnections(Connection* connection, const boost::system::error_code& err)
+void Network::_AcceptConnections(Connection* connection, const boost::system::error_code& err)
 {
 	//добавление асинхронной операции для принятого клиента(страшно, нужно упростить мб вывести в другую функцию)
-	connection->_Socket.async_read_some(buffer(connection->_ReadBuff), boost::bind(&Server::_AcceptMessage, this, connection, _1, _2));
+	connection->_Socket.async_read_some(buffer(connection->_ReadBuff), boost::bind(&Network::_AcceptMessage, this, connection, _1, _2));
 	//добавление клиента в список (не  критично, тк вызовы для сокета уже забинджены)
 
 #if _LOGGING_
@@ -151,7 +151,7 @@ void Server::_AcceptConnections(Connection* connection, const boost::system::err
 	error_code error;
 	//регистрируем обработчик нового коннекта
 
-	_Acceptor.async_accept(new_Connection->_Socket, boost::bind(&Server::_AcceptConnections, this, new_Connection, _1), error);
+	_Acceptor.async_accept(new_Connection->_Socket, boost::bind(&Network::_AcceptConnections, this, new_Connection, _1), error);
 
 	//TODO: fix this
 	if (error)
@@ -159,7 +159,7 @@ void Server::_AcceptConnections(Connection* connection, const boost::system::err
 }
 
 //TODO: rewrite this
-void  Server::_AcceptMessage(Connection* connection, const boost::system::error_code& err_code, size_t bytes)
+void  Network::_AcceptMessage(Connection* connection, const boost::system::error_code& err_code, size_t bytes)
 {
 	//ошибка, нужно удалить клиента
 	if (err_code) {
@@ -181,7 +181,7 @@ void  Server::_AcceptMessage(Connection* connection, const boost::system::error_
 #endif
 	//TODO: We need this?
 	connection->_Socket.async_read_some( buffer(connection->_ReadBuff),
-									boost::bind(&Server::_AcceptMessage,this, connection, _1, _2) );
+									boost::bind(&Network::_AcceptMessage,this, connection, _1, _2) );
 
 	connection->BytesRead = bytes;
 	_MessagerEngine->AnalyzePacket(connection);
@@ -192,7 +192,7 @@ void  Server::_AcceptMessage(Connection* connection, const boost::system::error_
 //*****************************
 
 //TODO: add some
-void  Server::_WriteHandler(const error_code& err, size_t bytes)
+void  Network::_WriteHandler(const error_code& err, size_t bytes)
 {
 #if (_LOGGING_) && (_PACKET_TRACE_)
 	if (err)
@@ -209,7 +209,7 @@ void  Server::_WriteHandler(const error_code& err, size_t bytes)
 //	Managing connections
 //*****************************
 
-void Server::_SolveProblemWithConnection(Connection* connection, const boost::system::error_code& err_code)
+void Network::_SolveProblemWithConnection(Connection* connection, const boost::system::error_code& err_code)
 {
 	//kick by default
 	switch (err_code.value())
@@ -231,7 +231,7 @@ void Server::_SolveProblemWithConnection(Connection* connection, const boost::sy
 }
 
 //check 
-void Server::_DeleteConnection(Connection* connection)
+void Network::_DeleteConnection(Connection* connection)
 {
 	error_code err;
 	//останавливаем все операции чтения-записи для сокета

@@ -16,7 +16,7 @@ public:
 
     uint32_t ToBuffer(Byte* Buffery) const override;
     uint32_t FromBuffer(const Byte* Buffer, const size_t Capacity) override;
-
+	//TODO: rename
     uint32_t GetValue()const {
         return _Response;
     }

@@ -36,7 +36,7 @@ public:
     uint32_t GetFrameSize() const {
         return TData.FrameSize;
     }
-    uint32_t GetType()const {
+    uint32_t GetType()const override {
         return TData.Type;
     }
     ~BaseHeader() {}
