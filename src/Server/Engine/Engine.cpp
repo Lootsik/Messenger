@@ -11,7 +11,7 @@
 
 using namespace Logger;
 
-static void LogLogin(const Connection* connection, const LoginResponse& Result)
+static void LogLogin(const boost::shared_ptr<Connection> connection, const LoginResponse& Result)
 {
 	if(Result.GetValue() == LoginResponse::Success)
 		LogBoth(Action, "[%s] - Logged in", ConnectionString(connection).c_str());
@@ -38,7 +38,7 @@ bool MessengerEngine::LoadFromConfig(const char* Filename)
 	+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 */
-void MessengerEngine::AnalyzePacket(Connection* connection)
+void MessengerEngine::AnalyzePacket(boost::shared_ptr<Connection> connection)
 {
 	
 	if (!BaseHeader::MinimumCheck(connection->BytesRead)){
@@ -73,7 +73,7 @@ void MessengerEngine::AnalyzePacket(Connection* connection)
 	}
 }
 
-void MessengerEngine::OnLogin(Connection* connection)
+void MessengerEngine::OnLogin(Connection& connection)
 {
 	LoginRequest Request;
 
@@ -95,9 +95,9 @@ void MessengerEngine::OnLogin(Connection* connection)
 	SendLoginResponce(connection, Response);
 }
 
-void MessengerEngine::OnLogout(Connection* connection)
+void MessengerEngine::OnLogout(Connection& connection)
 {
-	_AccountManager.Logout(connection->Account.ID);
+	_AccountManager.Logout(connection.Account.ID);
 #if _LOGGING_
 	LogBoth(Action, "[%s] - Logout", ConnectionString(connection).c_str());
 #endif // _LOGGING_
@@ -105,12 +105,12 @@ void MessengerEngine::OnLogout(Connection* connection)
 
 //TODO: rewrite according to changes
 //calculate size of message and _Send it
-void MessengerEngine::_Send(Connection* Connection)
+void MessengerEngine::_Send(Connection& connection)
 {
-	_Server->Send(Connection);
+	_Server->Send(connection);
 }
 
-void MessengerEngine::SendLoginResponce(Connection* connection, const LoginResponse& Result)
+void MessengerEngine::SendLoginResponce(Connection& connection, const LoginResponse& Result)
 {
 	if (!_MakePacket(connection, Result))
 	{
