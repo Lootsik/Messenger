@@ -7,6 +7,19 @@
 #include <Protocol\LoginResponse.h>
 #include <Protocol\Types.h>
 
+//to hide boost headers from main include file
+struct APIData
+{
+	EvetQuery _Query;
+
+	io_service service;
+	ip::tcp::endpoint ep;
+	ip::tcp::socket sock{ service };
+	boost::thread ThreadWorker;
+	uint32_t ID;
+	boost::array <Byte, 512> Buff;
+};
+
 MessengerAPI::MessengerAPI()
 {
 }
@@ -73,4 +86,14 @@ void MessengerAPI::TryLogin(const std::string& Login, const std::string& Pass)
 	Request.ToBuffer(Buff.c_array());
 	sock.async_write_some(boost::asio::buffer(Buff, Request.NeededSize()), 
 						  boost::bind(&MessengerAPI::_WriteHandler, this, _1, _2));
+}
+
+bool MessengerAPI::TryGetMessage() {
+	if (_Query.ready())
+	{
+		TransferredData*  data = _Query.pop_front();
+		_Callback(data->GetType(), data);
+		return true;
+	}
+	return false;
 }

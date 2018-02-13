@@ -37,4 +37,5 @@ struct Connection {
 	
 	boost::asio::ip::tcp::socket _Socket;
 	AccountInfo Account;
+	boost::posix_time::ptime LastSeen;
 };

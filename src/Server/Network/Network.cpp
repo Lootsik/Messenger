@@ -9,10 +9,12 @@
 #include <boost/asio.hpp>
 #include <boost/array.hpp>
 #include <boost/bind.hpp>
+#include <boost/shared_ptr.hpp>
 
 #include <Logger/Logger.h>
 #include "Network.h"
 
+//TODO: rewrite to blocking mode
 
 using namespace boost::asio;
 using boost::system::error_code;
@@ -33,7 +35,8 @@ std::string ConnectionString(const Connection* connection)
 
 Network::Network(boost::asio::io_service& service)
 	: _Service{ service },
-	_Acceptor{ service }{}
+		_Acceptor{ service },
+		_Timer{ service } {}
 
 
 //TODO: rewrite this
@@ -93,18 +96,24 @@ bool Network::SetPort(const unsigned short port)
 	return true;
 }
 
+void Network::_LastSeenNow(Connection* connection)
+{
+	connection->LastSeen = boost::posix_time::microsec_clock::local_time();
+}
+
 //*****************************
 //	Start server
 //*****************************
-
 //actually starts accept connections
 bool Network::Start()
 {
-	Connection* new_Connection = new Connection{ _Service };
+	boost::shared_ptr<Connection> new_Connection{ new Connection{ _Service } };
 	error_code error;
 	//register new Network/Connection.handler function
 	_Acceptor.async_accept(new_Connection->_Socket, boost::bind(&Network::_AcceptConnections, this, new_Connection, _1), error);
-	
+
+	_BindTimer();
+
 #if _LOGGING_
 	if (!error)
 		LogBoth(Success, "Server start working on port %d", _Acceptor.local_endpoint().port());
@@ -132,24 +141,25 @@ void Network::Send(Connection* connection)
 //*******************************
 
 
-void Network::_AcceptConnections(Connection* connection, const boost::system::error_code& err)
+void Network::_AcceptConnections(boost::shared_ptr<Connection> connection, const boost::system::error_code& err)
 {
 	//добавление асинхронной операции для принятого клиента(страшно, нужно упростить мб вывести в другую функцию)
 	connection->_Socket.async_read_some(buffer(connection->_ReadBuff), boost::bind(&Network::_AcceptMessage, this, connection, _1, _2));
 	//добавление клиента в список (не  критично, тк вызовы для сокета уже забинджены)
 
 #if _LOGGING_
-	Log(Action, "New connection: %s:%d", connection->_Socket.remote_endpoint().address().to_string().c_str(),
+	Log(Action, "New connection: %s:%d",connection->_Socket.remote_endpoint().address().to_string().c_str(),
 										 connection->_Socket.remote_endpoint().port());
 #endif
 
 	_Connections.push_back(connection);
 
 	//создаём нового клиента
-	Connection* new_Connection = new Connection{ _Service };
+	boost::shared_ptr<Connection> new_Connection{ new Connection{ _Service } };
 
 	error_code error;
 	//регистрируем обработчик нового коннекта
+	_LastSeenNow(connection.get());
 
 	_Acceptor.async_accept(new_Connection->_Socket, boost::bind(&Network::_AcceptConnections, this, new_Connection, _1), error);
 
@@ -158,8 +168,32 @@ void Network::_AcceptConnections(Connection* connection, const boost::system::er
 		throw;
 }
 
+void Network::_OnTimer()
+{
+	boost::posix_time::ptime now = boost::posix_time::microsec_clock::local_time();
+	if (_Connections.size() != 0) 
+	{
+		size_t i = _Connections.size();
+		while(i!=0)
+		{
+			--i;
+			if ((now - _Connections[i]->LastSeen).total_milliseconds() > Timeout)
+			{
+				_DeleteConnection(_Connections[i]);
+			}
+		}
+	}
+	_BindTimer();
+}
+
+void Network::_BindTimer()
+{
+	_Timer.expires_from_now(boost::posix_time::millisec(Timeout));
+	_Timer.async_wait(boost::bind(&Network::_OnTimer, this));
+}
+
 //TODO: rewrite this
-void  Network::_AcceptMessage(Connection* connection, const boost::system::error_code& err_code, size_t bytes)
+void  Network::_AcceptMessage(boost::shared_ptr<Connection> connection, const boost::system::error_code& err_code, size_t bytes)
 {
 	//ошибка, нужно удалить клиента
 	if (err_code) {
@@ -167,6 +201,8 @@ void  Network::_AcceptMessage(Connection* connection, const boost::system::error
 		_SolveProblemWithConnection(connection, err_code);
 		return;
 	}
+
+	_LastSeenNow(connection.get());
 
 	connection->BytesRead = bytes;
 
@@ -184,7 +220,7 @@ void  Network::_AcceptMessage(Connection* connection, const boost::system::error
 									boost::bind(&Network::_AcceptMessage,this, connection, _1, _2) );
 
 	connection->BytesRead = bytes;
-	_MessagerEngine->AnalyzePacket(connection);
+	_MessagerEngine->AnalyzePacket(connection.get());
 }
 
 //*****************************
@@ -209,21 +245,21 @@ void  Network::_WriteHandler(const error_code& err, size_t bytes)
 //	Managing connections
 //*****************************
 
-void Network::_SolveProblemWithConnection(Connection* connection, const boost::system::error_code& err_code)
+void Network::_SolveProblemWithConnection(boost::shared_ptr<Connection> connection, const boost::system::error_code& err_code)
 {
 	//kick by default
 	switch (err_code.value())
 	{
 	case error::connection_reset:
 #if _LOGGING_
-		Log(Action, "[%s] - Disconnected", ConnectionString(connection).c_str());
+		Log(Action, "[%s] - Disconnected", ConnectionString(connection.get()).c_str());
 #endif // _STATE_MESSAGE
 		_DeleteConnection(connection);
 		break;
 		
 	default:
 #if _LOGGING_
-		Log(Mistake, "[%s] - Drop connection: #%d: %s", ConnectionString(connection).c_str(), err_code.value(), err_code.message());
+		Log(Mistake, "[%s] - Drop connection: #%d: %s", ConnectionString(connection.get()).c_str(), err_code.value(), err_code.message());
 #endif // _STATE_MESSAGE
 		_DeleteConnection(connection);
 		break;
@@ -231,18 +267,27 @@ void Network::_SolveProblemWithConnection(Connection* connection, const boost::s
 }
 
 //check 
-void Network::_DeleteConnection(Connection* connection)
+void Network::_DeleteConnection(boost::shared_ptr<Connection> connection)
 {
 	error_code err;
-	//останавливаем все операции чтения-записи для сокета
-	connection->_Socket.shutdown(ip::tcp::socket::shutdown_both, err);
-	//assert нужно заменить
-	//не знаю как правильно обрабатывать такие ситуации
-	assert(!err);
+	if (connection->_Socket.is_open())
+	{
+		//останавливаем все операции чтения-записи для сокета
+		try
+		{
+			connection->_Socket.shutdown(ip::tcp::socket::shutdown_both);
+			connection->_Socket.close();
+		}
+		catch (...)
+		{
+			Log(Error, "SAD");
+		}
+	}
+	//assert(!err);
 
 	//TODO: change this
 	if ( connection->Account.Online() )
-		_MessagerEngine->OnLogout(connection);
+		_MessagerEngine->OnLogout(connection.get());
 
 	//ищем клиента в списке клиетов
 	auto res = find(_Connections.begin(), _Connections.end(), connection);
@@ -255,6 +300,6 @@ void Network::_DeleteConnection(Connection* connection)
 
 	//закрываем сокет
 	connection->_Socket.close();
-	delete connection;
+
 	return;
 }

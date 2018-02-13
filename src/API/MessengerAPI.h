@@ -11,34 +11,26 @@
 using EvetQuery = typename Query<TransferredData*>;
 using namespace boost::asio;
 
+struct APIData;
 
 class MessengerAPI
 {
 public:
 	MessengerAPI();
+	~MessengerAPI();
 
 	int Connect(const std::string& Address, unsigned short port);
 	void TryLogin(const std::string& Login, const std::string& Pass);
 
-	bool TryGetMessage() {
-		if (_Query.ready())
-		{
-			TransferredData*  data = _Query.pop_front();
-			_Callback(data->GetType(), data);
-			return true;
-		}
-		return false;
-	}
+	bool TryGetMessage(); 
 	//Connect to server
 	//Authorization
 	//Message
 
-	~MessengerAPI();
 
 	void(*_Callback)(uint32_t, TransferredData*);
 private:
 	
-	EvetQuery _Query;
 
 	void _NewEvent(const boost::system::error_code& err_code, size_t bytes);
 	void _WriteHandler(const boost::system::error_code& err_code, size_t bytes);

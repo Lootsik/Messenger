@@ -9,6 +9,8 @@
 #include <Network/Connection.h>
 #include <Engine/Engine.h>
 
+//TODO: replace calls to mem func with shared_ptr
+
 std::string ConnectionString(const Connection* Connection);
 
 class Network {
@@ -22,19 +24,33 @@ public:
 
 	void Send(Connection* connection);
 private:
+
+	//milliseconds
+	static const unsigned int Timeout = 5000;
+
+	//timer
+	boost::asio::deadline_timer _Timer;
+
+	boost::posix_time::ptime last_ping;
 	unsigned short _Port;
 	boost::asio::io_service& _Service;
 	boost::asio::ip::tcp::acceptor _Acceptor;
 
-	std::vector<Connection*> _Connections{};
+	std::vector<boost::shared_ptr<Connection>> _Connections{};
 	MessengerEngine* _MessagerEngine;
 
+	void _BindTimer();
+
+	void _LastSeenNow(Connection* connection);
 	//for internal use only
-	void _AcceptMessage(Connection* connection, const boost::system::error_code& err_code, size_t bytes);
-	void _AcceptConnections(Connection* connection, const boost::system::error_code& err);
+	void _OnTimer();
+	void _AcceptMessage(boost::shared_ptr<Connection> connection, const boost::system::error_code& err_code, size_t bytes);
+	void _AcceptConnections(boost::shared_ptr<Connection> connection, const boost::system::error_code& err);
+
+	//void _AcceptConnections(Connection* connection, const boost::system::error_code& err);
 	void _WriteHandler(const boost::system::error_code& err, size_t bytes);
 
-	void _SolveProblemWithConnection(Connection* connection, const boost::system::error_code& err_code);
-	void _DeleteConnection(Connection* connection);
+	void _SolveProblemWithConnection(boost::shared_ptr<Connection> conn , const boost::system::error_code& err_code);
+	void _DeleteConnection(boost::shared_ptr<Connection> connection);
 
 };

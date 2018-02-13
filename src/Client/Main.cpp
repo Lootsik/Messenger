@@ -7,8 +7,6 @@ void CallBack(uint32_t type, TransferredData* Data)
 	printf("Response: %d:%d", response->GetValue(), response->GetId());
 }
 
-
-
 int main()
 {
 	MessengerAPI api;
