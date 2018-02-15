@@ -12,7 +12,7 @@ struct AccountManager
 
 	ID_t VerifyAccount(const LoginRequest& AuthData);
 	LoginResponse Login(const LoginRequest& AuthData);
-	void Logout(ID_t& ID);
+	void Logout(ID_t ID);
 	bool UserOnline(ID_t ID);
 
 private:

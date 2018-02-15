@@ -14,22 +14,12 @@
 #include <Logger/Logger.h>
 #include "Network.h"
 
-//TODO: rewrite to blocking mode
 
 using namespace boost::asio;
 using boost::system::error_code;
 using namespace Logger;
-//TODO: add some error checking
 
-//todo add ID
-std::string ConnectionString(const Connection* connection)
-{
-	if(connection->_Socket.is_open())
-		return connection->_Socket.remote_endpoint().address().to_string() +
-					":" + std::to_string(connection->_Socket.remote_endpoint().port());
-	
-	return "";
-}
+//TODO: add some error checking
 
 
 //*****************************
@@ -37,7 +27,7 @@ std::string ConnectionString(const Connection* connection)
 //*****************************
 
 Network::Network(boost::asio::io_service& service)
-	: _Service{ service },
+	  : _Service{ service },
 		_Acceptor{ service },
 		_Timer{ service } {}
 
@@ -101,7 +91,7 @@ bool Network::SetPort(const unsigned short port)
 
 void Network::_LastSeenNow(PConnection& connection)
 {
-	connection->LastSeen = boost::posix_time::microsec_clock::local_time();
+	connection->LastTime() = boost::posix_time::microsec_clock::local_time();
 }
 
 //*****************************
@@ -113,7 +103,7 @@ bool Network::Start()
 	PConnection new_Connection{ new Connection{ _Service } };
 	error_code error;
 	//register new Network/Connection.handler function
-	_Acceptor.async_accept(new_Connection->_Socket, boost::bind(&Network::_AcceptConnections, this, new_Connection, _1), error);
+	_Acceptor.async_accept(new_Connection->Socket(), boost::bind(&Network::_AcceptConnections, this, new_Connection, _1), error);
 
 	_BindTimer();
 
@@ -134,44 +124,44 @@ bool Network::Start()
 //message already in Write buffer
 void Network::Send(PConnection& connection)
 {
-	connection->_Socket.async_write_some(
-				buffer(connection->_WriteBuf, connection->BytesWrite),
-				boost::bind(&Network::_WriteHandler, this, _1, _2));
+	connection->Socket().async_write_some(
+						buffer(connection->WriteBuffer(), connection->BytesToWrite()),
+						boost::bind(&Network::_WriteHandler, this, _1, _2));
 }
 
 //*******************************
 //	Accept message/cliet handlers
 //*******************************
 
-
+//TODO: change to refferense
 void Network::_AcceptConnections(PConnection connection, const boost::system::error_code& err)
 {
-	//добавление асинхронной операции для принятого клиента(страшно, нужно упростить мб вывести в другую функцию)
-	connection->_Socket.async_read_some(buffer(connection->_ReadBuff), boost::bind(&Network::_AcceptMessage, this, connection, _1, _2));
-	//добавление клиента в список (не  критично, тк вызовы для сокета уже забинджены)
+	// add async operation
+	connection->Socket().async_read_some(buffer(connection->ReadBuffer()), boost::bind(&Network::_AcceptMessage, this, connection, _1, _2));
 
 #if _LOGGING_
-	Log(Action, "New connection: %s:%d",connection->_Socket.remote_endpoint().address().to_string().c_str(),
-										 connection->_Socket.remote_endpoint().port());
+	Log(Action, "New connection: %s", connection->ConnectionString().c_str());
 #endif
+	//adding clients to list
 
+	_LastSeenNow(connection);
 	_Connections.push_back(connection);
 
-	//создаём нового клиента
-	boost::shared_ptr<Connection> new_Connection{ new Connection{ _Service } };
-
+	//new client
+	PConnection new_Connection{ new Connection{ _Service } };
 	error_code error;
-	//регистрируем обработчик нового коннекта
-	_LastSeenNow(connection);
 
-	_Acceptor.async_accept(new_Connection->_Socket, boost::bind(&Network::_AcceptConnections, this, new_Connection, _1), error);
+	//registering next connect handler 
+	_Acceptor.async_accept(new_Connection->Socket(), 
+							boost::bind(&Network::_AcceptConnections, this, new_Connection, _1),
+							error);
 
 	//TODO: fix this
 	if (error)
 		throw;
 }
 
-void Network::_OnTimer()
+void Network::_OnTimerCheck()
 {
 	boost::posix_time::ptime now = boost::posix_time::microsec_clock::local_time();
 	if (_Connections.size() != 0) 
@@ -180,7 +170,7 @@ void Network::_OnTimer()
 		while(i!=0)
 		{
 			--i;
-			if ((now - _Connections[i]->LastSeen).total_milliseconds() > Timeout)
+			if ((now - _Connections[i]->LastTime()).total_milliseconds() > Timeout)
 			{
 				_DeleteConnection(_Connections[i]);
 			}
@@ -192,37 +182,37 @@ void Network::_OnTimer()
 void Network::_BindTimer()
 {
 	_Timer.expires_from_now(boost::posix_time::millisec(Timeout));
-	_Timer.async_wait(boost::bind(&Network::_OnTimer, this));
+	_Timer.async_wait(boost::bind(&Network::_OnTimerCheck, this));
 }
 
 //TODO: rewrite this
 void  Network::_AcceptMessage(PConnection connection, const boost::system::error_code& err_code, size_t bytes)
 {
-	//ошибка, нужно удалить клиента
 	if (err_code) {
-		//TODO: стоит определить план дейстивий для конкретного случая: принимать дальше сообщения или нет
+		//TODO: what we should do?
 		_SolveProblemWithConnection(connection, err_code);
 		return;
 	}
 
+	// mark new time
 	_LastSeenNow(connection);
+	//set new number of read bytes
+	connection->SetBytesToRead( bytes );
 
-	connection->BytesRead = bytes;
 
 #if (_LOGGING_) && (_PACKET_TRACE_)
 	if(!err_code)
-		Log(Action, "[%s] - message %Iu recived", ConnectionString(Connection).c_str(),
+		Log(Action, "[%s] - message %Iu recived", connection->ConnectionString().c_str(),
 												  bytes);
 	else 
-		Log(Mistake, "[%s] - on message error: #%d: %s", ConnectionString(Connection).c_str(),
+		Log(Mistake, "[%s] - on message error: #%d: %s", connection->ConnectionString().c_str(),
 														 err_code.value(), 
 														 err_code.message().c_str());
 #endif
-	//TODO: We need this?
-	connection->_Socket.async_read_some( buffer(connection->_ReadBuff),
+
+	connection->Socket().async_read_some( buffer(connection->ReadBuffer()),
 									boost::bind(&Network::_AcceptMessage,this, connection, _1, _2) );
 
-	connection->BytesRead = bytes;
 	_MessagerEngine->AnalyzePacket(connection);
 }
 
@@ -255,7 +245,7 @@ void Network::_SolveProblemWithConnection(PConnection& connection, const boost::
 	{
 	case error::connection_reset:
 #if _LOGGING_
-		Log(Action, "[%s] - Disconnected", ConnectionString(connection.get()).c_str());
+		Log(Action, "[%s] - Disconnected", connection->ConnectionString().c_str());
 #endif // _STATE_MESSAGE
 		_DeleteConnection(connection);
 		break;
@@ -265,7 +255,7 @@ void Network::_SolveProblemWithConnection(PConnection& connection, const boost::
 
 	default:
 #if _LOGGING_
-		Log(Mistake, "[%s] - Drop connection: #%d: %s", ConnectionString(connection.get()).c_str(), err_code.value(), err_code.message());
+		Log(Mistake, "[%s] - Drop connection: #%d: %s", connection->ConnectionString().c_str(), err_code.value(), err_code.message());
 #endif // _STATE_MESSAGE
 		_DeleteConnection(connection);
 		break;
@@ -276,36 +266,34 @@ void Network::_SolveProblemWithConnection(PConnection& connection, const boost::
 void Network::_DeleteConnection(PConnection& connection)
 {
 	error_code err;
-	if (connection->_Socket.is_open())
+	if (connection->Socket().is_open())
 	{
-		//останавливаем все операции чтения-записи для сокета
-		try
-		{
-			connection->_Socket.shutdown(ip::tcp::socket::shutdown_both);
-			connection->_Socket.close();
-		}
-		catch (...)
-		{
-			Log(Error, "SAD");
-		}
+		connection->Socket().shutdown(ip::tcp::socket::shutdown_both, err);
+		if(err)
+			Log(Error, "Socket cannot be shutdowned %s", connection->ConnectionString().c_str());
+
+		connection->Socket().close(err);
+		if(err)
+			Log(Error, "Socket cannot be shutdowned %s", connection->ConnectionString().c_str());
+
 	}
 	//assert(!err);
 
 	//TODO: change this
-	if ( connection->Account.Online() )
+	if ( connection->Account().Online() )
 		_MessagerEngine->OnLogout(connection);
 
 	//ищем клиента в списке клиетов
 	auto res = find(_Connections.begin(), _Connections.end(), connection);
-	//если этого клиента в списке нет, что-то пошло не так
+	//
 	if (res == _Connections.end())
+	{
+		Log(Error, "Client should have been deleted but he is not in list %s", connection->ConnectionString().c_str());
 		return;
+	}
 
-	//удаляем клиента со списка
+	//delete form list
 	_Connections.erase(res);
-
-	//закрываем сокет
-	connection->_Socket.close();
 
 	return;
 }

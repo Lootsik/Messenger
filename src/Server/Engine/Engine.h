@@ -14,7 +14,6 @@ public:
 	bool LoadFromConfig(const char* Filename);
 	AccountManager& Accounts(){	return _AccountManager;}
 	/*	
-			Parse
 	*/
 	void AnalyzePacket(PConnection Connection);
 	void OnLogin(PConnection& Connection);
@@ -33,11 +32,11 @@ private:
 	template<typename T>
 	bool _MakePacket(PConnection& connection,const T& Item)
 	{
-		uint32_t err = Item.ToBuffer(connection->WriteBuf());
+		uint32_t err = Item.ToBuffer(connection->WriteBuffer().c_array());
 		if ( err )
 			return false;
 	
-		connection->BytesWrite = Item.NeededSize();
+		connection->SetBytesToWrite( Item.NeededSize() );
 		return true;
 	}
 	void _Send(PConnection& connection);

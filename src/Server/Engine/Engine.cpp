@@ -14,9 +14,9 @@ using namespace Logger;
 static void LogLogin(const PConnection& connection, const LoginResponse& Result)
 {
 	if(Result.GetValue() == LoginResponse::Success)
-		LogBoth(Action, "[%s] - Logged in", ConnectionString(connection.get()).c_str());
+		LogBoth(Action, "[%s] - Logged in", connection->ConnectionString().c_str());
 	else 
-		Log(Mistake, "[%s] - Failed login", ConnectionString(connection.get()).c_str());
+		Log(Mistake, "[%s] - Failed login", connection->ConnectionString().c_str());
 }
 
 //TODO: rewrite this
@@ -41,16 +41,16 @@ bool MessengerEngine::LoadFromConfig(const char* Filename)
 void MessengerEngine::AnalyzePacket(PConnection connection)
 {
 	
-	if (!BaseHeader::MinimumCheck(connection->BytesRead)){
+	if (!BaseHeader::MinimumCheck(connection->BytesToRead())){
 #if _LOGGING_ 
 		Log(Mistake, "[%s] - Packet wrong marking. Size %Iu bytes",
-					ConnectionString(connection.get()).c_str(), connection->BytesRead);
+						connection->ConnectionString().c_str(), connection->BytesToRead());
 #endif
 		return;
 	}
 
 	//TODO: divide this
-	switch (BaseHeader::BufferType( connection->ReadBuf()) )
+	switch (BaseHeader::BufferType(connection->ReadBuffer().c_array()))
 	{
 
 	case Types::LoginRequest:
@@ -77,17 +77,17 @@ void MessengerEngine::OnLogin(PConnection& connection)
 {
 	LoginRequest Request;
 
-	uint32_t err = Request.FromBuffer(connection->ReadBuf(), connection->BytesRead);
+	uint32_t err = Request.FromBuffer(connection->ReadBuffer().c_array(), connection->BytesToRead());
 	if(err){
 		//TODO: do smth with result
 		return;
 	}
 
 	LoginResponse Response = _AccountManager.Login(Request);
-	//TODO: CHANHE THIS ZERO
+
 	if (Response.GetValue() == LoginResponse::Success)
 	{
-		connection->Account.ID = Response.GetId();
+		connection->Account().SetID( Response.GetId());
 	}
 #if _LOGGING_
 	LogLogin(connection, Response);
@@ -97,9 +97,10 @@ void MessengerEngine::OnLogin(PConnection& connection)
 
 void MessengerEngine::OnLogout(PConnection& connection)
 {
-	_AccountManager.Logout(connection->Account.ID);
+	_AccountManager.Logout(connection->Account().ID());
+	connection->Account().Reset();
 #if _LOGGING_
-	LogBoth(Action, "[%s] - Logout", ConnectionString(connection.get()).c_str());
+	LogBoth(Action, "[%s] - Logout", connection->ConnectionString().c_str());
 #endif // _LOGGING_
 }
 

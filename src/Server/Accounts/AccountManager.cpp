@@ -41,10 +41,9 @@ LoginResponse AccountManager::Login( const LoginRequest& AuthData )
 	return LoginResponse{ LoginResponse::Success, id };
 }
 //no check, pure database change
-void AccountManager::Logout( ID_t& ID)
+void AccountManager::Logout( ID_t ID)
 {
 	_AccountStorage.RecordLogout(ID);
-	ID = INVALID_ID;
 }
 
 bool AccountManager::UserOnline(ID_t ID)
