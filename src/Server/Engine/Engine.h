@@ -16,23 +16,22 @@ public:
 	/*	
 			Parse
 	*/
-	void AnalyzePacket(Connection* Connection);
-	void OnLogin(Connection* Connection);
-	void OnLogout(Connection* Connection);
-	void OnMessage(Connection* Connection);
+	void AnalyzePacket(PConnection Connection);
+	void OnLogin(PConnection& Connection);
+	void OnLogout(PConnection& Connection);
+	void OnMessage(PConnection& Connection);
 	
 	/*
 
 	*/
 
-
-	void SendLoginResponce(Connection* connection, const LoginResponse& Result);
+	void SendLoginResponce(PConnection& connection, const LoginResponse& Result);
 	//void SendMessageUser(Connection* connection, ID_t from, size_t messageNum, Message* mes);
 	//void SendNewEventNotification(ID_t ID);
 private:
 	//packet already in Connection Writebuff
 	template<typename T>
-	bool _MakePacket(Connection* connection,const T& Item)
+	bool _MakePacket(PConnection& connection,const T& Item)
 	{
 		uint32_t err = Item.ToBuffer(connection->WriteBuf());
 		if ( err )
@@ -41,7 +40,7 @@ private:
 		connection->BytesWrite = Item.NeededSize();
 		return true;
 	}
-	void _Send(Connection* connection);
+	void _Send(PConnection& connection);
 	AccountManager _AccountManager;
 	Network* _Server;
 };

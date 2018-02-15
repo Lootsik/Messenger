@@ -11,12 +11,12 @@
 
 using namespace Logger;
 
-static void LogLogin(const Connection* connection, const LoginResponse& Result)
+static void LogLogin(const PConnection& connection, const LoginResponse& Result)
 {
 	if(Result.GetValue() == LoginResponse::Success)
-		LogBoth(Action, "[%s] - Logged in", ConnectionString(connection).c_str());
+		LogBoth(Action, "[%s] - Logged in", ConnectionString(connection.get()).c_str());
 	else 
-		Log(Mistake, "[%s] - Failed login", ConnectionString(connection).c_str());
+		Log(Mistake, "[%s] - Failed login", ConnectionString(connection.get()).c_str());
 }
 
 //TODO: rewrite this
@@ -38,13 +38,13 @@ bool MessengerEngine::LoadFromConfig(const char* Filename)
 	+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 */
-void MessengerEngine::AnalyzePacket(Connection* connection)
+void MessengerEngine::AnalyzePacket(PConnection connection)
 {
 	
 	if (!BaseHeader::MinimumCheck(connection->BytesRead)){
 #if _LOGGING_ 
 		Log(Mistake, "[%s] - Packet wrong marking. Size %Iu bytes",
-					ConnectionString(connection).c_str(), connection->BytesRead);
+					ConnectionString(connection.get()).c_str(), connection->BytesRead);
 #endif
 		return;
 	}
@@ -73,7 +73,7 @@ void MessengerEngine::AnalyzePacket(Connection* connection)
 	}
 }
 
-void MessengerEngine::OnLogin(Connection* connection)
+void MessengerEngine::OnLogin(PConnection& connection)
 {
 	LoginRequest Request;
 
@@ -95,22 +95,22 @@ void MessengerEngine::OnLogin(Connection* connection)
 	SendLoginResponce(connection, Response);
 }
 
-void MessengerEngine::OnLogout(Connection* connection)
+void MessengerEngine::OnLogout(PConnection& connection)
 {
 	_AccountManager.Logout(connection->Account.ID);
 #if _LOGGING_
-	LogBoth(Action, "[%s] - Logout", ConnectionString(connection).c_str());
+	LogBoth(Action, "[%s] - Logout", ConnectionString(connection.get()).c_str());
 #endif // _LOGGING_
 }
 
 //TODO: rewrite according to changes
 //calculate size of message and _Send it
-void MessengerEngine::_Send(Connection* Connection)
+void MessengerEngine::_Send(PConnection& Connection)
 {
 	_Server->Send(Connection);
 }
 
-void MessengerEngine::SendLoginResponce(Connection* connection, const LoginResponse& Result)
+void MessengerEngine::SendLoginResponce(PConnection& connection, const LoginResponse& Result)
 {
 	if (!_MakePacket(connection, Result))
 	{

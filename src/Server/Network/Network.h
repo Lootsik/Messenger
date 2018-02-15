@@ -22,7 +22,7 @@ public:
 
 	bool Start();
 
-	void Send(Connection* connection);
+	void Send(PConnection& connection);
 private:
 
 	//milliseconds
@@ -36,21 +36,21 @@ private:
 	boost::asio::io_service& _Service;
 	boost::asio::ip::tcp::acceptor _Acceptor;
 
-	std::vector<boost::shared_ptr<Connection>> _Connections{};
+	std::vector<PConnection> _Connections{};
 	MessengerEngine* _MessagerEngine;
 
 	void _BindTimer();
 
-	void _LastSeenNow(Connection* connection);
+	void _LastSeenNow(PConnection& connection);
 	//for internal use only
 	void _OnTimer();
-	void _AcceptMessage(boost::shared_ptr<Connection> connection, const boost::system::error_code& err_code, size_t bytes);
-	void _AcceptConnections(boost::shared_ptr<Connection> connection, const boost::system::error_code& err);
+	void _AcceptMessage(PConnection connection, const boost::system::error_code& err_code, size_t bytes);
+	void _AcceptConnections(PConnection connection, const boost::system::error_code& err);
 
 	//void _AcceptConnections(Connection* connection, const boost::system::error_code& err);
 	void _WriteHandler(const boost::system::error_code& err, size_t bytes);
 
-	void _SolveProblemWithConnection(boost::shared_ptr<Connection> conn , const boost::system::error_code& err_code);
-	void _DeleteConnection(boost::shared_ptr<Connection> connection);
+	void _SolveProblemWithConnection(PConnection& conn , const boost::system::error_code& err_code);
+	void _DeleteConnection(PConnection& connection);
 
 };

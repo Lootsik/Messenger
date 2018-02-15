@@ -2,6 +2,8 @@
 #include <string>
 #include <boost\asio.hpp>
 #include <boost\array.hpp>
+#include <boost\shared_ptr.hpp>
+
 #include <stdint.h>
 #include <GlobalInfo.h>
 
@@ -17,6 +19,7 @@ struct AccountInfo
 
 struct Connection {
 	Connection(boost::asio::io_service& service) :_Socket{ service } {}
+
 	static const size_t Buffsize = PacketMaxSize;
 	using Storage = boost::array<Byte, Buffsize>;
 
@@ -39,3 +42,5 @@ struct Connection {
 	AccountInfo Account;
 	boost::posix_time::ptime LastSeen;
 };
+
+using PConnection = boost::shared_ptr<Connection>;
