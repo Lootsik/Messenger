@@ -11,7 +11,7 @@
 
 //TODO: replace calls to mem func with shared_ptr
 
-std::string ConnectionString(const Connection& Connection);
+std::string ConnectionString(const Connection* Connection);
 
 class Network {
 public:
@@ -22,7 +22,7 @@ public:
 
 	bool Start();
 
-	void Send(boost::shared_ptr<Connection> connection);
+	void Send(Connection* connection);
 private:
 
 	//milliseconds
@@ -41,13 +41,13 @@ private:
 
 	void _BindTimer();
 
-	void _LastSeenNow(boost::shared_ptr<Connection> connection);
+	void _LastSeenNow(Connection* connection);
 	//for internal use only
 	void _OnTimer();
 	void _AcceptMessage(boost::shared_ptr<Connection> connection, const boost::system::error_code& err_code, size_t bytes);
 	void _AcceptConnections(boost::shared_ptr<Connection> connection, const boost::system::error_code& err);
 
-	//void _AcceptConnections(boost::shared_ptr<Connection>> connection, const boost::system::error_code& err);
+	//void _AcceptConnections(Connection* connection, const boost::system::error_code& err);
 	void _WriteHandler(const boost::system::error_code& err, size_t bytes);
 
 	void _SolveProblemWithConnection(boost::shared_ptr<Connection> conn , const boost::system::error_code& err_code);
