@@ -18,13 +18,14 @@ public:
 	void AnalyzePacket(PConnection Connection);
 	void OnLogin(PConnection& Connection);
 	void OnLogout(PConnection& Connection);
+	void OnUserInfo(PConnection& Connection);
 	void OnMessage(PConnection& Connection);
 	
 	/*
 
 	*/
 
-	void SendLoginResponce(PConnection& connection, const LoginResponse& Result);
+	void SendResponce(PConnection& connection, const TransferredData& Result);
 	//void SendMessageUser(Connection* connection, ID_t from, size_t messageNum, Message* mes);
 	//void SendNewEventNotification(ID_t ID);
 private:

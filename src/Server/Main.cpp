@@ -22,6 +22,13 @@ BOOL WINAPI consoleHandler(DWORD signal)
 
 int main()
 {
+	HANDLE Mutex = CreateMutex(NULL, FALSE, L"{5f981c84-b348-40ac-8dee-8de13545e68f}");
+
+	if (GetLastError() == ERROR_ALREADY_EXISTS)
+	{
+		return 2;
+	}
+
 #if _LOGGING_
 	Logger::OpenLogFile(LogFilename);
 #endif
@@ -56,4 +63,6 @@ int main()
 	}
 
 	service.run();
+
+	CloseHandle(Mutex);
 }

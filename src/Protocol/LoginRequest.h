@@ -37,8 +37,8 @@ protected:
         BaseHeaderDesc Header;
         uint32_t LoginSize;
         uint32_t PasswordSize;
-        Byte Data[0];
-    };
+		Byte Data[0];
+	};
 
 #pragma warning( pop ) 
 

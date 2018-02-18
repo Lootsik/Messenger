@@ -8,11 +8,13 @@
     <ClInclude Include="SerializationError.h" />
     <ClInclude Include="Types.h" />
     <ClInclude Include="TransferredData.h" />
+    <ClInclude Include="UserInfo.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BaseHeader.cpp" />
     <ClCompile Include="LoginResponse.cpp" />
     <ClCompile Include="LoginRequest.cpp" />
     <ClCompile Include="Logout.cpp" />
+    <ClCompile Include="UserInfo.cpp" />
   </ItemGroup>
 </Project>

@@ -12,7 +12,9 @@ namespace Types
 {
 enum Types{
     NotType = 0,
-    Message = 3,
+	PrevOperationDenied,
+	UserInfo,
+    Message,
     LoginRequest,
     LoginResponse,
     Logout,

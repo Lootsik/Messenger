@@ -50,3 +50,8 @@ bool AccountManager::UserOnline(ID_t ID)
 {
 	return _AccountStorage.Online(ID);
 }
+
+std::string AccountManager::FindLogin(ID_t ID)
+{
+	return _AccountStorage.GetLogin(ID);
+}

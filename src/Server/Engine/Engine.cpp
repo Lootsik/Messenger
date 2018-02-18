@@ -3,6 +3,8 @@
 #include <Protocol\BaseHeader.h>
 #include <Protocol\LoginRequest.h>
 #include <Protocol\LoginResponse.h>
+#include <Protocol\UserInfo.h>
+
 #include <Protocol\Types.h>
 #include <Protocol\SerializationError.h>
 //#include <PacketFormat\PacketFormat.h>
@@ -63,6 +65,10 @@ void MessengerEngine::AnalyzePacket(PConnection connection)
 		OnLogout(connection);
 	}break;
 
+	case Types::UserInfo:
+	{
+		OnUserInfo(connection);
+	}
 	/*case (int)Packet::Types::Message:
 	{
 		//OnMessage(connection);
@@ -85,14 +91,23 @@ void MessengerEngine::OnLogin(PConnection& connection)
 
 	LoginResponse Response = _AccountManager.Login(Request);
 
-	if (Response.GetValue() == LoginResponse::Success)
-	{
-		connection->Account().SetID( Response.GetId());
-	}
 #if _LOGGING_
 	LogLogin(connection, Response);
 #endif
-	SendLoginResponce(connection, Response);
+	SendResponce(connection, Response);
+
+
+	if (Response.GetValue() == LoginResponse::Success)
+	{
+		connection->Account().SetID( Response.GetId());
+		
+		//if success send packet with login
+		UserInfo ReturnInfo{ Response.GetId(), 
+					_AccountManager.FindLogin(Response.GetId())};
+
+		SendResponce(connection, ReturnInfo);
+	}
+
 }
 
 void MessengerEngine::OnLogout(PConnection& connection)
@@ -111,7 +126,7 @@ void MessengerEngine::_Send(PConnection& Connection)
 	_Server->Send(Connection);
 }
 
-void MessengerEngine::SendLoginResponce(PConnection& connection, const LoginResponse& Result)
+void MessengerEngine::SendResponce(PConnection& connection, const TransferredData& Result)
 {
 	if (!_MakePacket(connection, Result))
 	{
@@ -120,4 +135,24 @@ void MessengerEngine::SendLoginResponce(PConnection& connection, const LoginResp
 	}
 	//_Send result
 	_Send(connection);
+}
+
+void MessengerEngine::OnUserInfo(PConnection& connection)
+{
+	UserInfo Info;
+
+	uint32_t err = Info.FromBuffer(connection->ReadBuffer().c_array(), connection->BytesToRead());
+	if (err) {
+		//TODO: do smth with result
+		return;
+	}
+
+	std::string login = _AccountManager.FindLogin(Info.GetId());
+	//there is no user with such id
+	//if (login == "")
+		//return;
+
+	UserInfo ReturnInfo{ Info.GetId(), login };
+
+	SendResponce(connection, ReturnInfo);
 }

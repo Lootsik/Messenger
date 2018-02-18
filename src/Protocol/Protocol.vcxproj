@@ -26,12 +26,14 @@
     <ClInclude Include="SerializationError.h" />
     <ClInclude Include="TransferredData.h" />
     <ClInclude Include="Types.h" />
+    <ClInclude Include="UserInfo.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BaseHeader.cpp" />
     <ClCompile Include="LoginRequest.cpp" />
     <ClCompile Include="LoginResponse.cpp" />
     <ClCompile Include="Logout.cpp" />
+    <ClCompile Include="UserInfo.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

@@ -1,15 +1,20 @@
 #include <API\MessengerAPI.h>
 #include <Protocol\LoginResponse.h>
-
+#include <Protocol\Types.h>
+MessengerAPI api;
 void CallBack(uint32_t type, TransferredData* Data)
 {
-	LoginResponse* response  = static_cast<LoginResponse*>(Data);
-	printf("Response: %d:%d", response->GetValue(), response->GetId());
+	if (type == Types::UserInfo)
+	{
+		std::string str = api.GetUserLogin();
+		printf("You are #%d:%s\n", api.GetUserID(), str.c_str());
+	}
+	//LoginResponse* response  = static_cast<LoginResponse*>(Data);
+	//printf("Recived: ");
 }
 
 int main()
 {
-	MessengerAPI api;
 	if (api.Connect("127.0.0.1", 8021))
 	{
 		printf("Error");
@@ -17,6 +22,9 @@ int main()
 	}
 	api._Callback = CallBack;
 	api.TryLogin("w", "w");
-	while (!api.TryGetMessage());
-	while (1);
+	
+	while (1)
+	{
+		while (!api.TryGetMessage());
+	}
 }

@@ -1,6 +1,6 @@
 #pragma once
 #define _LOGGING_ 1
-#define _PACKET_TRACE_ 0
+#define _PACKET_TRACE_ 1
 
 #include <boost/asio.hpp>
 #include <boost/array.hpp>

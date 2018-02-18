@@ -38,11 +38,6 @@
     <ClInclude Include="Network\Connection.h" />
     <ClInclude Include="Network\Network.h" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Protocol\Protocol.vcxproj">
-      <Project>{9ace21e4-1ea9-4e6c-a4c3-e63e1a1fac75}</Project>
-    </ProjectReference>
-  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{A14CCA81-3607-4D97-8774-4F4A62C0E188}</ProjectGuid>
