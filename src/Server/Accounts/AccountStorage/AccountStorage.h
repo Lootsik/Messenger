@@ -1,32 +1,28 @@
 #pragma once
 #include <string>
 #include <vector>
+
 #include <GlobalInfo.h>
+#include <Utility\InPlace.h>
 #include <Database\Database.h>
 
 
-//TODO: пофиксить размеры в полей, не сделать случайно case insesetive, сделать что-то с кодировками
+class AccountStorage : InPlace 
+{
 
-//пересоздать дб
-class AccountStorage {
 public:
     AccountStorage();
     bool CreatePrepared();
 
-    //do not allow copy or move  
-    AccountStorage (const AccountStorage&) = delete;
-    AccountStorage& operator=(const AccountStorage&) = delete;
-    AccountStorage (AccountStorage&&) = delete;
-    AccountStorage& operator=(AccountStorage &&) = delete;
 
     ~AccountStorage();
-    //добавление нового пользователя
+    //adding new user 
     void NewUser(const std::string& login, const std::string& password);
-    //удаление пользователя
+    //deletin user
     bool DeleteUser(const std::string& login);
-    //проверка на существование пользователя с таким логином
+    //check, exist or not user with such login
     bool IsExist(const std::string& login);
-    //TODO: заменить функцией sql
+    //TODO: remove
     size_t FetchUser(const std::string& login, const std::string& password);
     uint32_t GetID(const std::string& login);
 
@@ -39,7 +35,6 @@ private:
     //TODO: we dont need string actually, is just to easy create query string
     static const std::string _UsersTable;
     
-    //TODO: заменить некоторые запросы функциями самой бд
     //Prepared
     sql::PreparedStatement* _Prepared_NewUser;
     sql::PreparedStatement* _Prepared_DeleteUser;

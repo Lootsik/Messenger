@@ -36,7 +36,6 @@ uint32_t LoginRequest::LoginRequestCheck( const LoginRequestDesc* Buffer, const 
     return Result;
 }
 
-//TODO: write
 uint32_t LoginRequest::CalculateSize() const
 {
     uint32_t res = sizeof(LoginRequestDesc);

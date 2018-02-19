@@ -9,6 +9,7 @@
     <ClCompile Include="Logger\Logger.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Network\Network.cpp" />
+    <ClCompile Include="Messages.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Accounts\AccountStorage\AccountStorage.h" />
@@ -19,5 +20,7 @@
     <ClInclude Include="Logger\Logger.h" />
     <ClInclude Include="Network\Connection.h" />
     <ClInclude Include="Network\Network.h" />
+    <ClInclude Include="Messages.h" />
+    <ClInclude Include="Utility\InPlace.h" />
   </ItemGroup>
 </Project>

@@ -15,14 +15,14 @@
 class BaseHeader : public TransferredData {
 
 public:
-	//check, that size is valid for packet
-	static bool MinimumCheck(size_t size) {
-		return size >= sizeof(BaseHeaderDesc);
-	}
+    //check, that size is valid for packet
+    static bool MinimumCheck(size_t size) {
+        return size >= sizeof(BaseHeaderDesc);
+    }
 
-	static uint32_t BufferType(const Byte* Buffer){
-		return ((BaseHeaderDesc*)Buffer)->Type;
-	}
+    static uint32_t BufferType(const Byte* Buffer){
+        return ((BaseHeaderDesc*)Buffer)->Type;
+    }
     /*
             core 
      */
@@ -51,8 +51,8 @@ protected:
     //we need pass type in constructor,
     //next call SetFrameSize with
     //return of directly called class::CalculateSize  
-	BaseHeader(uint32_t type, uint32_t MinTypeFrameSize) 
-					: TData{ 0,type }, _MinTypeFrameSize{ MinTypeFrameSize } {}
+    BaseHeader(uint32_t type, uint32_t MinTypeFrameSize) 
+                    : TData{ 0,type }, _MinTypeFrameSize{ MinTypeFrameSize } {}
     
     /*
       used in construction derived objects
@@ -65,12 +65,14 @@ protected:
     }
     //when derived dont need her own checks, not necessary use this
     //frombuffer uses this aswell 
+    //useful to override in derived classes if they have
+    //variable lenght arrays
     uint32_t HeaderCheck(const BaseHeaderDesc* data, const size_t size)const;
 
 private:
     //. transferred data
     BaseHeaderDesc TData;
-	//used in header check
-	uint32_t _MinTypeFrameSize;
+    //used in header check
+    uint32_t _MinTypeFrameSize;
 };
 #endif

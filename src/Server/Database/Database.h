@@ -1,4 +1,7 @@
 #pragma once
+
+#include <Utility\InPlace.h>
+
 namespace sql {
 	class Driver;
 	class Connection;
@@ -9,7 +12,7 @@ namespace sql {
 class MySqlDB;
 
 //to keep MySlqDB single instantion
-class Database
+class Database : InPlace 
 {
 public:
 	static bool Connect(const std::string& hostname, const std::string schema,

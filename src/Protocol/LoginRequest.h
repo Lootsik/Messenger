@@ -7,7 +7,6 @@
    ======================================================================== */
 #define LOGINREQUES_H
 
-//TODO: solve problems with sizing
 
 #include <string>
 #include <Protocol\BaseHeader.h>

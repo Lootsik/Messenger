@@ -1,3 +1,4 @@
+
 #if !defined(TYPES_H)
 /* ========================================================================
    $File: $
@@ -12,9 +13,10 @@ namespace Types
 {
 enum Types{
     NotType = 0,
-	PrevOperationDenied,
-	UserInfo,
-    Message,
+    PrevOperationDenied,
+    UserInfo,
+    MessageRequest,
+    MessageResponse,
     LoginRequest,
     LoginResponse,
     Logout,
