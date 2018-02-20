@@ -28,14 +28,6 @@ MessengerEngine::MessengerEngine(Network* server)
 {
 }
 
-//TODO: smth with db initialization
-//TODO: add actually load from config this
-bool MessengerEngine::LoadFromConfig(const char* Filename)
-{
-	return true;
-}
-
-
 /*
 	+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	+++++++++++++++++++++++++++++++++++++++++++++++++++++++++

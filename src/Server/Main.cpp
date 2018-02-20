@@ -1,9 +1,11 @@
-#include <Network/Network.h>
-#include <Database/Database.h>
-#include <Logger/Logger.h>
+#include <Network\Network.h>
+#include <Database\Database.h>
+#include <Logger\Logger.h>
+#include <Utility\ConfigParser.h>
 #include <Windows.h>
-const char* ConfigFilename = "MessengerServer.cfg";
-const char* LogFilename = "Network.log";
+
+const char* ConfigFilename = "Config.xml";
+const char* LogFilename = "Server.log";
 
 boost::asio::io_service service;
 
@@ -26,32 +28,35 @@ int main()
 
 	if (GetLastError() == ERROR_ALREADY_EXISTS)
 	{
-		return 2;
+		return 1;
 	}
 
 #if _LOGGING_
 	Logger::OpenLogFile(LogFilename);
 #endif
 
-	if (!Database::Connect("tcp://127.0.0.1:3306",  "messeger_server_db", "root", "11JustLikeYou11"))
+	ConfigParser Config;
+	if (!Config.LoadConfig(ConfigFilename))
+	{
+		Logger::LogBoth(Logger::Error, 
+				"Log file corrupted or contain wrong info, replaced by default, fill database info");
+		
+		Config.MakeDefaultConfig(ConfigFilename);
+		return 3;
+	}
+
+	if (!Database::Connect(Config.GetHost(), Config.GetSchema(),
+							Config.GetLogin(), Config.GetPassword()))
 	{
 		//Log
-		return 1;
+		return 2;
 	}
 	
 	Network server{ service };
-
-	if (!server.LoadFromConfig(ConfigFilename))
-	{
-		return 1;
-	}
+	if (!server.SetPort(Config.GetPort()))
+		return 3;
 
 	MessengerEngine engine{ &server };
-	if (!engine.LoadFromConfig(""))
-		return 1;
-
-	//engine.FillAccountInfo();
-
 
 	server.SetMessageEngine(&engine);
 	if (!server.Start())

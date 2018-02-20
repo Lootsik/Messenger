@@ -17,12 +17,10 @@ public:
 	
 	bool SetPort(const unsigned short port);
 	void SetMessageEngine(MessengerEngine* me) { _MessagerEngine = me; }
-	bool LoadFromConfig(const char*  ConfigFilename );
 	//for engine
 	void Send(PConnection& connection);
-	
+	void SetTimeout(unsigned int Timeout) { _Timeout = Timeout; }
 	//milliseconds
-	static const unsigned int Timeout = 5000;
 private:
 	boost::asio::io_service& _Service;
 	
@@ -33,6 +31,7 @@ private:
 	// connection list
 	std::vector<PConnection> _Connections{};
 	MessengerEngine* _MessagerEngine;
+	unsigned int _Timeout = 5000;
 
 	//for internal use only
 	void _LastSeenNow(PConnection& connection);

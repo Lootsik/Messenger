@@ -34,35 +34,6 @@ Network::Network(boost::asio::io_service& service)
 
 //TODO: rewrite this
 //NOTE: add new settings to config
-bool Network::LoadFromConfig(const char* ConfigFilename)
-{
-	std::ifstream ConfigFile{ ConfigFilename };
-	if (!ConfigFile.is_open())
-	{
-#if _LOGGING_
-		LogBoth(Error, "Configs cannot be loaded");
-#endif 
-		return false;
-	}
-	
-	unsigned short port = 0;
-	if (!(ConfigFile >> port))
-	{
-#if _LOGGING_
-		LogBoth(Error, "Configs cannot be loaded");
-#endif 
-		return false;
-	}
-
-	bool res = SetPort(port);
-#if _LOGGING_
-	if (res)
-		LogBoth(Success, "Configs successfully loaded.");
-	else
-		LogBoth(Error, "Configs cannot be loaded");
-#endif 
-	return res;
-}
 
 bool Network::SetPort(const unsigned short port)
 {
@@ -170,7 +141,7 @@ void Network::_OnTimerCheck()
 		while(i!=0)
 		{
 			--i;
-			if ((now - _Connections[i]->LastTime()).total_milliseconds() > Timeout)
+			if ((now - _Connections[i]->LastTime()).total_milliseconds() > _Timeout)
 			{
 				_DeleteConnection(_Connections[i]);
 			}
@@ -181,7 +152,7 @@ void Network::_OnTimerCheck()
 
 void Network::_BindTimer()
 {
-	_Timer.expires_from_now(boost::posix_time::millisec(Timeout));
+	_Timer.expires_from_now(boost::posix_time::millisec(_Timeout));
 	_Timer.async_wait(boost::bind(&Network::_OnTimerCheck, this));
 }
 

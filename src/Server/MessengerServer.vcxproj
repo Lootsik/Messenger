@@ -26,8 +26,8 @@
     <ClCompile Include="Engine\Engine.cpp" />
     <ClCompile Include="Logger\Logger.cpp" />
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="Messages.cpp" />
     <ClCompile Include="Network\Network.cpp" />
+    <ClCompile Include="Utility\ConfigParser.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Accounts\AccountManager.h" />
@@ -36,9 +36,9 @@
     <ClInclude Include="Database\MySqlDB.h" />
     <ClInclude Include="Engine\Engine.h" />
     <ClInclude Include="Logger\Logger.h" />
-    <ClInclude Include="Messages.h" />
     <ClInclude Include="Network\Connection.h" />
     <ClInclude Include="Network\Network.h" />
+    <ClInclude Include="Utility\ConfigParser.h" />
     <ClInclude Include="Utility\InPlace.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -131,13 +131,13 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_WIN32_WINNT=0x0501;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)src;$(ProjectDir);E:\Lib\Mysql C++ connector 1.1.9 x64\include;E:\Lib\boost_1_60_0_x64</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>E:\Lib\pugixml-1.8\include;$(SolutionDir)src;$(ProjectDir);E:\Lib\Mysql C++ connector 1.1.9 x64\include;E:\Lib\boost_1_60_0_x64</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>Protocol.lib;mysqlcppconn.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)build\$(Platform)\$(Configuration);E:\Lib\boost_1_60_0_x64\lib64-msvc-14.0;E:\Lib\Mysql C++ connector 1.1.9 x64\vc17 Debug MDD</AdditionalLibraryDirectories>
+      <AdditionalDependencies>PugiXml-1.8_debug.lib;Protocol.lib;mysqlcppconn.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>E:\Lib\pugixml-1.8\lib\x64;$(SolutionDir)build\$(Platform)\$(Configuration);E:\Lib\boost_1_60_0_x64\lib64-msvc-14.0;E:\Lib\Mysql C++ connector 1.1.9 x64\vc17 Debug MDD</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -168,15 +168,15 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_WIN32_WINNT=0x0501;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)src;$(ProjectDir);E:\Lib\Mysql C++ connector 1.1.9 x64\include;E:\Lib\boost_1_60_0_x64</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>E:\Lib\pugixml-1.8\include;$(SolutionDir)src;$(ProjectDir);E:\Lib\Mysql C++ connector 1.1.9 x64\include;E:\Lib\boost_1_60_0_x64</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>Protocol.lib;mysqlcppconn.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)build\$(Platform)\$(Configuration);E:\Lib\boost_1_60_0_x64\lib64-msvc-14.0;E:\Lib\Mysql C++ connector 1.1.9 x64\vc17 Release MD</AdditionalLibraryDirectories>
+      <AdditionalDependencies>PugiXml-1.8.lib;Protocol.lib;mysqlcppconn.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>E:\Lib\pugixml-1.8\lib\x64;$(SolutionDir)build\$(Platform)\$(Configuration);E:\Lib\boost_1_60_0_x64\lib64-msvc-14.0;E:\Lib\Mysql C++ connector 1.1.9 x64\vc17 Release MD</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

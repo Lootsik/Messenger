@@ -11,7 +11,6 @@ class MessengerEngine
 {
 public:
 	MessengerEngine(Network* server);
-	bool LoadFromConfig(const char* Filename);
 	AccountManager& Accounts(){	return _AccountManager;}
 	/*	
 	*/

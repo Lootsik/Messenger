@@ -140,29 +140,9 @@ size_t AccountStorage::FetchUser(const std::string& login, const std::string& pa
     }
     _Result->next();
     uint32_t id = _Result->getInt("id");
-    //
+
     return id;
 }
-/* dont need now
-std::vector<std::pair<unsigned int , std::string> > AccountStorage::FillLogins()
-{
-    std::vector<std::pair<unsigned int,std::string> > Output;
-
-    boost::scoped_ptr<sql::ResultSet> _Result;
-
-    try
-    {
-        _Result.reset(_DB.GetStatement()->executeQuery("SELECT id, Login FROM " + _UsersTable + ";"));
-        while (_Result->next()) {
-            Output.push_back(std::pair<unsigned int, std::string>{ _Result->getInt("id"),_Result->getString("Login") });
-        }
-    }
-    catch (...)
-    {
-        throw;
-    }
-    return Output;
-    }*/
 
 ID_t AccountStorage::GetID(const std::string& login)
 {
