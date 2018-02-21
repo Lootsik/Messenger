@@ -15,21 +15,24 @@ public:
 	bool CreatePrepared();
 
 
-	bool AddMessage(ID_t From, ID_t To, MessageContent Content);
+	bool AddMessage(ID_t From, ID_t To, const MessageContent& Content);
 
-	MessageContent GetMessage(const Speakers& speakers, ID_t InChatId);
+	MessageContent LoadMessage(const Speakers& speakers, ID_t InChatId);
 
 	// amount messages in chat
 	ID_t GetLastMessageID(const Speakers& speakers);
-	/*
-	GetMessage();
-	SendMessage();
-	GetLenght();
-	*/
 
 private:
 	sql::PreparedStatement* _PreparedAddMessage;
+	sql::PreparedStatement* _PreparedGetMessage;
+	sql::PreparedStatement* _PreparedGetChat;
+	sql::PreparedStatement* _PreparedCreateChat;
 
+	
+	bool _TryAddMessage(ID_t From, ID_t To,const MessageContent& Content);
+
+	ID_t _GetChat(const Speakers& speakers);
+	void _CreateChat(const Speakers& speakers);
 //  ChatExist();
 	//SELECT id FROM chats where Member1 = 7 and Member2 = 8;
 

@@ -69,7 +69,7 @@ int main()
 		return 1;
 	}
 	MessagesStorage storage;
-	//storage.AddMessage(1251, 1515, L"push me to the eadge ");
+	storage.AddMessage(7, 9, L"Hello");
 
 	service.run();
 
