@@ -4,11 +4,12 @@
 #include <Utility\ConfigParser.h>
 #include <Windows.h>
 
+#include <Messages\MessagesStorage.h>
+
 const char* ConfigFilename = "Config.xml";
 const char* LogFilename = "Server.log";
 
 boost::asio::io_service service;
-
 
 BOOL WINAPI consoleHandler(DWORD signal) 
 {
@@ -16,7 +17,7 @@ BOOL WINAPI consoleHandler(DWORD signal)
 	{
 		boost::system::error_code err;
 		service.stop();
-		Logger::Log(Logger::Success, "Server stopped");
+		Logger::LogBoth(Logger::Success, "Server stopped");
 	}
 	return TRUE;
 }
@@ -24,16 +25,15 @@ BOOL WINAPI consoleHandler(DWORD signal)
 
 int main()
 {
+	// to prevent multiple instantion of program
 	HANDLE Mutex = CreateMutex(NULL, FALSE, L"{5f981c84-b348-40ac-8dee-8de13545e68f}");
-
 	if (GetLastError() == ERROR_ALREADY_EXISTS)
 	{
 		return 1;
 	}
 
-#if _LOGGING_
 	Logger::OpenLogFile(LogFilename);
-#endif
+
 
 	ConfigParser Config;
 	if (!Config.LoadConfig(ConfigFilename))
@@ -42,19 +42,21 @@ int main()
 				"Log file corrupted or contain wrong info, replaced by default, fill database info");
 		
 		Config.MakeDefaultConfig(ConfigFilename);
-		return 3;
+		return 1;
 	}
+	Logger::LogBoth(Logger::Success, "Config successfully loaded");
 
 	if (!Database::Connect(Config.GetHost(), Config.GetSchema(),
 							Config.GetLogin(), Config.GetPassword()))
 	{
 		//Log
-		return 2;
+		return 1;
 	}
 	
 	Network server{ service };
 	if (!server.SetPort(Config.GetPort()))
-		return 3;
+		return 1;
+	
 
 	MessengerEngine engine{ &server };
 
@@ -64,8 +66,10 @@ int main()
 	
 	if (!SetConsoleCtrlHandler(consoleHandler, TRUE)) {
 		Logger::Log(Logger::Error, "Could not set control handler");
-		return 2;
+		return 1;
 	}
+	MessagesStorage storage;
+	//storage.AddMessage(1251, 1515, L"push me to the eadge ");
 
 	service.run();
 

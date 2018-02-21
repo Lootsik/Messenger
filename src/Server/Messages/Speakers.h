@@ -9,6 +9,9 @@ public:
 
 	//save less than greater value
 	Speakers(ID_t user1, ID_t user2) 
-				: std::pair<ID_t, ID_t>{ user1 > user2 ? user1, user2 : user2, user1 }
-	{}
+				: std::pair<ID_t, ID_t>{ user1, user2  }
+	{
+		if (user2 < user1)
+			std::swap(first, second);
+	}
 };

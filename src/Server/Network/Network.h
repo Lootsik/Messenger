@@ -20,6 +20,7 @@ public:
 	//for engine
 	void Send(PConnection& connection);
 	void SetTimeout(unsigned int Timeout) { _Timeout = Timeout; }
+	unsigned short GetTimeout() const { return _Timeout; }
 	//milliseconds
 private:
 	boost::asio::io_service& _Service;

@@ -45,10 +45,14 @@ static FILE* File;
 
 	short ConsoleColor(HANDLE& hConsole)
 	{
-		CONSOLE_SCREEN_BUFFER_INFO info;
-		if (!GetConsoleScreenBufferInfo(hConsole, &info))
+		CONSOLE_SCREEN_BUFFER_INFO info{};
+		//TODO: do smth with this
+
+		//if we use terminal is awlays ok
+		//but if output goes to file calling this function will 
+		//not succes, but output still ok
+		GetConsoleScreenBufferInfo(hConsole, &info);
 		//dont know what do with this
-			throw;
 
 		return info.wAttributes;
 	}

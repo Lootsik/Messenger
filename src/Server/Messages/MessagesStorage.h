@@ -11,12 +11,16 @@ class MessagesStorage
 public:
 	MessagesStorage();
 	~MessagesStorage();
+	
+	bool CreatePrepared();
+
 
 	bool AddMessage(ID_t From, ID_t To, MessageContent Content);
+
 	MessageContent GetMessage(const Speakers& speakers, ID_t InChatId);
 
 	// amount messages in chat
-	uint32_t GetLenght(const Speakers& speakers);
+	ID_t GetLastMessageID(const Speakers& speakers);
 	/*
 	GetMessage();
 	SendMessage();
@@ -24,10 +28,14 @@ public:
 	*/
 
 private:
-
+	sql::PreparedStatement* _PreparedAddMessage;
 
 //  ChatExist();
+	//SELECT id FROM chats where Member1 = 7 and Member2 = 8;
+
 //	AddChat();
+	//INSERT INTO chats(Member1, Member2) VALUES(8, 9);
+
 //	DeleteChat();
 };
 
