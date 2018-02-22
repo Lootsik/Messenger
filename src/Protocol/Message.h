@@ -18,6 +18,15 @@ public:
 	uint32_t Receiver() const { return _Reciver; }
 	const std::wstring& Content() const { return _Message; }
 
+	bool operator==(const Message& rv)const {
+		if (BaseHeader::operator==(rv)) {
+			return _MessageIndex == rv._MessageIndex &&
+				   _Sender == rv._Sender &&
+				   _Reciver == rv._Reciver && 
+				   _Message == rv._Message;
+		}
+		return false;
+	}
     
 protected:
 

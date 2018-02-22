@@ -40,12 +40,20 @@ public:
         return TData.Type;
     }
     ~BaseHeader() {}
+
+	bool operator==(const BaseHeader& rv)const  { 
+		return TData == rv.TData;
+	}
     
 protected:
     // data markup 
     struct BaseHeaderDesc{
         uint32_t FrameSize = 0;
         uint32_t Type = 0;
+		bool operator==(const BaseHeaderDesc& rv) const {
+			return FrameSize == rv.FrameSize &&
+					Type == rv.Type;
+		}
     };
     //in derived classes to initalize base,
     //we need pass type in constructor,

@@ -65,6 +65,7 @@ uint32_t Message::ToBuffer(Byte* Buffer) const
 
 	Response->MessageIndex = _MessageIndex;
 	Response->Sender = _Sender;
+	Response->Reciver = _Reciver;
 	Response->MessageSize = CalculateBufferSize(_Message);
 
 	memcpy(Response->Message, _Message.c_str(), Response->MessageSize);
@@ -85,8 +86,10 @@ uint32_t Message::FromBuffer(const Byte* Buffer, const size_t Capacity)
 
 	_MessageIndex = Response->MessageIndex;
 	_Sender = Response->Sender;
+	_Reciver = Response->Reciver;
 
-	_Message = { (wchar_t*)Response->Message,Response->MessageSize };
+	//becouse it takes lenght not in bytes, but in wchar_t
+	_Message = { (wchar_t*)Response->Message,Response->MessageSize /sizeof(wchar_t) };
 	return SerializationError::Ok;
 }
 
