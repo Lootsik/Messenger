@@ -4,6 +4,10 @@
 #include <Protocol\LoginRequest.h>
 #include <Protocol\LoginResponse.h>
 #include <Protocol\UserInfo.h>
+#include <Protocol\MessageRequest.h>
+#include <Protocol\Message.h>
+#include <Protocol\LastMessageResponse.h>
+
 
 #include <Protocol\Types.h>
 #include <Protocol\SerializationError.h>
@@ -24,7 +28,7 @@ static void LogLogin(const PConnection& connection, const LoginResponse& Result)
 //TODO: rewrite this
 MessengerEngine::MessengerEngine(Network* server)
 //считывать значения с конфигов
-	:_Server{ server }
+	:_Server{ server }, _MessageManager{ _AccountManager }
 {
 }
 
@@ -43,6 +47,12 @@ void MessengerEngine::AnalyzePacket(PConnection connection)
 		return;
 	}
 
+	if (connection->Account().Online())
+	{
+		_AutorizededProcess(connection);
+		return;
+	}
+
 	//TODO: divide this
 	switch (BaseHeader::BufferType(connection->ReadBuffer().c_array()))
 	{
@@ -52,6 +62,18 @@ void MessengerEngine::AnalyzePacket(PConnection connection)
 		OnLogin(connection);
 	}break;
 
+	default:
+		break;
+	}
+}
+
+
+
+void MessengerEngine::_AutorizededProcess(PConnection& connection)
+{
+	switch (BaseHeader::BufferType(connection->ReadBuffer().c_array()))
+	{
+
 	case Types::Logout:
 	{
 		OnLogout(connection);
@@ -60,11 +82,18 @@ void MessengerEngine::AnalyzePacket(PConnection connection)
 	case Types::UserInfo:
 	{
 		OnUserInfo(connection);
-	}
-	/*case (int)Packet::Types::Message:
+	}break;
+
+	//acces to specific message
+	case Types::MessageRequest:
 	{
-		//OnMessage(connection);
-	}break;*/
+		OnMessageRequest(connection);
+	}break;
+
+	case Types::Message:
+	{
+		OnMessage(connection);
+	}break;
 
 	default:
 		break;
@@ -147,4 +176,70 @@ void MessengerEngine::OnUserInfo(PConnection& connection)
 	UserInfo ReturnInfo{ Info.GetId(), login };
 
 	SendResponce(connection, ReturnInfo);
+}
+
+
+void MessengerEngine::OnMessage(PConnection& connection)
+{
+	Message message;
+	int err = message.FromBuffer(connection->ReadBuffer().c_array(),
+						connection->BytesToRead());
+	if (err) {
+		return;
+	}
+
+	if (message.Sender() != connection->Account().ID())
+	{
+		Log(Mistake, "Sended message not from %s", connection->ConnectionString().c_str());
+	}
+
+	_MessageManager.PostMessageUser(message.Sender(), message.Receiver(), message.Content());
+
+	//TODO: add response maybe 
+}
+
+// parse packet 
+void MessengerEngine::OnMessageRequest(PConnection& connection)
+{
+	MessageRequest Request;
+	int err = Request.FromBuffer(connection->ReadBuffer().c_array(),
+							connection->BytesToRead());
+	if (err) {
+		return;
+	}
+
+	switch (Request.GetRequestType())
+	{
+	case MessageRequest::Message:
+	{
+
+	}break;
+
+	case MessageRequest::LastMessageID:
+	{
+
+	}break;
+
+	default:
+
+#if _LOGGING_
+		Log(Mistake, "[%s] - Wrong MessageRequest type", connection->ConnectionString().c_str());
+#endif // _LOGGING_
+		break;
+	}
+
+
+}
+
+	// INVALID_ID sender if error
+void MessengerEngine::OnMessageRequest(PConnection& connection, MessageRequest& Request)
+{
+	auto Response = _MessageManager.GetMessageUser(Request.Sender(),Request.Receiver(),Request.GetMessageIndex());
+	SendResponce(connection, Response);
+}
+
+void MessengerEngine::OnLastMessage(PConnection& connection, MessageRequest& Request)
+{
+	auto Response = _MessageManager.GetLastMessageID(Request.Sender(),Request.Receiver());
+	SendResponce(connection, Response);
 }

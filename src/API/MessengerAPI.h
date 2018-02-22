@@ -1,6 +1,6 @@
 #pragma once
 
-#include <GlobalInfo.h>
+#include <Protocol\GlobalInfo.h>
 #include <Protocol\TransferredData.h>
 #include <string>
 

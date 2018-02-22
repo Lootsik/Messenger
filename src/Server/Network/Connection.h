@@ -4,7 +4,7 @@
 #include <boost\array.hpp>
 #include <boost\shared_ptr.hpp>
 
-#include <GlobalInfo.h>
+#include <Protocol\GlobalInfo.h>
 
 class AccountInfo
 {

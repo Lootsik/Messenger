@@ -1,6 +1,6 @@
 #pragma once
 
-#include <GlobalInfo.h>
+#include <Protocol\GlobalInfo.h>
 #include <Utility\InPlace.h>
 #include <Database\Database.h>
 
@@ -17,7 +17,7 @@ public:
 
 	bool AddMessage(ID_t From, ID_t To, const MessageContent& Content);
 
-	MessageContent LoadMessage(const Speakers& speakers, ID_t InChatId);
+	std::pair<ID_t, MessageContent> LoadMessage(const Speakers& speakers, ID_t InChatId);
 
 	// amount messages in chat
 	ID_t GetLastMessageID(const Speakers& speakers);

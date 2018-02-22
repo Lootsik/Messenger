@@ -1,9 +1,10 @@
 #pragma once
 #include <map>
-#include <Network/Connection.h>
-#include <Accounts/AccountStorage/AccountStorage.h>
-#include <Accounts/AccountManager.h>
-#include <GlobalInfo.h>
+#include <Network\Connection.h>
+#include <Accounts\AccountManager.h>
+#include <Messages\MessageManager.h>
+#include <Protocol\GlobalInfo.h>
+#include <Protocol\MessageRequest.h>
 class Network;
 
 //class Message;
@@ -15,11 +16,21 @@ public:
 	/*	
 	*/
 	void AnalyzePacket(PConnection Connection);
+
+	void _AutorizededProcess(PConnection& Connection);
+
+
 	void OnLogin(PConnection& Connection);
 	void OnLogout(PConnection& Connection);
 	void OnUserInfo(PConnection& Connection);
+
 	void OnMessage(PConnection& Connection);
+	void OnMessageRequest(PConnection& Connection);
+
+
 	
+	void OnMessageRequest(PConnection& connection, MessageRequest& Request);
+	void OnLastMessage(PConnection& connection, MessageRequest& Request);
 	/*
 
 	*/
@@ -29,6 +40,7 @@ public:
 	//void SendNewEventNotification(ID_t ID);
 private:
 	//packet already in Connection Writebuff
+	//TODO: rewrite to abstract type
 	template<typename T>
 	bool _MakePacket(PConnection& connection,const T& Item)
 	{
@@ -40,6 +52,8 @@ private:
 		return true;
 	}
 	void _Send(PConnection& connection);
+
 	AccountManager _AccountManager;
+	MessageManager _MessageManager;
 	Network* _Server;
 };

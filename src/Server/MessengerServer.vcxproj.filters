@@ -11,6 +11,7 @@
     <ClCompile Include="Network\Network.cpp" />
     <ClCompile Include="Utility\ConfigParser.cpp" />
     <ClCompile Include="Messages\MessagesStorage.cpp" />
+    <ClCompile Include="Messages\MessageManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Accounts\AccountStorage\AccountStorage.h" />
@@ -26,5 +27,6 @@
     <ClInclude Include="Messages\Speakers.h" />
     <ClInclude Include="Messages\MessagesStorage.h" />
     <ClInclude Include="Database\DbInternals.h" />
+    <ClInclude Include="Messages\MessageManager.h" />
   </ItemGroup>
 </Project>

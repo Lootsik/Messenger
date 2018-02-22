@@ -1,6 +1,6 @@
 #pragma once
 #include <utility>
-#include <GlobalInfo.h>
+#include <Protocol\GlobalInfo.h>
 
 //to snach overloaded operators
 class Speakers : public std::pair<ID_t, ID_t>
@@ -13,5 +13,12 @@ public:
 	{
 		if (user2 < user1)
 			std::swap(first, second);
+	}
+	uint32_t GetAnother(ID_t user)
+	{
+		if (user == first)
+			return second;
+		else
+			return first;
 	}
 };

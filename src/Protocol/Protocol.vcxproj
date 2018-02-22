@@ -20,9 +20,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BaseHeader.h" />
+    <ClInclude Include="GlobalInfo.h" />
+    <ClInclude Include="LastMessageResponse.h" />
     <ClInclude Include="LoginRequest.h" />
     <ClInclude Include="LoginResponse.h" />
     <ClInclude Include="Logout.h" />
+    <ClInclude Include="MessageRequest.h" />
+    <ClInclude Include="Message.h" />
     <ClInclude Include="SerializationError.h" />
     <ClInclude Include="TransferredData.h" />
     <ClInclude Include="Types.h" />
@@ -30,9 +34,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BaseHeader.cpp" />
+    <ClCompile Include="LastMessageResponse.cpp" />
     <ClCompile Include="LoginRequest.cpp" />
     <ClCompile Include="LoginResponse.cpp" />
     <ClCompile Include="Logout.cpp" />
+    <ClCompile Include="MessageRequest.cpp" />
+    <ClCompile Include="Message.cpp" />
     <ClCompile Include="UserInfo.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

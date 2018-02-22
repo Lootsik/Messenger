@@ -2,7 +2,7 @@
 #include <string>
 #include <vector>
 
-#include <GlobalInfo.h>
+#include <Protocol\GlobalInfo.h>
 #include <Utility\InPlace.h>
 #include <Database\Database.h>
 

@@ -1,19 +1,26 @@
 #pragma once
-#include <GlobalInfo.h>
-#include <unordered_map>
-#include <Messages\Chat.h>
-#include <Accounts\AccountManager.h>
-#include <Server\Server.h>
+#include <Protocol\GlobalInfo.h>
 
+#include <Messages\MessagesStorage.h>
+#include <Accounts\AccountManager.h>
+#include <Protocol\Message.h>
+#include <Protocol\LastMessageResponse.h>
+#include <Protocol\Message.h>
 //just interface for now
 class Engine;
 struct MessageManager
 {
-	MessageManager(MessengerEngine& engine) :_Engine{ engine } {}
-	void SendMessageUser(ID_t ID_from, ID_t ID_to, std::wstring Mes);
-	void GetMessageUser(Connection* connection, size_t index);
-	//_Send message
-	//Get Message
+	MessageManager(AccountManager& manager) :_AccountManager{ manager } {}
+
+
+	void PostMessageUser(ID_t ID_from, ID_t ID_to, const std::wstring& Content);
+	Message GetMessageUser(ID_t ID_from, ID_t ID_to, uint32_t  index);
+
+	//INVALID_ID if no messages in chat or no such chat
+	LastMessageResponse GetLastMessageID(ID_t ID_from, ID_t ID_to);
+
+
 private:
-	MessengerEngine & _Engine;
+	MessagesStorage _MessageStorage;
+	AccountManager& _AccountManager;
 };

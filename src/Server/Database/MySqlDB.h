@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include <GlobalInfo.h>
+#include <Protocol\GlobalInfo.h>
 
 //to hide includes inside .cpp 
 namespace sql {

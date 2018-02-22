@@ -9,7 +9,7 @@
 #define BASEHEADER_H
 
 
-#include <GlobalInfo.h>
+#include <Protocol\GlobalInfo.h>
 #include <Protocol\TransferredData.h>
 
 class BaseHeader : public TransferredData {

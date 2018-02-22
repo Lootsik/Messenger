@@ -8,7 +8,7 @@
 
 #define TRANSFERREDDATA_H
 
-#include <stdint.h>
+#include <cstdint>
 
 class TransferredData
 {

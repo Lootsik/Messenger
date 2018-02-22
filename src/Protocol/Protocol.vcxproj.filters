@@ -9,6 +9,10 @@
     <ClInclude Include="Types.h" />
     <ClInclude Include="TransferredData.h" />
     <ClInclude Include="UserInfo.h" />
+    <ClInclude Include="MessageRequest.h" />
+    <ClInclude Include="GlobalInfo.h" />
+    <ClInclude Include="LastMessageResponse.h" />
+    <ClInclude Include="Message.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BaseHeader.cpp" />
@@ -16,5 +20,8 @@
     <ClCompile Include="LoginRequest.cpp" />
     <ClCompile Include="Logout.cpp" />
     <ClCompile Include="UserInfo.cpp" />
+    <ClCompile Include="MessageRequest.cpp" />
+    <ClCompile Include="LastMessageResponse.cpp" />
+    <ClCompile Include="Message.cpp" />
   </ItemGroup>
 </Project>

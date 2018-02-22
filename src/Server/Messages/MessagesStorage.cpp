@@ -1,6 +1,6 @@
 #include <Database\DbInternals.h>
 
-#include <Logger/Logger.h>
+#include <Logger\Logger.h>
 
 #include "MessagesStorage.h"
 
@@ -58,8 +58,6 @@ bool MessagesStorage::AddMessage(ID_t From, ID_t To, const MessageContent& Conte
 }
 
 
-
-
 // mostly inmplemented in sql function
 // if false, need create chat and repeat
 // if true - done
@@ -92,7 +90,7 @@ bool MessagesStorage::_TryAddMessage(ID_t From, ID_t To, const MessageContent& C
 }
 
 //TODO: return sender
-MessageContent MessagesStorage::LoadMessage(const Speakers& speakers, ID_t InChatId)
+std::pair<ID_t, MessageContent> MessagesStorage::LoadMessage(const Speakers& speakers, ID_t InChatId)
 {
 	ID_t ChatId = _GetChat(speakers);
 	if (ChatId == INVALID_ID)
@@ -112,9 +110,11 @@ MessageContent MessagesStorage::LoadMessage(const Speakers& speakers, ID_t InCha
 
 		if (_Result->next()) 
 		{
-			std::string str = _Result->getString(1);
-			return { (wchar_t*)str.c_str(),str.size() / sizeof(wchar_t) };
+			ID_t sender = _Result->getUInt("SenderId");
+			std::string str = _Result->getString("Content");
+			return { sender,{ (wchar_t*)str.c_str(),str.size() / sizeof(wchar_t)} };
 		}
+		
 	}
 	//TODO: log + 
 	catch (sql::SQLException &e) {
@@ -128,7 +128,8 @@ ID_t MessagesStorage::GetLastMessageID(const Speakers& speakers)
 {
 	ID_t id = _GetChat(speakers);
 	if (id == INVALID_ID)
-		return id;
+		return INVALID_ID;
+
 	return Database::GetStatement().execute("SELECT LastMessageId FROM chats WHERE id = " + std::to_string(id) + " ;");
 }
 

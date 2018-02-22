@@ -1,13 +1,15 @@
 #pragma once
 #include <string>
-#include <GlobalInfo.h>
+#include <Protocol\GlobalInfo.h>
+
+#include <Accounts\AccountStorage\AccountStorage.h>
 
 #include <Protocol\LoginRequest.h>
 #include <Protocol\LoginResponse.h>
-class AuthenticationData;
 
-struct AccountManager
+class AccountManager
 {
+public:
 	AccountManager();
 
 	ID_t VerifyAccount(const LoginRequest& AuthData);

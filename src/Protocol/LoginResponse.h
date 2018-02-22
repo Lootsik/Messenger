@@ -39,8 +39,8 @@ public:
     };
 protected:
     struct LoginResponseDesc{
-        BaseHeaderDesc Header;
-        uint32_t Response;
+		BaseHeaderDesc Header;
+		uint32_t Response;
         ID_t ID;
     };
 private:

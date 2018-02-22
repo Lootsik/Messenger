@@ -1,34 +1,27 @@
-#if !defined(MESSAGEREQUEST_H)
-/* ========================================================================
-   $File: $
-   $Date: $
-   $Revision: $
-   $Notice: (C) Copyright 2014 by Molly Rocket, Inc. All Rights Reserved. $
-   ======================================================================== */
-#define MESSAGEREQUEST_H
-
+#pragma once
 #include <Protocol\BaseHeader.h>
-
-struct ChatData;
 
 class MessageRequest: public BaseHeader
 {
 
 public:
-    MessageRequest(uint32_t RequestType);
-    MessageRequest();
+	MessageRequest(uint32_t RequestType, uint32_t From, uint32_t To, uint32_t Index = 0);
+	MessageRequest();
 
     uint32_t ToBuffer(Byte* Buffer)const override;
     uint32_t FromBuffer(const Byte* Buffer, const size_t Capacity) override;
 
-    //TODO: add get 
-    enum RequestType
-    {
-        GetMessage
-        
+	uint32_t GetRequestType()const { return _RequestType; }
+	uint32_t Sender()const { return _From; }
+	uint32_t Receiver() const { return _To; }
+	uint32_t GetMessageIndex() const { return _MessageIndex; }
 
+    //TODO: add get 
+	enum RequestType
+	{
+		Message,
+		LastMessageID
     };
-    
     
 protected:
 
@@ -38,10 +31,13 @@ protected:
     //TODO: add fields
     struct MessageRequestDesc
     {
-        uint32_t Type;
-        ChatData* data;
-               
-        Byte Data[0];
+		BaseHeaderDesc Header;
+
+		uint32_t Type;
+        uint32_t From;
+		uint32_t To;
+
+		uint32_t MessageIndex;
     };
 
 #pragma warning( pop ) 
@@ -49,8 +45,9 @@ protected:
     uint32_t CalculateSize() const;
 
 private:
-    uint32_t _ReuqestType;
-        
+    uint32_t _RequestType = 0;
+	uint32_t _From = 0;
+	uint32_t _To = 0;
+	uint32_t _MessageIndex = 0;
 };
 
-#endif
