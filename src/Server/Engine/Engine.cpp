@@ -113,9 +113,6 @@ void MessengerEngine::OnLogin(PConnection& connection)
 
 	LoginResponse Response = _AccountManager.Login(Request);
 
-#if _LOGGING_
-	LogLogin(connection, Response);
-#endif
 	SendResponce(connection, Response);
 
 
@@ -130,15 +127,18 @@ void MessengerEngine::OnLogin(PConnection& connection)
 		SendResponce(connection, ReturnInfo);
 	}
 
+#if _LOGGING_
+	LogLogin(connection, Response);
+#endif
+
 }
 
 void MessengerEngine::OnLogout(PConnection& connection)
 {
+
+
 	_AccountManager.Logout(connection->Account().ID());
 	connection->Account().Reset();
-#if _LOGGING_
-	LogBoth(Action, "[%s] - Logout", connection->ConnectionString().c_str());
-#endif // _LOGGING_
 }
 
 //TODO: rewrite according to changes

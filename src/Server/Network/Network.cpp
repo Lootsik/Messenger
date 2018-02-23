@@ -143,6 +143,7 @@ void Network::_OnTimerCheck()
 			--i;
 			if ((now - _Connections[i]->LastTime()).total_milliseconds() > _Timeout)
 			{
+				Log(Action, "[%s] - Timeout", _Connections[i]->ConnectionString().c_str());
 				_DeleteConnection(_Connections[i]);
 			}
 		}
@@ -215,10 +216,9 @@ void Network::_SolveProblemWithConnection(PConnection& connection, const boost::
 	switch (err_code.value())
 	{
 	case error::connection_reset:
-#if _LOGGING_
-		Log(Action, "[%s] - Disconnected", connection->ConnectionString().c_str());
-#endif // _STATE_MESSAGE
+
 		_DeleteConnection(connection);
+
 		break;
 
 	case error::operation_aborted:
@@ -226,9 +226,10 @@ void Network::_SolveProblemWithConnection(PConnection& connection, const boost::
 
 	default:
 #if _LOGGING_
-		Log(Mistake, "[%s] - Drop connection: #%d: %s", connection->ConnectionString().c_str(), err_code.value(), err_code.message());
+		Log(Mistake, "[%s] - Unexpected error: #%d: %s", connection->ConnectionString().c_str(), err_code.value(), err_code.message());
 #endif // _STATE_MESSAGE
 		_DeleteConnection(connection);
+
 		break;
 	}
 }
@@ -236,6 +237,18 @@ void Network::_SolveProblemWithConnection(PConnection& connection, const boost::
 //check 
 void Network::_DeleteConnection(PConnection& connection)
 {
+	//TODO: change this
+	if (connection->Account().Online()) {
+#if _LOGGING_
+		LogBoth(Action, "[%s] - Logout", connection->ConnectionString().c_str());
+#endif // _LOGGING_
+		_MessagerEngine->OnLogout(connection);
+	}
+
+#if _LOGGING_
+	Log(Action, "[%s] - Disconnected", connection->ConnectionString().c_str());
+#endif // _STATE_MESSAGE
+
 	error_code err;
 	if (connection->Socket().is_open())
 	{
@@ -248,11 +261,7 @@ void Network::_DeleteConnection(PConnection& connection)
 			Log(Error, "Socket cannot be shutdowned %s", connection->ConnectionString().c_str());
 
 	}
-	//assert(!err);
 
-	//TODO: change this
-	if ( connection->Account().Online() )
-		_MessagerEngine->OnLogout(connection);
 
 	//ищем клиента в списке клиетов
 	auto res = find(_Connections.begin(), _Connections.end(), connection);
