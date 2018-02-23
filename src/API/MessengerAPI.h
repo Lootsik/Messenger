@@ -18,16 +18,21 @@ public:
 	MessengerAPI();
 	~MessengerAPI();
 
-	int Connect(const std::string& Address, unsigned short port);
+	bool Connect(const std::string& Address, unsigned short port);
 	void TryLogin(const std::string& Login, const std::string& Pass);
 
-	bool TryGetMessage(); 
-	
+	bool Ready();
+	TransferredData* GetPacket();
+
+
+	void GetUserLogin(ID_t Id);
+	void LastMessageId(ID_t another);
+	void LoadMessage(ID_t another, uint32_t index);
+	void SendMessageTo(ID_t to, const std::wstring& Content );
 
 	std::string GetCurrentUserLogin() const;
 	ID_t GetCurrentUserID() const;
 
-	void(*_Callback)(uint32_t, TransferredData*);
 private:
 	
 	void _NewEvent(const boost::system::error_code& err_code, size_t bytes);

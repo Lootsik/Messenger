@@ -7,12 +7,14 @@
 #include <boost\thread.hpp>
 #include <boost\array.hpp>
 
-
 #include <Protocol\TransferredData.h>
 #include <Protocol\LoginRequest.h>
 #include <Protocol\LoginResponse.h>
 #include <Protocol\Types.h>
 #include <Protocol\UserInfo.h>
+#include <Protocol\Message.h>
+#include <Protocol\MessageRequest.h>
+#include <Protocol\LastMessageResponse.h>
 
 #include "Query.h"
 
@@ -103,13 +105,42 @@ void MessengerAPI::_NewEvent(const boost::system::error_code& err_code, size_t b
 
 		_Data->_Query.push_back(Data);
 	}break;
-	
+
+
+	case Types::Message:
+	{
+		printf("Message\n");
+
+		Message* Data = new Message;
+		uint32_t err = Data->FromBuffer(_Data->Buff.c_array(), bytes);
+		if (err)
+		{
+			printf("Error when unpack\n");
+			return;
+		}
+
+		_Data->_Query.push_back(Data);
+	}
+	case Types::LastMessageResponse:
+	{
+		printf("LastMessageResponse\n");
+
+		LastMessageResponse* Data = new LastMessageResponse;
+		uint32_t err = Data->FromBuffer(_Data->Buff.c_array(), bytes);
+		if (err)
+		{
+			printf("Error when unpack\n");
+			return;
+		}
+
+		_Data->_Query.push_back(Data);
+	}
 	
 	default:
 		printf(" Wrong packet type\n");
 	}
-
 }
+
 void MessengerAPI::_WriteHandler(const boost::system::error_code& err_code, size_t bytes)
 {
 	printf("Writed %zd bytes\n", bytes);
@@ -131,7 +162,7 @@ ID_t MessengerAPI::GetCurrentUserID() const
 
 
 
-int MessengerAPI::Connect(const std::string& Address, unsigned short port)
+bool MessengerAPI::Connect(const std::string& Address, unsigned short port)
 {
 	_Data->ep = ip::tcp::endpoint{ ip::address::from_string(Address), port };
 
@@ -145,7 +176,7 @@ int MessengerAPI::Connect(const std::string& Address, unsigned short port)
 		_Data->ThreadWorker = boost::thread{ boost::bind(&boost::asio::io_service::run, &_Data->service) };
 	}
 
-	return err.value();
+	return !err;
 }
 
 void MessengerAPI::TryLogin(const std::string& Login, const std::string& Pass)
@@ -156,12 +187,44 @@ void MessengerAPI::TryLogin(const std::string& Login, const std::string& Pass)
 						  boost::bind(&MessengerAPI::_WriteHandler, this, _1, _2));
 }
 
-bool MessengerAPI::TryGetMessage() {
-	if (_Data->_Query.ready())
-	{
-		TransferredData*  data = _Data->_Query.pop_front();
-		_Callback(data->GetType(), data);
-		return true;
-	}
-	return false;
+bool MessengerAPI::Ready() {
+	return _Data->_Query.ready();
+}
+TransferredData* MessengerAPI::GetPacket() 
+{
+	if(_Data->_Query.ready())
+		return  _Data->_Query.pop_front();
+
+	return nullptr;
+}
+
+
+
+void MessengerAPI::GetUserLogin(ID_t Id)
+{
+	UserInfo info{ Id };
+	info.ToBuffer(_Data->Buff.c_array());
+	_Data->sock.async_write_some(boost::asio::buffer(_Data->Buff, info.NeededSize()),
+		boost::bind(&MessengerAPI::_WriteHandler, this, _1, _2));
+}
+void MessengerAPI::LastMessageId(ID_t another)
+{
+	MessageRequest Requset{ MessageRequest::LastMessageID, GetCurrentUserID(), another, };
+	Requset.ToBuffer(_Data->Buff.c_array());
+	_Data->sock.async_write_some(boost::asio::buffer(_Data->Buff, Requset.NeededSize()),
+				boost::bind(&MessengerAPI::_WriteHandler, this, _1, _2));
+}
+void MessengerAPI::LoadMessage(ID_t another, uint32_t index)
+{
+	MessageRequest Requset{ MessageRequest::Message, GetCurrentUserID(), another, };
+	Requset.ToBuffer(_Data->Buff.c_array());
+	_Data->sock.async_write_some(boost::asio::buffer(_Data->Buff, Requset.NeededSize()),
+		boost::bind(&MessengerAPI::_WriteHandler, this, _1, _2));
+}
+void MessengerAPI::SendMessageTo(ID_t to, const std::wstring& Content)
+{
+	Message message{ GetCurrentUserID(), to, Content };
+	message.ToBuffer(_Data->Buff.c_array());
+	_Data->sock.async_write_some(boost::asio::buffer(_Data->Buff, message.NeededSize()),
+		boost::bind(&MessengerAPI::_WriteHandler, this, _1, _2));
 }

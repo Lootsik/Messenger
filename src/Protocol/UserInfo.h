@@ -5,7 +5,7 @@
 class UserInfo : public BaseHeader
 {
 public:
-	UserInfo(uint32_t id, const std::string& Login);
+	UserInfo(uint32_t id, const std::string& Login = {});
 	UserInfo();
 
 	// 				Overrided

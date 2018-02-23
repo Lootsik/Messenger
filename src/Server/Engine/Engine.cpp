@@ -90,6 +90,7 @@ void MessengerEngine::_AutorizededProcess(PConnection& connection)
 		OnMessageRequest(connection);
 	}break;
 
+
 	case Types::Message:
 	{
 		OnMessage(connection);
