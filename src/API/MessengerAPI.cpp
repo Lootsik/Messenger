@@ -116,13 +116,13 @@ void MessengerAPI::_WriteHandler(const boost::system::error_code& err_code, size
 }
 
 
-std::string MessengerAPI::GetUserLogin() const
+std::string MessengerAPI::GetCurrentUserLogin() const
 {
 	boost::mutex::scoped_lock l{ _Data->UserDataMutex };
 
 	return _UserLogin; 
 }
-ID_t MessengerAPI::GetUserID() const
+ID_t MessengerAPI::GetCurrentUserID() const
 {
 	boost::mutex::scoped_lock l{ _Data->UserDataMutex };
 

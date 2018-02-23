@@ -5,6 +5,7 @@
    $Creator: Vitaliy Lutsyshyn $
    ======================================================================== */
 #include <Protocol\SerializationError.h>
+
 #include "BaseHeader.h"
 
 uint32_t BaseHeader::HeaderCheck(const BaseHeaderDesc* data, const size_t size)const

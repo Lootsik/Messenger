@@ -9,6 +9,8 @@ LastMessageResponse::LastMessageResponse()
 {
 	SetFrameSize(CalculateSize());
 }
+
+
 LastMessageResponse::LastMessageResponse(uint32_t id)
 			:BaseHeader(Types::LastMessageResponse, sizeof(LastMessageResponseDesc)),
 				_MessageId{ id }
@@ -16,10 +18,12 @@ LastMessageResponse::LastMessageResponse(uint32_t id)
 	SetFrameSize(CalculateSize());
 }
 
+
 uint32_t LastMessageResponse::CalculateSize() const
 {
 	return sizeof(LastMessageResponseDesc);
 }
+
 
 uint32_t LastMessageResponse::ToBuffer(Byte* Buffer)const
 {
@@ -32,6 +36,8 @@ uint32_t LastMessageResponse::ToBuffer(Byte* Buffer)const
 
 	return  SerializationError::Ok;
 }
+
+
 uint32_t LastMessageResponse::FromBuffer(const Byte* Buffer, const size_t Capacity)
 {
 	uint32_t err = BaseHeader::FromBuffer(Buffer, Capacity);

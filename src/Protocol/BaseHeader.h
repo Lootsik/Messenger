@@ -8,12 +8,11 @@
 
 #define BASEHEADER_H
 
-
 #include <Protocol\GlobalInfo.h>
 #include <Protocol\TransferredData.h>
 
-class BaseHeader : public TransferredData {
-
+class BaseHeader : public TransferredData
+{
 public:
     //check, that size is valid for packet
     static bool MinimumCheck(size_t size) {
@@ -23,6 +22,8 @@ public:
     static uint32_t BufferType(const Byte* Buffer){
         return ((BaseHeaderDesc*)Buffer)->Type;
     }
+
+
     /*
             core 
      */

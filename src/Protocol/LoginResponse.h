@@ -16,16 +16,10 @@ public:
 
     uint32_t ToBuffer(Byte* Buffery) const override;
     uint32_t FromBuffer(const Byte* Buffer, const size_t Capacity) override;
-    //TODO: rename
-    uint32_t GetValue()const {
-        return _Response;
-    }
-    ID_t GetId()const {
-        return ID;
-    }
-    uint32_t CalculateSize() const {
-        return sizeof(LoginResponseDesc);
-    }
+    
+    //              Getters
+    uint32_t GetValue()const {return _Response; }
+    ID_t GetId()const { return ID; }
             
     enum ResponseValue
     {
@@ -37,12 +31,26 @@ public:
         AlreadyOnline,
         NoSuchUser
     };
+
+    bool operator==(const LoginResponse& rv)const {
+        if (BaseHeader::operator==(rv)) {
+            return _Response == rv._Response &&
+                        ID == rv.ID;
+        }
+        return false;
+    }
+
+
 protected:
     struct LoginResponseDesc{
 		BaseHeaderDesc Header;
 		uint32_t Response;
         ID_t ID;
     };
+
+    uint32_t CalculateSize() const {
+        return sizeof(LoginResponseDesc);
+    }
 private:
     uint32_t _Response;
     ID_t ID;

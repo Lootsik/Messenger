@@ -6,8 +6,8 @@ void CallBack(uint32_t type, TransferredData* Data)
 {
 	if (type == Types::UserInfo)
 	{
-		std::string str = api.GetUserLogin();
-		printf("You are #%d:%s\n", api.GetUserID(), str.c_str());
+		std::string str = api.GetCurrentUserLogin();
+		printf("You are #%d:%s\n", api.GetCurrentUserID(), str.c_str());
 	}
 	//LoginResponse* response  = static_cast<LoginResponse*>(Data);
 	//printf("Recived: ");

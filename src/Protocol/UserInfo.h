@@ -2,21 +2,27 @@
 #include <Protocol\BaseHeader.h>
 #include <string>
 
-class UserInfo :
-	public BaseHeader
+class UserInfo : public BaseHeader
 {
-
 public:
 	UserInfo(uint32_t id, const std::string& Login);
 	UserInfo();
 
-	~UserInfo() {}
-
+	// 				Overrided
 	uint32_t ToBuffer(Byte* Buffer)const override;
 	uint32_t FromBuffer(const Byte* Buffer, const size_t Capacity) override;
 
+	// 				Getters
 	const std::string& GetLogin() const { return _Login; }
 	ID_t GetId() const { return _ID; }
+
+	bool operator==(const UserInfo& rv)const {
+        if (BaseHeader::operator==(rv)) {
+            return _Login == rv._Login &&
+                        _ID == rv._ID;
+        }
+        return false;
+    }
 
 protected:
 

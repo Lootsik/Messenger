@@ -7,24 +7,34 @@
    ======================================================================== */
 #define LOGINREQUES_H
 
-
 #include <string>
+
 #include <Protocol\BaseHeader.h>
 
-class LoginRequest: public BaseHeader{
-
+class LoginRequest: public BaseHeader
+{
 public:
     LoginRequest(const std::string& Login, const std::string& Password);
 	LoginRequest();
+
+    //              Overrided
     uint32_t ToBuffer(Byte* Buffer)const override;
     uint32_t FromBuffer(const Byte* Buffer, const size_t Capacity) override;
 
-    //getters
+    //              Getters
     const std::string& GetLogin()const{
         return _Login;
     }
     const std::string& GetPassword()const{
         return _Password;
+    }
+
+    bool operator==(const LoginRequest& rv)const {
+        if (BaseHeader::operator==(rv)) {
+            return _Login == rv._Login &&
+                _Password == rv._Password;
+            }
+        return false;
     }
     
 protected:
@@ -42,7 +52,7 @@ protected:
 #pragma warning( pop ) 
 
     uint32_t CalculateSize() const;
-	//check
+	//     check
 	uint32_t LoginRequestCheck(const LoginRequestDesc* Buffer, const size_t size)const;
 private:
     //LoginRequestDesc LRData;

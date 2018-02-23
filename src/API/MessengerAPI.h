@@ -22,11 +22,10 @@ public:
 	void TryLogin(const std::string& Login, const std::string& Pass);
 
 	bool TryGetMessage(); 
-	//Connect to server
-	//Authorization
-	//Message
-	std::string GetUserLogin() const;
-	ID_t GetUserID() const;
+	
+
+	std::string GetCurrentUserLogin() const;
+	ID_t GetCurrentUserID() const;
 
 	void(*_Callback)(uint32_t, TransferredData*);
 private:
