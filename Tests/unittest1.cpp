@@ -42,7 +42,7 @@ namespace Tests
 		}
 		TEST_METHOD(UserInfo_)
 		{
-			TestPacket<UserInfo>(1u, "Me");
+			TestPacket<UserInfo>(1u,"");
 		}
 		TEST_METHOD(LoginResponse_)
 		{

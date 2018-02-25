@@ -200,7 +200,7 @@ void MessengerEngine::OnMessage(PConnection& connection)
 	int err = message.FromBuffer(connection->ReadBuffer().c_array(),
 						connection->BytesToRead());
 	if (err) {
-		Log(Mistake, "[%s] Error when unpacking User info",
+		Log(Mistake, "[%s] Error when unpacking Mesage",
 			connection->ConnectionString().c_str());
 
 		return;

@@ -224,6 +224,7 @@ void MessengerAPI::GetUserLogin(ID_t Id)
 {
 	UserInfo info{ Id };
 	info.ToBuffer(_Data->Buff.c_array());
+	size_t size = info.NeededSize();
 	_Data->sock.async_write_some(boost::asio::buffer(_Data->Buff, info.NeededSize()),
 		boost::bind(&MessengerAPI::_WriteHandler, this, _1, _2));
 }
