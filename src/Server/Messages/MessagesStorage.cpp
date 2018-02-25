@@ -82,14 +82,12 @@ bool MessagesStorage::_TryAddMessage(ID_t From, ID_t To, const MessageContent& C
 		//sql returns 1 if chat is not created, if done
 		return _Result->getInt(1) == 0;
 	}
-	//TODO: log + 
 	catch (sql::SQLException &e) {
 		FallLog();
 	}
 	return true;
 }
 
-//TODO: return sender
 std::pair<ID_t, MessageContent> MessagesStorage::LoadMessage(const Speakers& speakers, ID_t InChatId)
 {
 	ID_t ChatId = _GetChat(speakers);
@@ -116,14 +114,12 @@ std::pair<ID_t, MessageContent> MessagesStorage::LoadMessage(const Speakers& spe
 		}
 		
 	}
-	//TODO: log + 
 	catch (sql::SQLException &e) {
 		FallLog();
 	}
 	return {};
 }
 
-//TODO: do smth with return return vlaue if no chat
 ID_t MessagesStorage::GetLastMessageID(const Speakers& speakers)
 {
 	ID_t id = _GetChat(speakers);
@@ -148,7 +144,6 @@ ID_t MessagesStorage::_GetChat(const Speakers& speakers)
 		if (_Result->next())
 			return _Result->getUInt(1);
 	}
-	//TODO: log + 
 	catch (sql::SQLException &e) {
 		FallLog();
 	}
@@ -167,7 +162,6 @@ void MessagesStorage::_CreateChat(const Speakers& speakers)
 		_PreparedCreateChat->execute();
 
 	}
-	//TODO: log + 
 	catch (sql::SQLException &e) {
 		FallLog();
 	}

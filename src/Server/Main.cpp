@@ -49,10 +49,10 @@ int main()
 	if (!Database::Connect(Config.GetHost(), Config.GetSchema(),
 							Config.GetLogin(), Config.GetPassword()))
 	{
-		//Log
 		return 1;
 	}
-	
+	Logger::LogBoth(Logger::Success, "Connected to database");
+
 	Network server{ service };
 	if (!server.SetPort(Config.GetPort()))
 		return 1;
@@ -68,8 +68,7 @@ int main()
 		Logger::Log(Logger::Error, "Could not set control handler");
 		return 1;
 	}
-	MessagesStorage storage;
-	storage.AddMessage(7, 9, L"Hello");
+	
 
 	service.run();
 

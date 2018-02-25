@@ -50,10 +50,9 @@ void AccountStorage::NewUser(const std::string& login, const std::string& passwo
         
         _Prepared_NewUser->execute();
     }
-    //TODO: log + 
-    catch (sql::SQLException &e) {
+    catch (sql::SQLException &e)
+	{
 		FallLog();
-        throw;
     }
 }
 
@@ -67,7 +66,6 @@ bool AccountStorage::DeleteUser(const std::string& login)
         size_t update = _Prepared_DeleteUser->executeUpdate();
         return update > 0;
     }
-    //TODO: log + 
     catch (sql::SQLException &e) {
 		FallLog();
     }
@@ -85,11 +83,10 @@ bool AccountStorage::IsExist(const std::string& login)
         
         _Result.reset(  _Prepared_IsExist->executeQuery());
     }
-    //TODO: Log + 
-    catch (...)
-    {
-        throw;
-    }
+	catch (sql::SQLException &e)
+	{
+		FallLog();
+	}
     //number of rows in output table
     size_t rows = _Result->rowsCount();
     //awlays 0 or 1 becouse login identical
@@ -97,8 +94,7 @@ bool AccountStorage::IsExist(const std::string& login)
 }
     
 
-//TODO: change name + checks 
-size_t AccountStorage::FetchUser(const std::string& login, const std::string& password)
+size_t AccountStorage::VerifyUser(const std::string& login, const std::string& password)
 {
     boost::scoped_ptr<sql::ResultSet> _Result;
 
@@ -110,11 +106,11 @@ size_t AccountStorage::FetchUser(const std::string& login, const std::string& pa
 
         _Result.reset( _Prepared_IsCorrect->executeQuery());
     }
-    //TODO: log + 
-    catch (sql::SQLException &e)
-    {
+	catch (sql::SQLException &e)
+	{
 		FallLog();
     }
+
     size_t rows = _Result->rowsCount();
     if (rows == 0)
     {

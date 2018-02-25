@@ -75,29 +75,9 @@ void DialogLogin::OnBnClickedOk()
 
 	connected = true;
 
-	API.TryLogin(AnciLogin, AnciPass);
 
-	
-	for(int i = 0; i < 15;++i )
-	{
-		if (API.Ready()) 
-		{
-			TransferredData* Packet =  API.GetPacket();
-			if (Packet->GetType() == Types::LoginResponse)
-			{
-				LoginResponse* Response = (LoginResponse*)Packet;
-				if( Response->GetValue() == LoginResponse::Success)
-					MessageBox(L"Succes", L"Result");
-				else
-					MessageBox(L"Error", L"Result");
-
-			}
-			break;
-		}
-		Sleep(200);
-	}
-
-	
-	
-	CDialogEx::OnOK();
+	if (API.TryLogin(AnciLogin, AnciPass) == 0)
+		CDialogEx::OnOK();
+	else
+		return;
 }

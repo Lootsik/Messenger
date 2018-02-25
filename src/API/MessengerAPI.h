@@ -19,7 +19,7 @@ public:
 	~MessengerAPI();
 
 	bool Connect(const std::string& Address, unsigned short port);
-	void TryLogin(const std::string& Login, const std::string& Pass);
+	int TryLogin(const std::string& Login, const std::string& Pass);
 
 	bool Ready();
 	TransferredData* GetPacket();

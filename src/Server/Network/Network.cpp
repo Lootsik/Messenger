@@ -141,7 +141,8 @@ void Network::_OnTimerCheck()
 		while(i!=0)
 		{
 			--i;
-			if ((now - _Connections[i]->LastTime()).total_milliseconds() > _Timeout)
+			if (!_Connections[i]->Account().Online() && 
+						(now - _Connections[i]->LastTime()).total_milliseconds() > _Timeout)
 			{
 				Log(Action, "[%s] - Timeout", _Connections[i]->ConnectionString().c_str());
 				_DeleteConnection(_Connections[i]);
@@ -242,7 +243,7 @@ void Network::_DeleteConnection(PConnection& connection)
 #if _LOGGING_
 		LogBoth(Action, "[%s] - Logout", connection->ConnectionString().c_str());
 #endif // _LOGGING_
-		_MessagerEngine->OnLogout(connection);
+		_MessagerEngine->ForceLogout(connection);
 	}
 
 #if _LOGGING_

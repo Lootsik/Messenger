@@ -23,7 +23,7 @@ public:
     //check, exist or not user with such login
     bool IsExist(const std::string& login);
     //TODO: remove
-    size_t FetchUser(const std::string& login, const std::string& password);
+    size_t VerifyUser(const std::string& login, const std::string& password);
     uint32_t GetID(const std::string& login);
 
     std::string GetLogin(ID_t ID);

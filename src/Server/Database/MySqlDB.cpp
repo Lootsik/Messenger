@@ -54,8 +54,7 @@ void MySqlDB::CloseConnection()
 	}
 	catch (sql::SQLException &e)
 	{
-		//TODO: write Log and make strategy to handle 
-		throw;
+		FallLog();
 	}
 }
 

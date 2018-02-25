@@ -14,18 +14,13 @@ AccountManager::AccountManager(){}
 
 ID_t AccountManager::VerifyAccount(const LoginRequest& AuthData)
 {
-	size_t id = _AccountStorage.FetchUser(AuthData.GetLogin(), AuthData.GetPassword());
-	//TODO: smth with this
-	/*
-	if (id > UINT32_MAX)
-		throw;
-	*/
+	size_t id = _AccountStorage.VerifyUser(AuthData.GetLogin(), AuthData.GetPassword());
+	
 	return static_cast<uint32_t>(id);
 }
 
 LoginResponse AccountManager::Login( const LoginRequest& AuthData )
 {
-	//TODO: AccountStorage action
 	ID_t id = VerifyAccount(AuthData);
 	//wrong pass or login
 	if (id == INVALID_ID)

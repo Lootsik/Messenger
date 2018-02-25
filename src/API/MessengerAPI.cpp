@@ -54,6 +54,10 @@ MessengerAPI::~MessengerAPI()
 
 void MessengerAPI::_NewEvent(const boost::system::error_code& err_code, size_t bytes)
 {
+	if (err_code)
+	{
+		return;
+	}
 	_Data->sock.async_read_some(buffer(_Data->Buff), boost::bind(&MessengerAPI::_NewEvent, this, _1, _2));
 //	printf("Recived %zd bytes\n", bytes);
 	//to queue here
@@ -179,12 +183,28 @@ bool MessengerAPI::Connect(const std::string& Address, unsigned short port)
 	return !err;
 }
 
-void MessengerAPI::TryLogin(const std::string& Login, const std::string& Pass)
+int MessengerAPI::TryLogin(const std::string& Login, const std::string& Pass)
 {
 	LoginRequest Request{ Login, Pass };
 	Request.ToBuffer(_Data->Buff.c_array());
 	_Data->sock.async_write_some(boost::asio::buffer(_Data->Buff, Request.NeededSize()),
 						  boost::bind(&MessengerAPI::_WriteHandler, this, _1, _2));
+
+	for (int i = 0; i < 15; ++i)
+	{
+		if (Ready())
+		{
+			TransferredData* Packet = GetPacket();
+			if (Packet->GetType() == Types::LoginResponse)
+			{
+				LoginResponse* Response = (LoginResponse*)Packet;
+				return Response->GetValue();
+			}
+			break;
+		}
+		Sleep(200);
+	}
+	return -1;
 }
 
 bool MessengerAPI::Ready() {

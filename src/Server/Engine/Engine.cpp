@@ -1,5 +1,8 @@
 #include <vector>
 #include <Network\Network.h>
+
+#include <Protocol\Types.h>
+#include <Protocol\SerializationError.h>
 #include <Protocol\BaseHeader.h>
 #include <Protocol\LoginRequest.h>
 #include <Protocol\LoginResponse.h>
@@ -8,15 +11,17 @@
 #include <Protocol\Message.h>
 #include <Protocol\LastMessageResponse.h>
 
-
-#include <Protocol\Types.h>
-#include <Protocol\SerializationError.h>
-//#include <PacketFormat\PacketFormat.h>
 #include <Logger\Logger.h>
+
 #include "Engine.h"
+
+
+//TODO: make template to unpack
+//TODO: add constructor from buffer to transferable types
 
 using namespace Logger;
 
+//TODO: remove this
 static void LogLogin(const PConnection& connection, const LoginResponse& Result)
 {
 	if(Result.GetValue() == LoginResponse::Success)
@@ -25,17 +30,30 @@ static void LogLogin(const PConnection& connection, const LoginResponse& Result)
 		Log(Mistake, "[%s] - Failed login", connection->ConnectionString().c_str());
 }
 
-//TODO: rewrite this
 MessengerEngine::MessengerEngine(Network* server)
 //считывать значения с конфигов
 	:_Server{ server }, _MessageManager{ _AccountManager }
+	, UnauthorizedOperations
+	{
+		{ Types::LoginRequest, &MessengerEngine::OnLogin }
+	}
+	, AuthorizedOperations
+	{
+		{ Types::Logout ,&MessengerEngine::OnLogout },
+		{ Types::UserInfo , &MessengerEngine::OnUserInfo },
+		{ Types::MessageRequest, &MessengerEngine::OnMessageRequest },
+		{ Types::Message, &MessengerEngine::OnMessage }
+	}
 {
 }
 
 /*
 	+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+						Chose Packet Process
 	+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 */
+
+//basic check and call function to process unauthorized request
 void MessengerEngine::AnalyzePacket(PConnection connection)
 {
 	
@@ -53,53 +71,49 @@ void MessengerEngine::AnalyzePacket(PConnection connection)
 		return;
 	}
 
-	//TODO: divide this
-	switch (BaseHeader::BufferType(connection->ReadBuffer().c_array()))
-	{
+	auto ProcessFunc = UnauthorizedOperations.find(
+			BaseHeader::BufferType(connection->ReadBuffer().c_array()));
 
-	case Types::LoginRequest:
+	//wrong type
+	if (ProcessFunc == UnauthorizedOperations.end())
 	{
-		OnLogin(connection);
-	}break;
+		//TODO: add string to describe types of packet 
+		Log(Mistake, "[%s] Wrong packet type forom unauthorized packet type #",
+							connection->ConnectionString().c_str());
 
-	default:
-		break;
+		return;
 	}
+
+	ProcessFunc->second(this, connection);
 }
 
 
-
+//find and call function to process 
 void MessengerEngine::_AutorizededProcess(PConnection& connection)
 {
-	switch (BaseHeader::BufferType(connection->ReadBuffer().c_array()))
+	auto ProcessFunc = AuthorizedOperations.find(
+		BaseHeader::BufferType(connection->ReadBuffer().c_array()));
+
+	//wrong type
+	if (ProcessFunc == AuthorizedOperations.end())
 	{
+		//TODO: add string to describe types
+		Log(Mistake, "[%s] Wrong packet type forom authorized packet type #",
+					connection->ConnectionString().c_str());
 
-	case Types::Logout:
-	{
-		OnLogout(connection);
-	}break;
-
-	case Types::UserInfo:
-	{
-		OnUserInfo(connection);
-	}break;
-
-	//acces to specific message
-	case Types::MessageRequest:
-	{
-		OnMessageRequest(connection);
-	}break;
-
-
-	case Types::Message:
-	{
-		OnMessage(connection);
-	}break;
-
-	default:
-		break;
+		return;
 	}
+
+	ProcessFunc->second(this, connection);
 }
+
+
+/*
+	+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+						Request Process
+	+++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*/
+	
 
 void MessengerEngine::OnLogin(PConnection& connection)
 {
@@ -107,7 +121,9 @@ void MessengerEngine::OnLogin(PConnection& connection)
 
 	uint32_t err = Request.FromBuffer(connection->ReadBuffer().c_array(), connection->BytesToRead());
 	if(err){
-		//TODO: do smth with result
+		Log(Mistake, "[%s] Error when unpacking login request",
+			connection->ConnectionString().c_str());
+
 		return;
 	}
 
@@ -130,13 +146,10 @@ void MessengerEngine::OnLogin(PConnection& connection)
 #if _LOGGING_
 	LogLogin(connection, Response);
 #endif
-
 }
 
 void MessengerEngine::OnLogout(PConnection& connection)
 {
-
-
 	_AccountManager.Logout(connection->Account().ID());
 	connection->Account().Reset();
 }
@@ -165,7 +178,8 @@ void MessengerEngine::OnUserInfo(PConnection& connection)
 
 	uint32_t err = Info.FromBuffer(connection->ReadBuffer().c_array(), connection->BytesToRead());
 	if (err) {
-		//TODO: do smth with result
+		Log(Mistake, "[%s] Error when unpacking User info",
+			connection->ConnectionString().c_str());
 		return;
 	}
 
@@ -186,6 +200,9 @@ void MessengerEngine::OnMessage(PConnection& connection)
 	int err = message.FromBuffer(connection->ReadBuffer().c_array(),
 						connection->BytesToRead());
 	if (err) {
+		Log(Mistake, "[%s] Error when unpacking User info",
+			connection->ConnectionString().c_str());
+
 		return;
 	}
 
@@ -209,6 +226,7 @@ void MessengerEngine::OnMessageRequest(PConnection& connection)
 		return;
 	}
 
+	//TODO: divide message request 
 	switch (Request.GetRequestType())
 	{
 	case MessageRequest::Message:
@@ -233,7 +251,7 @@ void MessengerEngine::OnMessageRequest(PConnection& connection)
 }
 
 	// INVALID_ID sender if error
-void MessengerEngine::OnMessageRequest(PConnection& connection, MessageRequest& Request)
+void MessengerEngine::OnMessageRequest_M(PConnection& connection, MessageRequest& Request)
 {
 	auto Response = _MessageManager.GetMessageUser(Request.Sender(),Request.Receiver(),Request.GetMessageIndex());
 	SendResponce(connection, Response);

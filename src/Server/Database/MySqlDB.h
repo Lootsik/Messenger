@@ -10,7 +10,6 @@ namespace sql {
 	class ResultSet;
 	class PreparedStatement;
 }
-//TODO: пофиксить размеры в полей, не сделать случайно case insesetive, сделать что-то с кодировками
 
 class MySqlDB {
 public:
