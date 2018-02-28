@@ -6,12 +6,13 @@
 
 #include <Protocol\GlobalInfo.h>
 
+
 class AccountInfo
 {
 public:
 	AccountInfo(uint32_t id = INVALID_ID) : _ID{ id } {}
 
-	bool Online() const {	return _ID != INVALID_ID;}
+	bool Online() const { return _ID != INVALID_ID; }
 	ID_t ID() const { return _ID; }
 	void SetID(ID_t ID) { _ID = ID; }
 	void Reset() { _ID = INVALID_ID; }
@@ -21,11 +22,12 @@ private:
 
 class Connection {
 public:
-	Connection(boost::asio::io_service& service) :_Socket{ service } {}
+	Connection(boost::asio::io_service& service) :
+		_Socket{ service }, _PacketBegin{ _ReadBuff.c_array() } {}
 
 	static const size_t Buffsize = PacketMaxSize;
 	using Storage = boost::array<Byte, Buffsize>;
-			
+
 	//				Getters, setters
 
 	/*******************************************/
@@ -38,20 +40,27 @@ public:
 	Storage& ReadBuffer() { return _ReadBuff; }
 	Storage& WriteBuffer() { return _WriteBuff; }
 
+	Byte* Packet() { return _PacketBegin; };
+	void SetPacket(Byte* packet) { _PacketBegin = packet; }
+	void ResetPacket() { _PacketBegin = _ReadBuff.c_array(); }
+
+	Byte* CReadBuffer() { return _ReadBuff.c_array(); }
+	Byte* CWriteBuffer() { return _WriteBuff.c_array(); }
+
 	//					Time
 	boost::posix_time::ptime& LastTime() { return _LastSeen; }
 	AccountInfo& Account() { return _Account; }
 	const boost::asio::ip::tcp::socket& Socket() const { return _Socket; }
 	boost::asio::ip::tcp::socket& Socket() { return _Socket; }
 
-	std::string ConnectionString() const 
+	std::string ConnectionString() const
 	{
 		if (_Account.Online())
 			return "id:" + std::to_string(_Account.ID());
 
 		if (_Socket.is_open())
 			return _Socket.remote_endpoint().address().to_string() +
-				":" + std::to_string(_Socket.remote_endpoint().port());
+			":" + std::to_string(_Socket.remote_endpoint().port());
 
 		return "INVALID CONNECTION";
 	}
@@ -68,6 +77,8 @@ private:
 	boost::asio::ip::tcp::socket _Socket;
 	boost::posix_time::ptime _LastSeen;
 	AccountInfo _Account;
+
+	Byte* _PacketBegin;
 };
 
 using PConnection = boost::shared_ptr<Connection>;

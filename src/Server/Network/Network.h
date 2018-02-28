@@ -32,16 +32,27 @@ private:
 	// connection list
 	std::vector<PConnection> _Connections{};
 	MessengerEngine* _MessagerEngine;
-	unsigned int _Timeout = 5000;
+	//TODO: to config
+	unsigned int _Timeout = 5000000;
 
 	//for internal use only
 	void _LastSeenNow(PConnection& connection);
+
 	void _AcceptMessage(PConnection connection, const boost::system::error_code& err_code, size_t bytes);
+	void _AcceptMessageRemainder(PConnection connection, const boost::system::error_code& err_code, size_t bytes);
+
 	void _AcceptConnections(PConnection connection, const boost::system::error_code& err);
 	void _WriteHandler(const boost::system::error_code& err, size_t bytes);
 	void _SolveProblemWithConnection(PConnection& conn , const boost::system::error_code& err_code);
 	void _DeleteConnection(PConnection& connection);
+
+
 	void _BindTimer();
+	void _BindMessage(PConnection& connection);
+	void _BindMessageRemainder(PConnection& connection, size_t ReceiveBytes);
+
+
+	
 	//erase check unautorized connectios, that dont doing nothing more that timeout
 	//not for single connection, working with list
 	void _OnTimerCheck();

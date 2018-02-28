@@ -218,13 +218,24 @@ TransferredData* MessengerAPI::GetPacket()
 	return nullptr;
 }
 
+static void Dump(FILE* file, Byte* bytes, size_t size)
+{
+	for (size_t i = 0; i < size; ++i)
+		fprintf(file, "%02d ", bytes[i]);
 
+	fprintf(file, "\n");
+}
 
 void MessengerAPI::GetUserLogin(ID_t Id)
 {
 	UserInfo info{ Id };
-	info.ToBuffer(_Data->Buff.c_array());
-	size_t size = info.NeededSize();
+	if (info.ToBuffer(_Data->Buff.c_array()) != 0)
+		throw;
+
+	FILE* file = fopen("dump.txt", "a");
+	Dump(file,_Data->Buff.c_array(), info.NeededSize());
+	fclose(file);
+
 	_Data->sock.async_write_some(boost::asio::buffer(_Data->Buff, info.NeededSize()),
 		boost::bind(&MessengerAPI::_WriteHandler, this, _1, _2));
 }

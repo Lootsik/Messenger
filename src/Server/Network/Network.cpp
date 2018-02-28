@@ -1,5 +1,6 @@
 #pragma once
 #define _SCL_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS
 
 #include <string>
 #include <algorithm>
@@ -18,6 +19,24 @@
 using namespace boost::asio;
 using boost::system::error_code;
 using namespace Logger;
+
+// to avoid directly BaseHeader in class
+
+static bool ValidSize(size_t size) {
+	return size >= BaseHeader::HeaderSize() && size <= PacketMaxSize;
+}
+
+static bool NeedReadMore(size_t size)
+{
+	return size	> BaseHeader::HeaderSize();
+}
+
+// already know that received header
+static size_t BytesToReceive(size_t FrameSize)
+{
+	return FrameSize - BaseHeader::HeaderSize();
+}
+
 
 //TODO: add some error checking
 
@@ -108,7 +127,7 @@ void Network::Send(PConnection& connection)
 void Network::_AcceptConnections(PConnection connection, const boost::system::error_code& err)
 {
 	// add async operation
-	connection->Socket().async_read_some(buffer(connection->ReadBuffer()), boost::bind(&Network::_AcceptMessage, this, connection, _1, _2));
+	boost::asio::async_read(connection->Socket(),buffer(connection->ReadBuffer(),8), boost::bind(&Network::_AcceptMessage, this, connection, _1, _2));
 
 #if _LOGGING_
 	Log(Action, "New connection: %s", connection->ConnectionString().c_str());
@@ -152,26 +171,67 @@ void Network::_OnTimerCheck()
 	_BindTimer();
 }
 
+/*
+	Binds
+*/
+
 void Network::_BindTimer()
 {
 	_Timer.expires_from_now(boost::posix_time::millisec(_Timeout));
 	_Timer.async_wait(boost::bind(&Network::_OnTimerCheck, this));
 }
 
-//TODO: rewrite this
-void  Network::_AcceptMessage(PConnection connection, const boost::system::error_code& err_code, size_t bytes)
+
+void Network::_BindMessage(PConnection& connection)
+{
+	connection->Socket().async_read_some(buffer(connection->ReadBuffer(), BaseHeader::HeaderSize()),
+				boost::bind(&Network::_AcceptMessage, this, connection, _1, _2));
+}
+
+void Network::_BindMessageRemainder(PConnection& connection, size_t ReceiveBytes)
+{
+	connection->Socket().async_read_some(
+				buffer(connection->CReadBuffer() + BaseHeader::HeaderSize(), ReceiveBytes),
+				boost::bind(&Network::_AcceptMessageRemainder, this, connection, _1, _2));
+}
+
+/*
+		Accept message
+*/
+
+void Network::_AcceptMessageRemainder(PConnection connection, const boost::system::error_code& err_code, size_t bytes)
 {
 	if (err_code) {
-		//TODO: what we should do?
 		_SolveProblemWithConnection(connection, err_code);
 		return;
 	}
-
-	// mark new time
 	_LastSeenNow(connection);
-	//set new number of read bytes
-	connection->SetBytesToRead( bytes );
 
+	connection->SetBytesToRead(bytes + BaseHeader::HeaderSize());
+	_MessagerEngine->AnalyzePacket(connection);
+
+	_BindMessage(connection);
+}
+
+
+// in this function we accept only header
+// then if frame size greater that readed
+// accept next part in _AcceptMessageRemainder
+void  Network::_AcceptMessage(PConnection connection, const boost::system::error_code& err_code, size_t bytes)
+{
+	if (err_code) {
+		_SolveProblemWithConnection(connection, err_code);
+		return;
+	}
+	_LastSeenNow(connection);
+
+	auto FrameSize = BaseHeader::FrameSize(connection->CReadBuffer());
+
+	if ( !ValidSize(FrameSize))
+	{
+		Log(Mistake, "[%s] Invalid framesize %ud", connection->ConnectionString().c_str());
+		return;
+	}
 
 #if (_LOGGING_) && (_PACKET_TRACE_)
 	if(!err_code)
@@ -183,10 +243,17 @@ void  Network::_AcceptMessage(PConnection connection, const boost::system::error
 														 err_code.message().c_str());
 #endif
 
-	connection->Socket().async_read_some( buffer(connection->ReadBuffer()),
-									boost::bind(&Network::_AcceptMessage,this, connection, _1, _2) );
+	if (NeedReadMore(FrameSize))
+	{
+		_BindMessageRemainder(connection, BytesToReceive(FrameSize));
+	}
+	else {
+		connection->SetBytesToRead(bytes);
 
-	_MessagerEngine->AnalyzePacket(connection);
+		_MessagerEngine->AnalyzePacket(connection);
+
+		_BindMessage(connection);
+	}
 }
 
 //*****************************
@@ -278,3 +345,5 @@ void Network::_DeleteConnection(PConnection& connection)
 
 	return;
 }
+
+// already know that we recive HeaderSize

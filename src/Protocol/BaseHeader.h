@@ -22,8 +22,14 @@ public:
     static uint32_t BufferType(const Byte* Buffer){
         return ((BaseHeaderDesc*)Buffer)->Type;
     }
+	static uint32_t FrameSize(const Byte* Buffer) {
+		return ((BaseHeaderDesc*)Buffer)->FrameSize;
+	}
 
-
+	static uint32_t HeaderSize() {
+		return sizeof(BaseHeaderDesc);
+	}
+	
     /*
             core 
      */
@@ -51,6 +57,7 @@ protected:
     struct BaseHeaderDesc{
         uint32_t FrameSize = 0;
         uint32_t Type = 0;
+
 		bool operator==(const BaseHeaderDesc& rv) const {
 			return FrameSize == rv.FrameSize &&
 					Type == rv.Type;

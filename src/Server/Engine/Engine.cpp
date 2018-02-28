@@ -72,7 +72,7 @@ void MessengerEngine::AnalyzePacket(PConnection connection)
 	}
 
 	auto ProcessFunc = UnauthorizedOperations.find(
-			BaseHeader::BufferType(connection->ReadBuffer().c_array()));
+			BaseHeader::BufferType(connection->Packet()));
 
 	//wrong type
 	if (ProcessFunc == UnauthorizedOperations.end())
@@ -92,7 +92,7 @@ void MessengerEngine::AnalyzePacket(PConnection connection)
 void MessengerEngine::_AutorizededProcess(PConnection& connection)
 {
 	auto ProcessFunc = AuthorizedOperations.find(
-		BaseHeader::BufferType(connection->ReadBuffer().c_array()));
+		BaseHeader::BufferType(connection->Packet()));
 
 	//wrong type
 	if (ProcessFunc == AuthorizedOperations.end())
@@ -119,7 +119,7 @@ void MessengerEngine::OnLogin(PConnection& connection)
 {
 	LoginRequest Request;
 
-	uint32_t err = Request.FromBuffer(connection->ReadBuffer().c_array(), connection->BytesToRead());
+	uint32_t err = Request.FromBuffer(connection->Packet(), connection->BytesToRead());
 	if(err){
 		Log(Mistake, "[%s] Error when unpacking login request",
 			connection->ConnectionString().c_str());
@@ -176,13 +176,15 @@ void MessengerEngine::OnUserInfo(PConnection& connection)
 {
 	UserInfo Info;
 
-	uint32_t err = Info.FromBuffer(connection->ReadBuffer().c_array(), connection->BytesToRead());
+	uint32_t err = Info.FromBuffer(connection->Packet(), connection->BytesToRead());
 	if (err) {
 		Log(Mistake, "[%s] Error when unpacking User info",
 			connection->ConnectionString().c_str());
 		return;
 	}
 
+	Log(Success, "[%s] %d",
+				connection->ConnectionString().c_str(), Info.GetId());
 	std::string login = _AccountManager.FindLogin(Info.GetId());
 	//there is no user with such id
 	//if (login == "")
@@ -197,7 +199,7 @@ void MessengerEngine::OnUserInfo(PConnection& connection)
 void MessengerEngine::OnMessage(PConnection& connection)
 {
 	Message message;
-	int err = message.FromBuffer(connection->ReadBuffer().c_array(),
+	int err = message.FromBuffer(connection->Packet(),
 						connection->BytesToRead());
 	if (err) {
 		Log(Mistake, "[%s] Error when unpacking Mesage",
@@ -220,7 +222,7 @@ void MessengerEngine::OnMessage(PConnection& connection)
 void MessengerEngine::OnMessageRequest(PConnection& connection)
 {
 	MessageRequest Request;
-	int err = Request.FromBuffer(connection->ReadBuffer().c_array(),
+	int err = Request.FromBuffer(connection->Packet(),
 							connection->BytesToRead());
 	if (err) {
 		return;
