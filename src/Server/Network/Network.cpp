@@ -207,7 +207,7 @@ void Network::_AcceptMessageRemainder(PConnection connection, const boost::syste
 	}
 	_LastSeenNow(connection);
 
-	connection->SetBytesToRead(bytes + BaseHeader::HeaderSize());
+	connection->SetBytesToRead(connection->BytesToRead() + bytes);
 	_MessagerEngine->AnalyzePacket(connection);
 
 	_BindMessage(connection);
@@ -224,6 +224,7 @@ void  Network::_AcceptMessage(PConnection connection, const boost::system::error
 		return;
 	}
 	_LastSeenNow(connection);
+	connection->SetBytesToRead(bytes);
 
 	auto FrameSize = BaseHeader::FrameSize(connection->CReadBuffer());
 
@@ -246,14 +247,12 @@ void  Network::_AcceptMessage(PConnection connection, const boost::system::error
 	if (NeedReadMore(FrameSize))
 	{
 		_BindMessageRemainder(connection, BytesToReceive(FrameSize));
+		return;
 	}
-	else {
-		connection->SetBytesToRead(bytes);
 
-		_MessagerEngine->AnalyzePacket(connection);
+	_MessagerEngine->AnalyzePacket(connection);
 
-		_BindMessage(connection);
-	}
+	_BindMessage(connection);
 }
 
 //*****************************

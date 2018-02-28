@@ -35,8 +35,16 @@ public:
 
 private:
 	
-	void _NewEvent(const boost::system::error_code& err_code, size_t bytes);
+	void _AnalyzePacket(Byte* Packet, size_t size);
+
+	void _AcceptMessage(const boost::system::error_code& err_code, size_t bytes);
+	void _AcceptMessageRemainder(const boost::system::error_code& err_code, size_t bytes);
+
 	void _WriteHandler(const boost::system::error_code& err_code, size_t bytes);
+
+	void _BindMessage();
+	void _BindMessageRemainder(size_t size);
+
 	bool _Working = false;
 	APIData* _Data;
 

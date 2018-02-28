@@ -34,7 +34,7 @@ int main()
 
 	Logger::OpenLogFile(LogFilename);
 
-
+	
 	ConfigParser Config;
 	if (!Config.LoadConfig(ConfigFilename))
 	{
@@ -57,6 +57,8 @@ int main()
 	if (!server.SetPort(Config.GetPort()))
 		return 1;
 	
+	server.SetTimeout(Config.GetTimeout());
+
 
 	MessengerEngine engine{ &server };
 

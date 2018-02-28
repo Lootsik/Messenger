@@ -21,6 +21,23 @@
 using namespace boost::asio;
 using EvetQuery = typename Query<TransferredData*>;
 
+
+static bool ValidSize(size_t size) {
+	return size >= BaseHeader::HeaderSize() && size <= PacketMaxSize;
+}
+
+static bool NeedReadMore(size_t size)
+{
+	return size	> BaseHeader::HeaderSize();
+}
+
+// already know that received header
+static size_t BytesToReceive(size_t FrameSize)
+{
+	return FrameSize - BaseHeader::HeaderSize();
+}
+
+
 //to hide boost headers from main include file
 struct APIData
 {
@@ -32,6 +49,7 @@ struct APIData
 	boost::thread ThreadWorker;
 	uint32_t ID;
 	boost::array <Byte, 512> Buff;
+	boost::array <Byte, 512> ReadBuff;
 	//acces to logined user info
 	boost::mutex UserDataMutex;
 };
@@ -50,29 +68,92 @@ MessengerAPI::MessengerAPI()
 
 MessengerAPI::~MessengerAPI()
 {
+	delete _Data;
 }
 
-void MessengerAPI::_NewEvent(const boost::system::error_code& err_code, size_t bytes)
+
+
+// Bind 
+
+void MessengerAPI::_BindMessage()
 {
+	boost::asio::async_read(_Data->sock, buffer(_Data->ReadBuff, BaseHeader::HeaderSize() ),
+				boost::bind(&MessengerAPI::_AcceptMessage, this, _1, _2));
+}
+
+
+
+void MessengerAPI::_BindMessageRemainder(size_t size)
+{
+	boost::asio::async_read(_Data->sock, buffer(
+				_Data->ReadBuff.c_array() + BaseHeader::HeaderSize(), size),
+				boost::bind(&MessengerAPI::_AcceptMessageRemainder, this, _1, _2));
+}
+
+
+
+
+void MessengerAPI::_AcceptMessage(const boost::system::error_code& err_code, size_t bytes)
+{
+	//TODO: do smth
 	if (err_code)
 	{
 		return;
 	}
-	_Data->sock.async_read_some(buffer(_Data->Buff), boost::bind(&MessengerAPI::_NewEvent, this, _1, _2));
-//	printf("Recived %zd bytes\n", bytes);
-	//to queue here
-	if (!BaseHeader::MinimumCheck(bytes))
+
+
+	size_t FrameSize = BaseHeader::FrameSize(_Data->ReadBuff.c_array());
+
+	//TODO: do smth
+	if (!ValidSize(FrameSize))
+	{
+		_BindMessage();
+		return;
+	}
+
+	// if we packet not fully transferred
+	if (NeedReadMore(FrameSize))
+	{
+		_BindMessageRemainder( BytesToReceive(FrameSize) );
+		return;
+	}
+	else {
+
+		//DO Work
+	}
+
+	_AnalyzePacket(_Data->ReadBuff.c_array(), bytes);
+
+	_BindMessage();
+}
+
+
+
+
+void MessengerAPI::_AcceptMessageRemainder(const boost::system::error_code& err_code, size_t bytes)
+{
+	if (err_code)
 		return;
 
-	switch (BaseHeader::BufferType(_Data->Buff.c_array()))
+	_AnalyzePacket(_Data->ReadBuff.c_array(), bytes + BaseHeader::HeaderSize());
+
+	_BindMessage();
+}
+
+// message atleast have header
+void MessengerAPI::_AnalyzePacket(Byte* Packet, size_t size)
+{
+
+	switch (BaseHeader::BufferType(_Data->ReadBuff.c_array()))
 	{
-	
-	
+
+
 	case Types::LoginResponse:
 	{
+		
 		printf("LoginResponse\n");
 		LoginResponse* Data = new LoginResponse;
-		uint32_t err = Data->FromBuffer(_Data->Buff.c_array(),bytes);
+		uint32_t err = Data->FromBuffer(_Data->ReadBuff.c_array(), size);
 		if (err)
 		{
 			printf("Error when unpack\n");
@@ -94,7 +175,7 @@ void MessengerAPI::_NewEvent(const boost::system::error_code& err_code, size_t b
 		printf("UserInfo\n");
 
 		UserInfo* Data = new UserInfo;
-		uint32_t err = Data->FromBuffer(_Data->Buff.c_array(), bytes);
+		uint32_t err = Data->FromBuffer(_Data->ReadBuff.c_array(), size);
 		if (err)
 		{
 			printf("Error when unpack\n");
@@ -116,7 +197,7 @@ void MessengerAPI::_NewEvent(const boost::system::error_code& err_code, size_t b
 		printf("Message\n");
 
 		Message* Data = new Message;
-		uint32_t err = Data->FromBuffer(_Data->Buff.c_array(), bytes);
+		uint32_t err = Data->FromBuffer(_Data->ReadBuff.c_array(), size);
 		if (err)
 		{
 			printf("Error when unpack\n");
@@ -130,7 +211,7 @@ void MessengerAPI::_NewEvent(const boost::system::error_code& err_code, size_t b
 		printf("LastMessageResponse\n");
 
 		LastMessageResponse* Data = new LastMessageResponse;
-		uint32_t err = Data->FromBuffer(_Data->Buff.c_array(), bytes);
+		uint32_t err = Data->FromBuffer(_Data->ReadBuff.c_array(), size);
 		if (err)
 		{
 			printf("Error when unpack\n");
@@ -139,11 +220,12 @@ void MessengerAPI::_NewEvent(const boost::system::error_code& err_code, size_t b
 
 		_Data->_Query.push_back(Data);
 	}
-	
+
 	default:
 		printf(" Wrong packet type\n");
 	}
 }
+
 
 void MessengerAPI::_WriteHandler(const boost::system::error_code& err_code, size_t bytes)
 {
@@ -157,6 +239,7 @@ std::string MessengerAPI::GetCurrentUserLogin() const
 
 	return _UserLogin; 
 }
+
 ID_t MessengerAPI::GetCurrentUserID() const
 {
 	boost::mutex::scoped_lock l{ _Data->UserDataMutex };
@@ -176,7 +259,8 @@ bool MessengerAPI::Connect(const std::string& Address, unsigned short port)
 	{
 		_Working = true;
 		
-		_Data->sock.async_read_some(buffer(_Data->Buff), boost::bind(&MessengerAPI::_NewEvent,this, _1, _2));
+		_BindMessage();
+
 		_Data->ThreadWorker = boost::thread{ boost::bind(&boost::asio::io_service::run, &_Data->service) };
 	}
 
@@ -232,9 +316,6 @@ void MessengerAPI::GetUserLogin(ID_t Id)
 	if (info.ToBuffer(_Data->Buff.c_array()) != 0)
 		throw;
 
-	FILE* file = fopen("dump.txt", "a");
-	Dump(file,_Data->Buff.c_array(), info.NeededSize());
-	fclose(file);
 
 	_Data->sock.async_write_some(boost::asio::buffer(_Data->Buff, info.NeededSize()),
 		boost::bind(&MessengerAPI::_WriteHandler, this, _1, _2));
