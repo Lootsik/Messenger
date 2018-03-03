@@ -2,9 +2,14 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="MessengerAPI.cpp" />
+    <ClCompile Include="AsyncStrategy.cpp" />
+    <ClCompile Include="PacketAnalyzer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MessengerAPI.h" />
     <ClInclude Include="Query.h" />
+    <ClInclude Include="NetworkStrategy.h" />
+    <ClInclude Include="AsyncStrategy.h" />
+    <ClInclude Include="PacketAnalyzer.h" />
   </ItemGroup>
 </Project>
