@@ -14,7 +14,7 @@
 #include <API\PacketAnalyzer.h>
 #include <API\MessengerAPI.h>
 
-using PacketQuery = Query<std::shared_ptr<BaseHeader>>;
+using PacketQuery = Query<BaseHeader*>;
 
 class AsyncStrategy :
 	public NetworkStrategy
@@ -25,7 +25,7 @@ public:
 	bool Connect(const std::string& Address, unsigned short port) override;
 
 	bool Ready() override;
-	std::shared_ptr<TransferredData> GetPacket() override;
+	BaseHeader* GetPacket() override;
 	bool Send(const TransferredData& Data) override;
 
 	//bool Connected 

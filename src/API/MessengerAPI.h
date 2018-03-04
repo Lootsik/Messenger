@@ -2,6 +2,7 @@
 
 #include <Protocol\GlobalInfo.h>
 #include <Protocol\TransferredData.h>
+#include <Protocol\BaseHeader.h>
 #include <string>
 #include <atomic>
 #include <memory>
@@ -27,7 +28,7 @@ public:
 	int TryLogin(const std::string& Login, const std::string& Pass);
 
 	bool Ready();
-	std::shared_ptr<TransferredData> GetPacket();
+	BaseHeader* GetPacket();
 
 
 

@@ -10,7 +10,7 @@ class PacketAnalyzer
 {
 public:
 	PacketAnalyzer();
-	std::shared_ptr<BaseHeader> Analyze(const Byte* Packet, size_t size);
+	BaseHeader* Analyze(const Byte* Packet, size_t size);
 	~PacketAnalyzer();
 };
 

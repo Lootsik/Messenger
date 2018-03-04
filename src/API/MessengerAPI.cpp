@@ -149,7 +149,7 @@ int MessengerAPI::TryLogin(const std::string& Login, const std::string& Pass)
 		if (Ready())
 		{
 			auto ptrPacket = GetPacket();
-			const TransferredData* Packet = ptrPacket.get();
+			const TransferredData* Packet = ptrPacket;
 			if (Packet->GetType() == Types::LoginResponse)
 			{
 				const LoginResponse* Response =  (const LoginResponse*)Packet;
@@ -167,7 +167,7 @@ bool MessengerAPI::Ready()
 	return _Data->Network->Ready();
 }
 
-std::shared_ptr<TransferredData> MessengerAPI::GetPacket()
+BaseHeader* MessengerAPI::GetPacket()
 {
 	return _Data->Network->GetPacket();
 }

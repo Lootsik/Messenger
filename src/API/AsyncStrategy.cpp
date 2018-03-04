@@ -43,11 +43,11 @@ void AsyncStrategy::_CheckPacket(const Byte* packet, size_t size)
 {
 	auto Data = Analyzer.Analyze(packet, size);
 	// deserialization fail
-	if (Data.get() == nullptr)
+	if (Data == nullptr)
 		return;
 
 	// if false, user need to see this
-	if (! API.Process(Data.get()))
+	if (! API.Process(Data))
 	{
 		query.push_back(Data);
 	}
@@ -127,7 +127,7 @@ void AsyncStrategy::_AcceptMessageRemainder(const boost::system::error_code& err
 	_BindMessage();
 }
 
-std::shared_ptr<TransferredData> AsyncStrategy::GetPacket()
+BaseHeader* AsyncStrategy::GetPacket()
 {
 	return query.pop_front();
 }

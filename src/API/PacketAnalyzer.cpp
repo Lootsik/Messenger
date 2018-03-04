@@ -16,7 +16,7 @@ PacketAnalyzer::PacketAnalyzer()
 {
 }
 
-std::shared_ptr<BaseHeader> PacketAnalyzer::Analyze(const Byte* Packet, size_t size)
+BaseHeader* PacketAnalyzer::Analyze(const Byte* Packet, size_t size)
 {
 
 	switch (BaseHeader::BufferType(Packet))
@@ -31,10 +31,10 @@ std::shared_ptr<BaseHeader> PacketAnalyzer::Analyze(const Byte* Packet, size_t s
 		if (err)
 		{
 			printf("Error when unpack\n");
-			return std::shared_ptr<BaseHeader>{ nullptr };
+			return  nullptr ;
 
 		}
-		return std::shared_ptr<BaseHeader>{ Data };
+		return  Data ;
 		
 	}break;
 
@@ -46,10 +46,10 @@ std::shared_ptr<BaseHeader> PacketAnalyzer::Analyze(const Byte* Packet, size_t s
 		if (err)
 		{
 			printf("Error when unpack\n");
-			return std::shared_ptr<BaseHeader>{ nullptr };
+			return  nullptr ;
 
 		}
-		return std::shared_ptr<BaseHeader>{ Data };
+		return Data ;
 
 	}break;
 
@@ -63,10 +63,10 @@ std::shared_ptr<BaseHeader> PacketAnalyzer::Analyze(const Byte* Packet, size_t s
 		if (err)
 		{
 			printf("Error when unpack\n");
-			return std::shared_ptr<BaseHeader>{ nullptr };
+			return  nullptr ;
 
 		}
-		return std::shared_ptr<BaseHeader>{ Data };
+		return  Data ;
 
 	}
 	case Types::LastMessageResponse:
@@ -77,13 +77,13 @@ std::shared_ptr<BaseHeader> PacketAnalyzer::Analyze(const Byte* Packet, size_t s
 		if (err)
 		{
 			printf("Error when unpack\n");
-			return std::shared_ptr<BaseHeader>{ nullptr };
+			return  nullptr ;
 
 		}
 	}
 
 	}
-	return std::shared_ptr<BaseHeader>{ nullptr };
+	return  nullptr ;
 }
 
 
