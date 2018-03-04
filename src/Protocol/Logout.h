@@ -12,6 +12,7 @@
 
 class Logout: public BaseHeader
 {
+public:
     Logout();
 
     //            Getters

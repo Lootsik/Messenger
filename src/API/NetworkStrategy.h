@@ -14,6 +14,8 @@ public:
 
 	virtual bool Send(const TransferredData& Data) = 0;
 
+	virtual void Release() = 0;
+
 	virtual ~NetworkStrategy() {};
 };
 

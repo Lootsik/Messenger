@@ -21,6 +21,7 @@
 #include <Protocol\Message.h>
 #include <Protocol\MessageRequest.h>
 #include <Protocol\LastMessageResponse.h>
+#include <Protocol\Logout.h>
 
 using namespace boost::asio;
 
@@ -154,6 +155,9 @@ int MessengerAPI::TryLogin(const std::string& Login, const std::string& Pass)
 			if (Packet->GetType() == Types::LoginResponse)
 			{
 				const LoginResponse* Response =  (const LoginResponse*)Packet;
+				
+				_Authorized = true;
+
 				return Response->GetValue();
 			}
 			break;
@@ -168,12 +172,26 @@ bool MessengerAPI::Ready()
 	return _Data->Network->Ready();
 }
 
+
 std::shared_ptr<BaseHeader> MessengerAPI::GetPacket()
 {
 	return std::shared_ptr<BaseHeader>{ _Data->Network->GetPacket() };
 }
 
+void MessengerAPI::Quit()
+{
+	if (_Authorized)
+	{
+		Logout packet;
+		_Data->Network->Send(packet);
 
+		_Authorized = false;
+	}	
+	_Data->Network->Release();
+
+	_SetUserId(INVALID_ID);
+	_SetUserLogin("");
+}
 
 
 void MessengerAPI::GetUserLogin(ID_t Id)

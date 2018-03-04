@@ -42,6 +42,8 @@ public:
 	std::string GetCurrentUserLogin() const;
 	ID_t GetCurrentUserID() const;
 
+	void Quit();
+
 	class Disconnect{};
 
 private:
@@ -53,7 +55,7 @@ private:
 	std::atomic<bool> _Kicked = false;
 	APIData* _Data;
 
-
+	bool _Authorized = false;
 	std::string _UserLogin;
 	ID_t _UserID;
 };

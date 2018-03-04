@@ -28,8 +28,7 @@ public:
 	bool Ready() override;
 	BaseHeader* GetPacket() override;
 	bool Send(const TransferredData& Data) override;
-
-	void Reset();
+	void Release() override;
 	//bool Connected 
 
 	//TODO: improve exception

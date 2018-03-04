@@ -46,7 +46,7 @@ AsyncStrategy::~AsyncStrategy()
 //	Worker.detach();
 }
 
-void AsyncStrategy::Reset()
+void AsyncStrategy::Release()
 {
 	_Disconnect();
 	//delete all packets 
@@ -79,7 +79,7 @@ void AsyncStrategy::_CheckPacket(const Byte* packet, size_t size)
 	}
 }
 
-
+// TODO: more
 void AsyncStrategy::_SolveProblem(const boost::system::error_code& err_code)
 {
 	auto s = err_code.message();
@@ -87,11 +87,12 @@ void AsyncStrategy::_SolveProblem(const boost::system::error_code& err_code)
 	switch (err_code.value()) {
 
 	case 2:
-		if (_Connected) {
-			sock.shutdown(socket_base::shutdown_both);
-			sock.close();
-			_Connected = false;
-		}break;
+		_Disconnect();
+		break;
+
+	default:
+		_Disconnect();
+
 	}
 }
 
@@ -183,7 +184,14 @@ void AsyncStrategy::_AcceptMessageRemainder(const boost::system::error_code& err
 
 BaseHeader* AsyncStrategy::GetPacket()
 {
-	return query.pop_front();
+	try
+	{
+		return query.pop_front();
+	}
+	catch (...)
+	{
+		throw;
+	}
 }
 
 
@@ -202,6 +210,10 @@ bool AsyncStrategy::Connect(const std::string& Address, unsigned short port)
 
 bool AsyncStrategy::Connect(const boost::asio::ip::tcp::endpoint& endpoint)
 {
+	//TODO: mb connect to another ep
+	if (_Connected)
+		return true;
+
 	ep = endpoint;
 
 	boost::system::error_code err;

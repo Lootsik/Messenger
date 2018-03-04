@@ -61,7 +61,7 @@ public:
 
 			return tmpData;
 		}
-		throw;
+		throw 0;
 	}
 	const T& front()
 	{
