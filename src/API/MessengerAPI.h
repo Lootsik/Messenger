@@ -28,7 +28,7 @@ public:
 	int TryLogin(const std::string& Login, const std::string& Pass);
 
 	bool Ready();
-	BaseHeader* GetPacket();
+	std::shared_ptr<BaseHeader>  GetPacket();
 
 
 

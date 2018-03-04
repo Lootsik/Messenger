@@ -21,6 +21,7 @@
 #include <Protocol\Message.h>
 #include <Protocol\MessageRequest.h>
 #include <Protocol\LastMessageResponse.h>
+
 using namespace boost::asio;
 
 
@@ -149,7 +150,7 @@ int MessengerAPI::TryLogin(const std::string& Login, const std::string& Pass)
 		if (Ready())
 		{
 			auto ptrPacket = GetPacket();
-			const TransferredData* Packet = ptrPacket;
+			const TransferredData* Packet = ptrPacket.get();
 			if (Packet->GetType() == Types::LoginResponse)
 			{
 				const LoginResponse* Response =  (const LoginResponse*)Packet;
@@ -167,9 +168,9 @@ bool MessengerAPI::Ready()
 	return _Data->Network->Ready();
 }
 
-BaseHeader* MessengerAPI::GetPacket()
+std::shared_ptr<BaseHeader> MessengerAPI::GetPacket()
 {
-	return _Data->Network->GetPacket();
+	return std::shared_ptr<BaseHeader>{ _Data->Network->GetPacket() };
 }
 
 

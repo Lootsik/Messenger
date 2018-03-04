@@ -9,8 +9,6 @@
 
 using namespace boost::asio;
 
-
-
 static bool ValidSize(size_t size) {
 	return size >= BaseHeader::HeaderSize() && size <= PacketMaxSize;
 }
@@ -27,17 +25,42 @@ static size_t BytesToReceive(size_t FrameSize)
 }
 
 
+/*
+	****************************************
+					Core
+	****************************************
+*/
 
 AsyncStrategy::AsyncStrategy(PacketAnalyzer analyzer, MessengerAPI& api)
-	:Analyzer{ analyzer }, API{api}
+	:Analyzer{ analyzer }, API{api},
+	Worker{ [&]() {
+				_BindTimer();
+				service.run();
+		} },  _ThreadWorking{ true }
 {
 }
 
 AsyncStrategy::~AsyncStrategy()
 {
+	service.stop();
+//	Worker.detach();
 }
 
-
+void AsyncStrategy::Reset()
+{
+	_Disconnect();
+	//delete all packets 
+	while (true)
+	{
+		try {
+			auto p = GetPacket();
+			delete p;
+		}
+		catch (...){
+			break;
+		}
+	}
+}
 
 void AsyncStrategy::_CheckPacket(const Byte* packet, size_t size)
 {
@@ -51,11 +74,39 @@ void AsyncStrategy::_CheckPacket(const Byte* packet, size_t size)
 	{
 		query.push_back(Data);
 	}
+	else {
+		delete Data;
+	}
+}
+
+
+void AsyncStrategy::_SolveProblem(const boost::system::error_code& err_code)
+{
+	auto s = err_code.message();
+	
+	switch (err_code.value()) {
+
+	case 2:
+		if (_Connected) {
+			sock.shutdown(socket_base::shutdown_both);
+			sock.close();
+			_Connected = false;
+		}break;
+	}
+}
+
+void AsyncStrategy::_Disconnect()
+{
+	if (_Connected) {
+		sock.shutdown(socket_base::shutdown_both);
+		sock.close();
+		_Connected = false;
+	}
 }
 
 /*
 	***********************************************
-					Bind
+					Bind message
 	***********************************************
 */
 
@@ -91,6 +142,7 @@ void AsyncStrategy::_AcceptMessage(const boost::system::error_code& err_code, si
 	//TODO: do smth
 	if (err_code)
 	{
+		_SolveProblem(err_code);
 		return;
 	}
 
@@ -120,8 +172,10 @@ void AsyncStrategy::_AcceptMessage(const boost::system::error_code& err_code, si
 void AsyncStrategy::_AcceptMessageRemainder(const boost::system::error_code& err_code, size_t bytes)
 {
 	if (err_code)
+	{
+		_SolveProblem(err_code);
 		return;
-
+	}
 	_CheckPacket(ReadBuff.c_array(), bytes + BaseHeader::HeaderSize());
 
 	_BindMessage();
@@ -153,15 +207,15 @@ bool AsyncStrategy::Connect(const boost::asio::ip::tcp::endpoint& endpoint)
 	boost::system::error_code err;
 
 	sock.connect(ep, err);
+	
 	if (err)
+		//connection can be refuzed
 		throw ConnectionTrouble{};
 
 	_BindMessage();
 	
-	// new thread
-	Worker = boost::thread{ [&]() {service.run(); } };
-
 	_Connected = true;
+
 	return true;
 }
 
@@ -172,6 +226,12 @@ bool AsyncStrategy::Ready()
 }
 
 
+
+/*
+	***********************************************
+						Send
+	***********************************************
+*/
 
 
 
@@ -195,17 +255,37 @@ bool AsyncStrategy::Send(const TransferredData& Data)
 	if (ser_err)
 		return false;
 
-	boost::system::error_code err;
 
 	sock.async_write_some(
 			buffer(WriteBuff, Data.NeededSize()),
 			boost::bind(&AsyncStrategy::_WriteHandler, this, _1, _2));
 
-	return !err;
+	return true;
 }
 
 void AsyncStrategy::_WriteHandler(const boost::system::error_code& err, size_t bytes)
 {
 	if (err)
 		throw;
+}
+
+
+
+
+/*
+	***********************************************
+						Timer
+	***********************************************
+*/
+
+
+void AsyncStrategy::_BindTimer()
+{
+	_Timer.expires_from_now(boost::posix_time::millisec(30000));
+	_Timer.async_wait(boost::bind(&AsyncStrategy::_DumpTimer, this,_1));
+}
+
+void AsyncStrategy::_DumpTimer(const boost::system::error_code& error)
+{
+	_BindTimer();
 }
