@@ -45,19 +45,19 @@ uint32_t UserInfo::ToBuffer(Byte* Buffer)const
 	if (err)
 		return err;
 
-	UserInfoDesc* Info = (UserInfoDesc*)Buffer;
+	UserInfoDesc* Users = (UserInfoDesc*)Buffer;
 
-	Info->ID = _ID;
-	Info->LoginSize = static_cast<uint32_t>(_Login.size());
+	Users->ID = _ID;
+	Users->LoginSize = static_cast<uint32_t>(_Login.size());
 	
-	memcpy(Info->Data, _Login.c_str(), Info->LoginSize);
+	memcpy(Users->Data, _Login.c_str(), Users->LoginSize);
 	return SerializationError::Ok;
 }
 
 uint32_t UserInfo::FromBuffer(const Byte* Buffer, size_t Capacity)
 {
-	const UserInfoDesc* Info = (UserInfoDesc*)Buffer;
-	uint32_t err = UserInfoCheck(Info, Capacity);
+	const UserInfoDesc* Users = (UserInfoDesc*)Buffer;
+	uint32_t err = UserInfoCheck(Users, Capacity);
 	if (err)
 		return err;
 
@@ -65,9 +65,9 @@ uint32_t UserInfo::FromBuffer(const Byte* Buffer, size_t Capacity)
 	if (err)
 		return err;
 
-	_ID = Info->ID;
-	uint32_t LoginSize = Info->LoginSize;
-	_Login = std::string{ Info->Data , Info->Data + LoginSize };
+	_ID = Users->ID;
+	uint32_t LoginSize = Users->LoginSize;
+	_Login = std::string{ Users->Data , Users->Data + LoginSize };
 
 	return SerializationError::Ok;
 }

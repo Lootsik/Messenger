@@ -16,13 +16,13 @@ public:
 	}
 	bool ready() 
 	{
-		boost::mutex::scoped_lock{ mutex };
+		boost::mutex::scoped_lock lock{ mutex } ;
 		return first;
 	}
 	//todo: make refference
 	void push_back(const T& data)
 	{
-		boost::mutex::scoped_lock{ mutex };
+		boost::mutex::scoped_lock lock{ mutex } ;
 		node* new_node = new node;
 		//mutex
 		if (first)
@@ -43,7 +43,7 @@ public:
 	{
 		if (last)
 		{
-			boost::mutex::scoped_lock{ mutex };
+			boost::mutex::scoped_lock lock{ mutex } ;
 
 			node* tmp = last;
 
@@ -65,7 +65,7 @@ public:
 	}
 	const T& front()
 	{
-		boost::mutex::scoped_lock{ mutex };
+		boost::mutex::scoped_lock lock{ mutex };
 		if (last)
 		{
 			return last->data;

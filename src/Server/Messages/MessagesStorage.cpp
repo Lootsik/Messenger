@@ -125,8 +125,21 @@ ID_t MessagesStorage::GetLastMessageID(const Speakers& speakers)
 	ID_t id = _GetChat(speakers);
 	if (id == INVALID_ID)
 		return INVALID_ID;
-
-	return Database::GetStatement().execute("SELECT LastMessageId FROM chats WHERE id = " + std::to_string(id) + " ;");
+	
+	try
+	{
+		boost::scoped_ptr<sql::ResultSet> _Result{
+				Database::GetStatement().executeQuery("SELECT LastMessageId FROM chats WHERE id = " 
+						+ std::to_string(id) + " ;") };
+	
+		if (_Result->next())
+			return _Result->getUInt(1);
+		
+	}
+	catch (sql::SQLException &e) {
+		FallLog();
+	}
+	return INVALID_ID;
 }
 
 // if no such chat, INVALID_ID returned

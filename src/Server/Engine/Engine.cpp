@@ -174,9 +174,9 @@ void MessengerEngine::SendResponce(PConnection& connection, const TransferredDat
 
 void MessengerEngine::OnUserInfo(PConnection& connection)
 {
-	UserInfo Info;
+	UserInfo Users;
 
-	uint32_t err = Info.FromBuffer(connection->Packet(), connection->BytesToRead());
+	uint32_t err = Users.FromBuffer(connection->Packet(), connection->BytesToRead());
 	if (err) {
 		Log(Mistake, "[%s] Error when unpacking User info",
 			connection->ConnectionString().c_str());
@@ -184,13 +184,13 @@ void MessengerEngine::OnUserInfo(PConnection& connection)
 	}
 
 	Log(Success, "[%s] %d",
-				connection->ConnectionString().c_str(), Info.GetId());
-	std::string login = _AccountManager.FindLogin(Info.GetId());
+				connection->ConnectionString().c_str(), Users.GetId());
+	std::string login = _AccountManager.FindLogin(Users.GetId());
 	//there is no user with such id
 	//if (login == "")
 		//return;
 
-	UserInfo ReturnInfo{ Info.GetId(), login };
+	UserInfo ReturnInfo{ Users.GetId(), login };
 
 	SendResponce(connection, ReturnInfo);
 }
@@ -233,12 +233,12 @@ void MessengerEngine::OnMessageRequest(PConnection& connection)
 	{
 	case MessageRequest::Message:
 	{
-
+		OnMessageRequest_M(connection, Request);
 	}break;
 
 	case MessageRequest::LastMessageID:
 	{
-
+		OnLastMessage(connection, Request);
 	}break;
 
 	default:

@@ -78,8 +78,8 @@ BaseHeader* PacketAnalyzer::Analyze(const Byte* Packet, size_t size)
 		{
 			printf("Error when unpack\n");
 			return  nullptr ;
-
 		}
+		return Data;
 	}
 
 	}

@@ -8,6 +8,10 @@
 #include <Protocol\LoginRequest.h>
 #include <Protocol\LastMessageResponse.h>
 
+#include <thread>
+
+#include <API/Query.h>
+#include <ctime>
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 template<typename T, typename... Args>
@@ -27,6 +31,53 @@ void TestPacket(Args... args)
 
 namespace Tests
 {		
+
+	TEST_CLASS(QueryTest)
+	{
+	public:
+		TEST_METHOD(Method1)
+		{
+			Query<std::string> query;
+			time_t start = time(NULL);
+			std::thread first{ [&]() {
+				while (1)
+				{
+					query.push_back("Hello world");
+					auto time_now = time(NULL);
+					if (time_now - start > 2)
+						break;
+				}
+			} };
+			std::thread second{ [&]() {
+				while (1)
+				{
+					if (time(NULL) - start > 3)
+					{
+						while (query.ready())
+							query.pop_front();
+						break;
+					}
+					int truies_left = 10;
+					while (!query.ready())
+					{
+						truies_left--;
+						if (! truies_left)
+							break;
+					};
+					if (!truies_left)
+						continue;
+
+					query.pop_front();
+					auto time_now = time(NULL);
+
+				
+				}
+			} };
+			first.join();
+			second.join();
+			Assert::IsFalse(query.ready());
+		}
+	};
 	TEST_CLASS(UnitTest1)
 	{
 	public:
@@ -55,7 +106,7 @@ namespace Tests
 		}
 		TEST_METHOD(LastMessageResponse_)
 		{
-			TestPacket<LastMessageResponse>(1u);
+			TestPacket<LastMessageResponse>(1u,2u);
 		}
 
 	};

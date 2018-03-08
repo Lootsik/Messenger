@@ -6,7 +6,7 @@ LastMessageResponse MessageManager::GetLastMessageID(ID_t ID_from, ID_t ID_to)
 {
 	Speakers speakers(ID_from, ID_to);
 
-	return { _MessageStorage.GetLastMessageID(speakers) };
+	return { ID_from, _MessageStorage.GetLastMessageID(speakers) };
 }
 
 

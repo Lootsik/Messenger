@@ -11,9 +11,9 @@ LastMessageResponse::LastMessageResponse()
 }
 
 
-LastMessageResponse::LastMessageResponse(uint32_t id)
+LastMessageResponse::LastMessageResponse(ID_t anotherID, uint32_t id)
 			:BaseHeader(Types::LastMessageResponse, sizeof(LastMessageResponseDesc)),
-				_MessageId{ id }
+				_MessageId{ id }, _AnotherUserId{anotherID}
 {
 	SetFrameSize(CalculateSize());
 }
@@ -32,6 +32,7 @@ uint32_t LastMessageResponse::ToBuffer(Byte* Buffer)const
 		return err;
 
 	LastMessageResponseDesc* Request = (LastMessageResponseDesc*)Buffer;
+	Request->AnotherId = _AnotherUserId;
 	Request->MessageId = _MessageId;
 
 	return  SerializationError::Ok;
@@ -45,6 +46,7 @@ uint32_t LastMessageResponse::FromBuffer(const Byte* Buffer, const size_t Capaci
 		return err;
 
 	LastMessageResponseDesc* Request = (LastMessageResponseDesc*)Buffer;
+	_AnotherUserId = Request->AnotherId;
 	_MessageId = Request->MessageId;
 
 	return  SerializationError::Ok;
