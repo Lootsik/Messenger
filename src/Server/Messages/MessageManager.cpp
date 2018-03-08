@@ -1,12 +1,16 @@
 #include <Engine\Engine.h>
 #include "MessageManager.h"
 
-
-LastMessageResponse MessageManager::GetLastMessageID(ID_t ID_from, ID_t ID_to)
+//TODO: remove another
+LastMessageResponse MessageManager::GetLastMessageID(ID_t ID_from, ID_t ID_to, ID_t thisUser)
 {
 	Speakers speakers(ID_from, ID_to);
-
-	return { ID_from, _MessageStorage.GetLastMessageID(speakers) };
+	ID_t another;
+	if (ID_from == thisUser)
+		another = ID_to;
+	else
+		another = ID_from;
+	return { another, _MessageStorage.GetLastMessageID(speakers) };
 }
 
 

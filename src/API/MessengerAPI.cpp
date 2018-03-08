@@ -206,7 +206,7 @@ void MessengerAPI::LastMessageId(ID_t another)
 }
 void MessengerAPI::LoadMessage(ID_t another, uint32_t index)
 {
-	MessageRequest Requset{ MessageRequest::Message, GetCurrentUserID(), another, };
+	MessageRequest Requset{ MessageRequest::Message, GetCurrentUserID(), another, index };
 	_Data->Network->Send(Requset);
 }
 void MessengerAPI::SendMessageTo(ID_t to, const std::wstring& Content)

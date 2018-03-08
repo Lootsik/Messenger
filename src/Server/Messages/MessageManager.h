@@ -17,7 +17,7 @@ struct MessageManager
 	Message GetMessageUser(ID_t ID_from, ID_t ID_to, uint32_t  index);
 
 	//INVALID_ID if no messages in chat or no such chat
-	LastMessageResponse GetLastMessageID(ID_t ID_from, ID_t ID_to);
+	LastMessageResponse GetLastMessageID(ID_t ID_from, ID_t ID_to, ID_t another);
 
 
 private:

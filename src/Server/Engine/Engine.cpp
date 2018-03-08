@@ -183,8 +183,6 @@ void MessengerEngine::OnUserInfo(PConnection& connection)
 		return;
 	}
 
-	Log(Success, "[%s] %d",
-				connection->ConnectionString().c_str(), Users.GetId());
 	std::string login = _AccountManager.FindLogin(Users.GetId());
 	//there is no user with such id
 	//if (login == "")
@@ -256,11 +254,17 @@ void MessengerEngine::OnMessageRequest(PConnection& connection)
 void MessengerEngine::OnMessageRequest_M(PConnection& connection, MessageRequest& Request)
 {
 	auto Response = _MessageManager.GetMessageUser(Request.Sender(),Request.Receiver(),Request.GetMessageIndex());
+#if _LOGGING_
+	Log(Action, "[%s] - Message sended", connection->ConnectionString().c_str());
+#endif // _LOGGING_
 	SendResponce(connection, Response);
 }
 
 void MessengerEngine::OnLastMessage(PConnection& connection, MessageRequest& Request)
 {
-	auto Response = _MessageManager.GetLastMessageID(Request.Sender(),Request.Receiver());
+	auto Response = _MessageManager.GetLastMessageID(Request.Sender(), Request.Receiver(), connection->Account().ID());
+#if _LOGGING_
+	Log(Action, "[%s] - Last message sended", connection->ConnectionString().c_str());
+#endif // _LOGGING_
 	SendResponce(connection, Response);
 }

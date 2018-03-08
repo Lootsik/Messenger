@@ -26,7 +26,7 @@ bool MessagesStorage::CreatePrepared()
 	try
 	{
 		_PreparedAddMessage = Conn.prepareStatement("SELECT AddMessage(?,?,?,?);");
-		_PreparedGetMessage = Conn.prepareStatement("SELECT Content FROM messages WHERE Chat = ? and IdInChat = ? ;");
+		_PreparedGetMessage = Conn.prepareStatement("SELECT SenderId, Content FROM messages WHERE Chat = ? and IdInChat = ? ;");
 		_PreparedGetChat = Conn.prepareStatement("SELECT id FROM chats WHERE Member1 = ? and Member2 = ? ;");
 		_PreparedCreateChat  = Conn.prepareStatement("INSERT INTO chats(Member1,Member2) VALUES(?,?);");
 	}
