@@ -212,8 +212,17 @@ void MessengerEngine::OnMessage(PConnection& connection)
 	}
 
 	_MessageManager.PostMessageUser(message.Sender(), message.Receiver(), message.Content());
+	auto NewMess =_MessageManager.GetMessageUser(message.Sender(), message.Receiver(), 
+						_MessageManager.GetLastMessageID(message.Sender(), message.Receiver(), message.Sender()).GetMessageId());
+	// send to sender
+	SendResponce(connection, NewMess);
 
-	//TODO: add response maybe 
+	auto User = _Server->FindConnected(message.Receiver());
+	if (User == nullptr)
+		return;
+
+	SendResponce(*User, NewMess);
+
 }
 
 // parse packet 
