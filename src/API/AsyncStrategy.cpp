@@ -49,6 +49,7 @@ AsyncStrategy::~AsyncStrategy()
 void AsyncStrategy::Release()
 {
 	_Disconnect();
+	_Dropped = false;
 	//delete all packets 
 	while (true)
 	{
@@ -90,9 +91,21 @@ void AsyncStrategy::_SolveProblem(const boost::system::error_code& err_code)
 		_Disconnect();
 		break;
 
+	case 10054:
+	{
+		// connection dropped
+		_Disconnect();
+		_Dropped = true;
+	}break;
+
+		
+	case 10061:
+	{
+		// connection refused
+	}break;
 	default:
 		_Disconnect();
-
+		_Dropped = true;
 	}
 }
 
@@ -211,21 +224,22 @@ bool AsyncStrategy::Connect(const std::string& Address, unsigned short port)
 bool AsyncStrategy::Connect(const boost::asio::ip::tcp::endpoint& endpoint)
 {
 	//TODO: mb connect to another ep
-	if (_Connected)
+	if (_Connected && endpoint == ep)
 		return true;
+	else if (endpoint == ep)
+	{
+		_Disconnect();
+	}
 
 	ep = endpoint;
 
 	boost::system::error_code err;
-
 	sock.connect(ep, err);
 	
 	if (err)
-		//connection can be refuzed
-		throw ConnectionTrouble{};
+		throw __ConnectionRefused{};
 
 	_BindMessage();
-	
 	_Connected = true;
 
 	return true;
@@ -234,6 +248,9 @@ bool AsyncStrategy::Connect(const boost::asio::ip::tcp::endpoint& endpoint)
 
 bool AsyncStrategy::Ready()
 {
+	if (_Dropped)
+		throw  __ConnectionDropped{};
+
 	return query.ready();
 }
 
@@ -249,12 +266,16 @@ bool AsyncStrategy::Ready()
 
 bool AsyncStrategy::Send(const TransferredData& Data)
 {
+	// connection dropped exception will dropped soon
+	if (_Dropped)
+		return false;
+
 	if (!_Connected)
 	{
 		try {
 			Connect(ep);
 		}
-		catch (ConnectionTrouble){
+		catch (NetworkTrouble){
 			throw;
 		}
 	}
@@ -278,7 +299,7 @@ bool AsyncStrategy::Send(const TransferredData& Data)
 void AsyncStrategy::_WriteHandler(const boost::system::error_code& err, size_t bytes)
 {
 	if (err)
-		throw;
+		_SolveProblem(err);
 }
 
 

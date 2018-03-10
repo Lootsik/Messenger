@@ -67,10 +67,15 @@ void DialogLogin::OnBnClickedOk()
 		return;
 	}
 	//TODO: rewrite somehow
-	if (!connected && !API.Connect(boost::asio::ip::address_v4{ Address }.to_string(), Port))
-	{
-		MessageBox(L"Cannot connect", L"Error", 0);
-		return;
+	if (!connected ){
+		auto IpString = boost::asio::ip::address_v4{ Address }.to_string();
+		try {
+			API.Connect(IpString, Port);
+		}
+		catch(const MessengerAPI::ConnectionRefused&){
+			MessageBox((L"Connection refused " + std::wstring{ IpString.begin(), IpString.end() } + L':' + std::to_wstring(Port)).c_str(), L"Refused", 0);
+			return;
+		}
 	}
 
 	connected = true;

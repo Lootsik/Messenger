@@ -17,5 +17,8 @@ public:
 	virtual void Release() = 0;
 
 	virtual ~NetworkStrategy() {};
+
+	class __ConnectionRefused {};
+	class __ConnectionDropped {};
 };
 

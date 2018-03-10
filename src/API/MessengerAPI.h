@@ -20,13 +20,13 @@ public:
 	MessengerAPI();
 	~MessengerAPI();
 
-	bool Connected() const {
-		return _Connected;
-	}
 
+	//  throw ConnectionRefused
 	bool Connect(const std::string& Address, unsigned short port);
+
 	int TryLogin(const std::string& Login, const std::string& Pass);
 
+	// throw Disconnect
 	bool Ready();
 	std::shared_ptr<BaseHeader>  GetPacket();
 
@@ -45,14 +45,15 @@ public:
 	void Quit();
 
 	class Disconnect{};
+	class ConnectionRefused {};
 
 private:
 	void _SetUserId(const ID_t id);
 	void _SetUserLogin(const std::string& NewLogin);
 
-	bool _Working = false;
 	bool _Connected = false;
-	std::atomic<bool> _Kicked = false;
+	bool _ConnectionDropped = false;
+
 	APIData* _Data;
 
 	bool _Authorized = false;

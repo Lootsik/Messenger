@@ -136,41 +136,61 @@ void MessengerAPI::_SetUserLogin(const std::string& NewLogin)
 
 
 
-bool MessengerAPI::Connect(const std::string& Address, unsigned short port)
+bool MessengerAPI::Connect(const std::string& Address, unsigned short port) 
 {
-	return _Data->Network->Connect( Address, port );
+	try
+	{
+		return _Data->Network->Connect( Address, port );
+	}
+	catch (const NetworkStrategy::__ConnectionRefused&)
+	{
+		throw ConnectionRefused{};
+	}
 }
 
 int MessengerAPI::TryLogin(const std::string& Login, const std::string& Pass)
 {
 	LoginRequest Request{ Login, Pass };
 	_Data->Network->Send(Request);
-
-	for (int i = 0; i < 15; ++i)
-	{
-		if (Ready())
+	try {
+		for (int i = 0; i < 15; ++i)
 		{
-			auto ptrPacket = GetPacket();
-			const TransferredData* Packet = ptrPacket.get();
-			if (Packet->GetType() == Types::LoginResponse)
+			if (Ready())
 			{
-				const LoginResponse* Response =  (const LoginResponse*)Packet;
-				
-				_Authorized = true;
+				auto ptrPacket = GetPacket();
+				const TransferredData* Packet = ptrPacket.get();
+				if (Packet->GetType() == Types::LoginResponse)
+				{
+					const LoginResponse* Response = (const LoginResponse*)Packet;
 
-				return Response->GetValue();
+					_Authorized = true;
+
+					return Response->GetValue();
+				}
+				break;
 			}
-			break;
+			Sleep(200);
 		}
-		Sleep(200);
 	}
+	catch (const Disconnect&)
+	{
+		throw;
+	}
+	//TODO: add 
 	return -1;
 }
 
 bool MessengerAPI::Ready() 
 {
-	return _Data->Network->Ready();
+	try {
+		return _Data->Network->Ready();
+	}
+	catch (const NetworkStrategy::__ConnectionDropped&)
+	{
+		throw Disconnect{};
+	}
 }
+
 
 
 std::shared_ptr<BaseHeader> MessengerAPI::GetPacket()
@@ -191,6 +211,7 @@ void MessengerAPI::Quit()
 
 	_SetUserId(INVALID_ID);
 	_SetUserLogin("");
+
 }
 
 

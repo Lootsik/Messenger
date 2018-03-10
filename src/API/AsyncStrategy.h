@@ -27,15 +27,23 @@ public:
 
 	bool Ready() override;
 	BaseHeader* GetPacket() override;
+
+
 	bool Send(const TransferredData& Data) override;
 	void Release() override;
 	//bool Connected 
 
-	//TODO: improve exception
-	class ConnectionTrouble{};
+	class NetworkTrouble {
+	public:
+		NetworkTrouble(const wchar_t* what) : message{ what } {}
+		const wchar_t* what()const { return message; }
+	private:
+		const wchar_t* message;
+	};
 
 
 private:
+	bool _Dropped = false;
 
 	MessengerAPI & API;
 
