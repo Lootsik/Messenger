@@ -12,5 +12,4 @@ public:
 
 	InPlace(InPlace&&) = delete;
 	InPlace& operator=(InPlace&&) = delete;
-
 };

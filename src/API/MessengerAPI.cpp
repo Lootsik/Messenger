@@ -155,21 +155,27 @@ int MessengerAPI::TryLogin(const std::string& Login, const std::string& Pass)
 	try {
 		for (int i = 0; i < 15; ++i)
 		{
-			if (Ready())
-			{
-				auto ptrPacket = GetPacket();
-				const TransferredData* Packet = ptrPacket.get();
-				if (Packet->GetType() == Types::LoginResponse)
+			try {
+				if (Ready())
 				{
-					const LoginResponse* Response = (const LoginResponse*)Packet;
+					auto ptrPacket = GetPacket();
+					const TransferredData* Packet = ptrPacket.get();
+					if (Packet->GetType() == Types::LoginResponse)
+					{
+						const LoginResponse* Response = (const LoginResponse*)Packet;
 
-					_Authorized = true;
+						_Authorized = true;
 
-					return Response->GetValue();
+						return Response->GetValue();
+					}
+					break;
 				}
-				break;
+				Sleep(200);
 			}
-			Sleep(200);
+			catch (const Disconnect&)
+			{
+				return TryLogin(Login, Pass);
+			}
 		}
 	}
 	catch (const Disconnect&)

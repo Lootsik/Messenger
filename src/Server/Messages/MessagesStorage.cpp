@@ -6,6 +6,7 @@
 
 //TODO: make "atomic" in database
 
+
 MessagesStorage::MessagesStorage()
 {
 	CreatePrepared();
@@ -32,14 +33,19 @@ bool MessagesStorage::CreatePrepared()
 	}
 	catch (sql::SQLException& e)
 	{
-		FallLog();
+		FallLog(e);
 	}
 	return true;
 }
 
-bool MessagesStorage::AddMessage(ID_t From, ID_t To, const MessageContent& Content)
+
+MessagesStorage::State MessagesStorage::AddMessage(ID_t From, ID_t To, const MessageContent& Content)
 {
-	if (!_TryAddMessage(From, To, Content))
+	std::string ByteString{ (char*)Content.c_str(), Content.size() * sizeof(wchar_t) };
+
+	auto ret = _TryAddMessage(From, To, ByteString);
+	
+	if (ret == State::NoSuchChat)
 	{
 		Speakers speakers{ From, To };
 		
@@ -47,26 +53,23 @@ bool MessagesStorage::AddMessage(ID_t From, ID_t To, const MessageContent& Conte
 
 		ID_t ChatId = _GetChat(speakers);
 		if (ChatId == INVALID_ID)
-		{
-			//TODO: fix
+			// internal error 
 			throw;
-		}
-		return _TryAddMessage(From, To, Content);
+
+		return _TryAddMessage(From, To, ByteString);
 	}
 
-	return true;
+	return State::Ok;
 }
-
 
 // mostly inmplemented in sql function
 // if false, need create chat and repeat
 // if true - done
-bool MessagesStorage::_TryAddMessage(ID_t From, ID_t To, const MessageContent& Content)
+MessagesStorage::State MessagesStorage::_TryAddMessage(ID_t From, ID_t To, const std::string& str)
 {
-	sql::SQLString str{(char*) Content.c_str(), Content.size() * sizeof(wchar_t) };
-
 	Speakers sp{ From, To };
 	boost::scoped_ptr<sql::ResultSet> _Result;
+
 	try
 	{
 		_PreparedAddMessage->clearParameters();
@@ -80,22 +83,26 @@ bool MessagesStorage::_TryAddMessage(ID_t From, ID_t To, const MessageContent& C
 		_Result->next();
 		
 		//sql returns 1 if chat is not created, if done
-		return _Result->getInt(1) == 0;
+		if (_Result->getInt(1) == 0)
+			return State::Ok;
+		else 
+			return State::NoSuchChat;
 	}
 	catch (sql::SQLException &e) {
-		FallLog();
+
+		// data too long
+		if (e.getErrorCode() == 1406)
+			return State::DataTooBig;
+		
+		FallLog(e);
 	}
-	return true;
 }
 
-std::pair<ID_t, MessageContent> MessagesStorage::LoadMessage(const Speakers& speakers, ID_t InChatId)
+MessagesStorage::State MessagesStorage::LoadMessage(const Speakers& speakers, ID_t InChatId, std::pair<ID_t, MessageContent>& Message)
 {
 	ID_t ChatId = _GetChat(speakers);
 	if (ChatId == INVALID_ID)
-	{
-		return {};
-		//report err
-	}
+		return State::NoSuchMessage;
 
 	boost::scoped_ptr<sql::ResultSet> _Result;
 	try
@@ -110,14 +117,17 @@ std::pair<ID_t, MessageContent> MessagesStorage::LoadMessage(const Speakers& spe
 		{
 			ID_t sender = _Result->getUInt("SenderId");
 			std::string str = _Result->getString("Content");
-			return { sender,{ (wchar_t*)str.c_str(),str.size() / sizeof(wchar_t)} };
+			Message.first = sender;
+			Message.second = { (wchar_t*)str.c_str(),str.size() / sizeof(wchar_t) };
+
+			return State::Ok;
 		}
 		
 	}
 	catch (sql::SQLException &e) {
-		FallLog();
+		FallLog(e);
 	}
-	return {};
+	return State::NoSuchMessage;
 }
 
 ID_t MessagesStorage::GetLastMessageID(const Speakers& speakers)
@@ -137,12 +147,11 @@ ID_t MessagesStorage::GetLastMessageID(const Speakers& speakers)
 		
 	}
 	catch (sql::SQLException &e) {
-		FallLog();
+		FallLog(e);
 	}
 	return INVALID_ID;
 }
 
-// if no such chat, INVALID_ID returned
 ID_t MessagesStorage::_GetChat(const Speakers& speakers)
 {
 	boost::scoped_ptr<sql::ResultSet> _Result;
@@ -158,7 +167,7 @@ ID_t MessagesStorage::_GetChat(const Speakers& speakers)
 			return _Result->getUInt(1);
 	}
 	catch (sql::SQLException &e) {
-		FallLog();
+		FallLog(e);
 	}
 
 	return INVALID_ID;
@@ -176,6 +185,6 @@ void MessagesStorage::_CreateChat(const Speakers& speakers)
 
 	}
 	catch (sql::SQLException &e) {
-		FallLog();
+		FallLog(e);
 	}
 }

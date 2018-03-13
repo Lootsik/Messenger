@@ -25,7 +25,7 @@ bool AccountStorage::CreatePrepared()
     }
     catch (sql::SQLException& e)
     {
-		FallLog();
+		FallLog(e);
     }
     return true;
 }
@@ -40,7 +40,7 @@ AccountStorage::~AccountStorage()
     delete _Prepared_GetLogin;
 }
     
-void AccountStorage::NewUser(const std::string& login, const std::string& password)
+bool AccountStorage::NewUser(const std::string& login, const std::string& password)
 {
     try
     {
@@ -52,12 +52,17 @@ void AccountStorage::NewUser(const std::string& login, const std::string& passwo
     }
     catch (sql::SQLException &e)
 	{
-		FallLog();
+		if (e.getErrorCode() == 1406)
+			return false;
+
+		FallLog(e);
     }
+	return true;
 }
 
 bool AccountStorage::DeleteUser(const std::string& login)
 {
+
     try
     {
         _Prepared_DeleteUser->clearParameters();
@@ -67,9 +72,8 @@ bool AccountStorage::DeleteUser(const std::string& login)
         return update > 0;
     }
     catch (sql::SQLException &e) {
-		FallLog();
+		FallLog(e);
     }
-
 }
 
 bool AccountStorage::IsExist(const std::string& login)
@@ -85,7 +89,7 @@ bool AccountStorage::IsExist(const std::string& login)
     }
 	catch (sql::SQLException &e)
 	{
-		FallLog();
+		FallLog(e);
 	}
     //number of rows in output table
     size_t rows = _Result->rowsCount();
@@ -108,13 +112,13 @@ size_t AccountStorage::VerifyUser(const std::string& login, const std::string& p
     }
 	catch (sql::SQLException &e)
 	{
-		FallLog();
+		FallLog(e);
     }
 
     size_t rows = _Result->rowsCount();
     if (rows == 0)
     {
-        return 0;
+		return INVALID_ID;
     }
 	_Result->next();
     uint32_t id = _Result->getInt("id");
@@ -134,7 +138,7 @@ ID_t AccountStorage::GetID(const std::string& login)
     }
     catch (sql::SQLException &e)
     {
-		FallLog();
+		FallLog(e);
     }
     if (_Result->next())
         return  _Result->getInt("id");
@@ -151,7 +155,7 @@ std::string AccountStorage::GetLogin(ID_t ID)
     }
     catch (sql::SQLException &e)
     {
-		FallLog();
+		FallLog(e);
     }
     if (_Result->next())
         return _Result->getString("Login");
@@ -179,7 +183,7 @@ bool AccountStorage::Online(ID_t ID)
     }
     catch (sql::SQLException &e)
     {
-		FallLog();
+		FallLog(e);
     }
     return false;
 }

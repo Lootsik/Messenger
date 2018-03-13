@@ -24,6 +24,7 @@
     <ClInclude Include="LastMessageResponse.h" />
     <ClInclude Include="LoginRequest.h" />
     <ClInclude Include="LoginResponse.h" />
+    <ClInclude Include="LoginRules.h" />
     <ClInclude Include="Logout.h" />
     <ClInclude Include="MessageRequest.h" />
     <ClInclude Include="Message.h" />
@@ -37,6 +38,7 @@
     <ClCompile Include="LastMessageResponse.cpp" />
     <ClCompile Include="LoginRequest.cpp" />
     <ClCompile Include="LoginResponse.cpp" />
+    <ClCompile Include="LoginRules.cpp" />
     <ClCompile Include="Logout.cpp" />
     <ClCompile Include="MessageRequest.cpp" />
     <ClCompile Include="Message.cpp" />

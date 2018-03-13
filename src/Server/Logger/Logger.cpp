@@ -153,8 +153,10 @@ void LogBoth(const int TypeEvent, const char* format...)
 	va_start(args, format);
 	_VLog(stdout, TypeEvent, format, args);
 	//to prevent double message when File is not open
-	if( File )
-		_VLog(File,  TypeEvent, format, args);
+	if (File) {
+		_VLog(File, TypeEvent, format, args);
+		Flush();
+	}
 	va_end(args);
 }
 

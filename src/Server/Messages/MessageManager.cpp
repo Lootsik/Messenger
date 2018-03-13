@@ -1,4 +1,5 @@
 #include <Engine\Engine.h>
+
 #include "MessageManager.h"
 
 //TODO: remove another
@@ -18,11 +19,20 @@ Message MessageManager::GetMessageUser(ID_t ID_from, ID_t ID_to, uint32_t  index
 {
 	Speakers speakers(ID_from, ID_to);
 
-	auto Res = _MessageStorage.LoadMessage(speakers, index);
-	return { Res.first, speakers.GetAnother(Res.first),Res.second, index };
+	std::pair<ID_t, MessageContent> Content;
+
+	auto ret = _MessageStorage.LoadMessage(speakers, index, Content);
+	if (ret == MessagesStorage::State::Ok)
+		return { Content.first, speakers.GetAnother(Content.first),Content.second, index };
+	
+	return {};
 }
 
-void MessageManager::PostMessageUser(ID_t ID_from, ID_t ID_to, const std::wstring& Content)
+bool MessageManager::PostMessageUser(ID_t ID_from, ID_t ID_to, const std::wstring& Content)
 {
-	_MessageStorage.AddMessage(ID_from, ID_to, Content);
+	if (BytesContain(Content) > MessageMax)
+		return false;
+
+	auto ret = 	_MessageStorage.AddMessage(ID_from, ID_to, Content);
+	return ret == MessagesStorage::State::Ok;
 }

@@ -13,6 +13,7 @@
     <ClInclude Include="GlobalInfo.h" />
     <ClInclude Include="LastMessageResponse.h" />
     <ClInclude Include="Message.h" />
+    <ClInclude Include="LoginRules.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BaseHeader.cpp" />
@@ -23,5 +24,6 @@
     <ClCompile Include="MessageRequest.cpp" />
     <ClCompile Include="LastMessageResponse.cpp" />
     <ClCompile Include="Message.cpp" />
+    <ClCompile Include="LoginRules.cpp" />
   </ItemGroup>
 </Project>

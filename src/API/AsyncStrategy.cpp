@@ -267,16 +267,17 @@ bool AsyncStrategy::Ready()
 bool AsyncStrategy::Send(const TransferredData& Data)
 {
 	// connection dropped exception will dropped soon
-	if (_Dropped)
-		return false;
-
+	
 	if (!_Connected)
 	{
 		try {
 			Connect(ep);
 		}
 		catch (NetworkTrouble){
-			throw;
+			if (_Dropped)
+				return false;
+			else
+				throw;
 		}
 	}
 

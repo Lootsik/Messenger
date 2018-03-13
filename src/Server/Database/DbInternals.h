@@ -13,6 +13,6 @@
 
 #include <Logger\Logger.h>
 
-#define FallLog() Logger::LogBoth(Logger::Error, "SQLException thrown in. %s : %s. Error # %d: %s", \
-			__FILE__, __func__, e.getErrorCode(), e.what());\
+#define FallLog(sql_error) Logger::LogBoth(Logger::Error, "SQLException thrown in. %s : %s. Error # %d: %s", \
+			__FILE__, __func__, sql_error.getErrorCode(), sql_error.what());\
 			throw
