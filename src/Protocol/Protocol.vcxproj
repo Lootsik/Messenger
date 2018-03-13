@@ -21,28 +21,28 @@
   <ItemGroup>
     <ClInclude Include="BaseHeader.h" />
     <ClInclude Include="GlobalInfo.h" />
-    <ClInclude Include="LastMessageResponse.h" />
-    <ClInclude Include="LoginRequest.h" />
-    <ClInclude Include="LoginResponse.h" />
+    <ClInclude Include="Types\LastMessageResponse.h" />
+    <ClInclude Include="Types\LoginRequest.h" />
+    <ClInclude Include="Types\LoginResponse.h" />
     <ClInclude Include="LoginRules.h" />
-    <ClInclude Include="Logout.h" />
-    <ClInclude Include="MessageRequest.h" />
-    <ClInclude Include="Message.h" />
+    <ClInclude Include="Types\Logout.h" />
+    <ClInclude Include="Types\MessageRequest.h" />
+    <ClInclude Include="Types\Message.h" />
     <ClInclude Include="SerializationError.h" />
     <ClInclude Include="TransferredData.h" />
     <ClInclude Include="Types.h" />
-    <ClInclude Include="UserInfo.h" />
+    <ClInclude Include="Types\UserInfo.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BaseHeader.cpp" />
-    <ClCompile Include="LastMessageResponse.cpp" />
-    <ClCompile Include="LoginRequest.cpp" />
-    <ClCompile Include="LoginResponse.cpp" />
+    <ClCompile Include="Types\LastMessageResponse.cpp" />
+    <ClCompile Include="Types\LoginRequest.cpp" />
+    <ClCompile Include="Types\LoginResponse.cpp" />
     <ClCompile Include="LoginRules.cpp" />
-    <ClCompile Include="Logout.cpp" />
-    <ClCompile Include="MessageRequest.cpp" />
-    <ClCompile Include="Message.cpp" />
-    <ClCompile Include="UserInfo.cpp" />
+    <ClCompile Include="Types\Logout.cpp" />
+    <ClCompile Include="Types\MessageRequest.cpp" />
+    <ClCompile Include="Types\Message.cpp" />
+    <ClCompile Include="Types\UserInfo.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

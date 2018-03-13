@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+
 #include <Protocol\GlobalInfo.h>
 
 //to hide includes inside .cpp 

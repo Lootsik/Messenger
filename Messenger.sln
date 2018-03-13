@@ -4,14 +4,29 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 15.0.27130.2010
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MessengerServer", "src\Server\MessengerServer.vcxproj", "{A14CCA81-3607-4D97-8774-4F4A62C0E188}"
+	ProjectSection(ProjectDependencies) = postProject
+		{9ACE21E4-1EA9-4E6C-A4C3-E63E1A1FAC75} = {9ACE21E4-1EA9-4E6C-A4C3-E63E1A1FAC75}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "API", "src\API\API.vcxproj", "{7645130D-B9B7-4DC9-A0D8-0066BE2430D2}"
+	ProjectSection(ProjectDependencies) = postProject
+		{9ACE21E4-1EA9-4E6C-A4C3-E63E1A1FAC75} = {9ACE21E4-1EA9-4E6C-A4C3-E63E1A1FAC75}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Protocol", "src\Protocol\Protocol.vcxproj", "{9ACE21E4-1EA9-4E6C-A4C3-E63E1A1FAC75}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Tests", "Tests\Tests.vcxproj", "{70D38B5C-CBF3-415F-8452-CCC51439E5D2}"
+	ProjectSection(ProjectDependencies) = postProject
+		{7645130D-B9B7-4DC9-A0D8-0066BE2430D2} = {7645130D-B9B7-4DC9-A0D8-0066BE2430D2}
+		{9ACE21E4-1EA9-4E6C-A4C3-E63E1A1FAC75} = {9ACE21E4-1EA9-4E6C-A4C3-E63E1A1FAC75}
+		{8C0A0AF6-C3AF-4034-B05D-9319E71EFA63} = {8C0A0AF6-C3AF-4034-B05D-9319E71EFA63}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Client", "src\MessengerClient\MessengerClient.vcxproj", "{8C0A0AF6-C3AF-4034-B05D-9319E71EFA63}"
+	ProjectSection(ProjectDependencies) = postProject
+		{7645130D-B9B7-4DC9-A0D8-0066BE2430D2} = {7645130D-B9B7-4DC9-A0D8-0066BE2430D2}
+		{9ACE21E4-1EA9-4E6C-A4C3-E63E1A1FAC75} = {9ACE21E4-1EA9-4E6C-A4C3-E63E1A1FAC75}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -4,12 +4,6 @@
 #include <Protocol\Types.h>
 #include <Protocol\SerializationError.h>
 #include <Protocol\BaseHeader.h>
-#include <Protocol\LoginRequest.h>
-#include <Protocol\LoginResponse.h>
-#include <Protocol\UserInfo.h>
-#include <Protocol\MessageRequest.h>
-#include <Protocol\Message.h>
-#include <Protocol\LastMessageResponse.h>
 
 #include <Logger\Logger.h>
 

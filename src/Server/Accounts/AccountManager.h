@@ -2,10 +2,10 @@
 #include <string>
 #include <Protocol\GlobalInfo.h>
 
-#include <Accounts\AccountStorage\AccountStorage.h>
+#include <Accounts\AccountStorage.h>
 
-#include <Protocol\LoginRequest.h>
-#include <Protocol\LoginResponse.h>
+#include <Protocol\Types\LoginRequest.h>
+#include <Protocol\Types\LoginResponse.h>
 
 class AccountManager
 {

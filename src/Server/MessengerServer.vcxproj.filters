@@ -1,7 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="Accounts\AccountStorage\AccountStorage.cpp" />
     <ClCompile Include="Accounts\AccountManager.cpp" />
     <ClCompile Include="Database\Database.cpp" />
     <ClCompile Include="Database\MySqlDB.cpp" />
@@ -12,9 +11,9 @@
     <ClCompile Include="Utility\ConfigParser.cpp" />
     <ClCompile Include="Messages\MessagesStorage.cpp" />
     <ClCompile Include="Messages\MessageManager.cpp" />
+    <ClCompile Include="Accounts\AccountStorage.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Accounts\AccountStorage\AccountStorage.h" />
     <ClInclude Include="Accounts\AccountManager.h" />
     <ClInclude Include="Database\Database.h" />
     <ClInclude Include="Database\MySqlDB.h" />
@@ -28,5 +27,6 @@
     <ClInclude Include="Messages\MessagesStorage.h" />
     <ClInclude Include="Database\DbInternals.h" />
     <ClInclude Include="Messages\MessageManager.h" />
+    <ClInclude Include="Accounts\AccountStorage.h" />
   </ItemGroup>
 </Project>

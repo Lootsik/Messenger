@@ -3,7 +3,7 @@
 #include <string>
 
 #include <Protocol\Types.h>
-#include <Protocol\LoginResponse.h>
+
 #include <boost\asio.hpp>
 DialogLogin::DialogLogin(MessengerAPI& api) :
 								CDialogEx(IDDialogLogin),

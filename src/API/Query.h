@@ -1,5 +1,6 @@
 #pragma once
 #include <boost\thread\mutex.hpp>
+
 template<typename T>
 class Query
 {

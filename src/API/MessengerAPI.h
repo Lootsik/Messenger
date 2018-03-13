@@ -1,11 +1,13 @@
 #pragma once
 
-#include <Protocol\GlobalInfo.h>
-#include <Protocol\TransferredData.h>
-#include <Protocol\BaseHeader.h>
 #include <string>
 #include <atomic>
 #include <memory>
+
+#include <Protocol\GlobalInfo.h>
+#include <Protocol\TransferredData.h>
+#include <Protocol\BaseHeader.h>
+
 struct APIData;
 
 namespace boost {

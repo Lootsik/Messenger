@@ -1,14 +1,6 @@
 #include <Protocol\BaseHeader.h>
 #include <Protocol\Types.h>
 
-#include <Protocol\TransferredData.h>
-#include <Protocol\LoginRequest.h>
-#include <Protocol\LoginResponse.h>
-#include <Protocol\Types.h>
-#include <Protocol\UserInfo.h>
-#include <Protocol\Message.h>
-#include <Protocol\MessageRequest.h>
-#include <Protocol\LastMessageResponse.h>
 
 #include "PacketAnalyzer.h"
 

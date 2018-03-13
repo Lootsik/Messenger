@@ -4,6 +4,7 @@
 #include "afxcmn.h"
 
 #include <API\MessengerAPI.h>
+
 class ClientNetwork;
 
 class DialogLogin : public CDialogEx

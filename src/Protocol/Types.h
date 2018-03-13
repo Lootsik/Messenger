@@ -1,11 +1,14 @@
 #if !defined(TYPES_H)
-/* ========================================================================
-$File: $
-$Date: $
-$Revision: $
-$Notice: (C) Copyright 2014 by Molly Rocket, Inc. All Rights Reserved. $
-======================================================================== */
 #define TYPES_H
+
+#include <Protocol\Types\UserInfo.h>
+#include <Protocol\Types\MessageRequest.h>
+#include <Protocol\Types\Message.h>
+#include <Protocol\Types\LastMessageResponse.h>
+#include <Protocol\Types\LoginRequest.h>
+#include <Protocol\Types\LoginResponse.h>
+#include <Protocol\Types\Logout.h>
+
 
 namespace Types
 {
@@ -19,7 +22,6 @@ namespace Types
 		LoginRequest,
 		LoginResponse,
 		Logout,
-		UncheckedEvent
 	};
 }
 

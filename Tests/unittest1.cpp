@@ -1,12 +1,8 @@
 #include "stdafx.h"
 #include "CppUnitTest.h"
 
-#include <Protocol\Message.h>
-#include <Protocol\MessageRequest.h>
-#include <Protocol\LoginResponse.h>
-#include <Protocol\UserInfo.h>
-#include <Protocol\LoginRequest.h>
-#include <Protocol\LastMessageResponse.h>
+#include <Protocol\Types.h>
+
 
 #include <thread>
 
@@ -35,7 +31,7 @@ namespace Tests
 	TEST_CLASS(QueryTest)
 	{
 	public:
-		TEST_METHOD(Method1)
+		TEST_METHOD(AsyncQuery)
 		{
 			Query<std::string> query;
 			time_t start = time(NULL);

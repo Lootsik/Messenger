@@ -1,10 +1,3 @@
-#include <Accounts\AccountStorage\AccountStorage.h>
-
-#include <Network\Connection.h>
-
-#include <Protocol\LoginRequest.h>
-#include <Protocol\LoginResponse.h>
-
 #include <Protocol\LoginRules.h>
 
 #include "AccountManager.h"
@@ -48,6 +41,7 @@ LoginResponse AccountManager::Login( const LoginRequest& AuthData )
 	return LoginResponse{ LoginResponse::Success, id };
 }
 
+// TODO: write
 bool AccountManager::AddUser(const std::string& Login, const std::string& Password)
 {
 	return IsAllowedLogin(Login);

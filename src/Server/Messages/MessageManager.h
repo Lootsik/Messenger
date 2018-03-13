@@ -3,11 +3,11 @@
 
 #include <Accounts\AccountManager.h>
 
-#include <Messages\MessagesStorage.h>
+#include <Protocol\Types\Message.h>
+#include <Protocol\Types\LastMessageResponse.h>
+#include <Protocol\Types\Message.h>
 
-#include <Protocol\Message.h>
-#include <Protocol\LastMessageResponse.h>
-#include <Protocol\Message.h>
+#include <Messages\MessagesStorage.h>
 
 class Engine;
 

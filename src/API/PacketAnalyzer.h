@@ -2,7 +2,6 @@
 #include <memory>
 
 #include <Protocol\GlobalInfo.h>
-
 #include <Protocol\TransferredData.h>
 
 

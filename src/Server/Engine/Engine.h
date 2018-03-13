@@ -6,7 +6,7 @@
 #include <Accounts\AccountManager.h>
 #include <Messages\MessageManager.h>
 #include <Protocol\GlobalInfo.h>
-#include <Protocol\MessageRequest.h>
+#include <Protocol\Types\MessageRequest.h>
 
 
 class Network;

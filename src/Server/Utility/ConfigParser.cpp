@@ -1,6 +1,9 @@
-#include "ConfigParser.h"
-#include "pugixml.hpp"
 #include <climits>
+
+#include <pugixml.hpp>
+
+#include "ConfigParser.h"
+
 // true if val is between values left and right
 template <typename T>
 bool __Between(T val, T left, T right)

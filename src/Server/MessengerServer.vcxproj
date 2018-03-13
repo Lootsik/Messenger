@@ -20,7 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Accounts\AccountManager.cpp" />
-    <ClCompile Include="Accounts\AccountStorage\AccountStorage.cpp" />
+    <ClCompile Include="Accounts\AccountStorage.cpp" />
     <ClCompile Include="Database\Database.cpp" />
     <ClCompile Include="Database\MySqlDB.cpp" />
     <ClCompile Include="Engine\Engine.cpp" />
@@ -33,7 +33,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Accounts\AccountManager.h" />
-    <ClInclude Include="Accounts\AccountStorage\AccountStorage.h" />
+    <ClInclude Include="Accounts\AccountStorage.h" />
     <ClInclude Include="Database\Database.h" />
     <ClInclude Include="Database\DbInternals.h" />
     <ClInclude Include="Database\MySqlDB.h" />

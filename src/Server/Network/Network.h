@@ -2,10 +2,12 @@
 #define _LOGGING_ 1
 #define _PACKET_TRACE_ 0
 
-#include <boost/asio.hpp>
-#include <boost/array.hpp>
 #include <map>
 #include <string>
+
+#include <boost/asio.hpp>
+#include <boost/array.hpp>
+
 #include <Network/Connection.h>
 #include <Engine/Engine.h>
 

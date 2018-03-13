@@ -1,8 +1,8 @@
 #pragma once
-#include <Protocol\TransferredData.h>
-#include <Protocol\BaseHeader.h>
 #include <memory>
 
+#include <Protocol\TransferredData.h>
+#include <Protocol\BaseHeader.h>
 
 class NetworkStrategy
 {

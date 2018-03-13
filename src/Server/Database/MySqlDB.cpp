@@ -1,6 +1,7 @@
 #include <Database\DbInternals.h>
 
-#include <Logger/Logger.h>
+#include <Logger\Logger.h>
+
 #include "MySqlDB.h"
 
 
