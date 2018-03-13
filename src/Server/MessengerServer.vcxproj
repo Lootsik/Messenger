@@ -101,19 +101,23 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)build\$(Platform)_$(Configuration)\$(ProjectName)\</OutDir>
+    <IntDir>$(SolutionDir)build\$(Platform)_$(Configuration)\$(ProjectName)\intermadiate\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>$(SolutionDir)build\$(Platform)\$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)build\$(ProjectName)_intermediate\$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)build\$(Platform)_$(Configuration)\$(ProjectName)\</OutDir>
+    <IntDir>$(SolutionDir)build\$(Platform)_$(Configuration)\$(ProjectName)\intermadiate\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)build\$(Platform)_$(Configuration)\$(ProjectName)\</OutDir>
+    <IntDir>$(SolutionDir)build\$(Platform)_$(Configuration)\$(ProjectName)\intermadiate\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(SolutionDir)build\$(Platform)\$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)build\$(ProjectName)_intermediate\$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)build\$(Platform)_$(Configuration)\$(ProjectName)\</OutDir>
+    <IntDir>$(SolutionDir)build\$(Platform)_$(Configuration)\$(ProjectName)\intermadiate\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -143,7 +147,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>PugiXml-1.8_debug.lib;Protocol.lib;mysqlcppconn.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>E:\Lib\pugixml-1.8\lib\x64;$(SolutionDir)build\$(Platform)\$(Configuration);E:\Lib\boost_1_60_0_x64\lib64-msvc-14.0;E:\Lib\Mysql C++ connector 1.1.9 x64\vc17 Debug MDD</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>E:\Lib\pugixml-1.8\lib\x64;$(SolutionDir)build\$(Platform)_$(Configuration)\Protocol\;E:\Lib\boost_1_60_0_x64\lib64-msvc-14.0;E:\Lib\Mysql C++ connector 1.1.9 x64\vc17 Debug MDD</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -182,7 +186,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>PugiXml-1.8.lib;Protocol.lib;mysqlcppconn.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>E:\Lib\pugixml-1.8\lib\x64;$(SolutionDir)build\$(Platform)\$(Configuration);E:\Lib\boost_1_60_0_x64\lib64-msvc-14.0;E:\Lib\Mysql C++ connector 1.1.9 x64\vc17 Release MD</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>E:\Lib\pugixml-1.8\lib\x64;$(SolutionDir)build\$(Platform)_$(Configuration)\Protocol\;E:\Lib\boost_1_60_0_x64\lib64-msvc-14.0;E:\Lib\Mysql C++ connector 1.1.9 x64\vc17 Release MD</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
