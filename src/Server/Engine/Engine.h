@@ -28,7 +28,7 @@ public:
 private:
 	void _AutorizededProcess(PConnection& Connection, TransferredData* Data);
 
-
+	void OnRegistration(PConnection& Connection, TransferredData* Data);
 	void OnLogin(PConnection& Connection, TransferredData* Data);
 	void OnLogout(PConnection& Connection, TransferredData* Data);
 	void OnUserInfo(PConnection& Connection, TransferredData* Data);
@@ -43,19 +43,7 @@ private:
 
 	void SendResponce(PConnection& connection, const TransferredData& Result);
 	
-	//void SendMessageUser(Connection* connection, ID_t from, size_t messageNum, Message* mes);
-	//packet already in Connection Writebuff
-	//TODO: rewrite to abstract type
-	template<typename T>
-	bool __MakePacket(PConnection& connection,const T& Item)
-	{
-		uint32_t err = Item.ToBuffer(connection->WriteBuffer().c_array());
-		if ( err )
-			return false;
-	
-		connection->SetBytesToWrite( Item.NeededSize() );
-		return true;
-	}
+
 	bool _MakePacket(PConnection& connection, const TransferredData& Item);
 	void _Send(PConnection& connection);
 

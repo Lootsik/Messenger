@@ -1,17 +1,20 @@
 #include "stdafx.h"
-#include "DialogLogin.h"
 #include <string>
+
 
 #include <Protocol\Types\LoginResponse.h>
 
 #include <boost\asio.hpp>
-DialogLogin::DialogLogin(MessengerAPI& api) :
-								CDialogEx(IDDialogLogin),
+#include "DialogRegistration.h"
+
+
+DialogRegistration::DialogRegistration(MessengerAPI& api) :
+								CDialogEx(IDDialogRegistration),
 								API{ api }
 {
 }
 
-void DialogLogin::DoDataExchange(CDataExchange* pDX)
+void DialogRegistration::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Control(pDX, EditIP, IPEdit);
@@ -20,8 +23,8 @@ void DialogLogin::DoDataExchange(CDataExchange* pDX)
 	SetDlgItemInt(EditPort, 8021);
 }
 
-BEGIN_MESSAGE_MAP(DialogLogin, CDialogEx)
-	ON_BN_CLICKED(IDOK, &DialogLogin::OnBnClickedOk)
+BEGIN_MESSAGE_MAP(DialogRegistration, CDialogEx)
+	ON_BN_CLICKED(IDOK, &DialogRegistration::OnBnClickedOk)
 END_MESSAGE_MAP()
 
 bool UnicodeToAnci(const CString& Wstring, std::string& ANCIString)
@@ -39,7 +42,7 @@ bool UnicodeToAnci(const CString& Wstring, std::string& ANCIString)
 	return Res == false;
 }
 
-void DialogLogin::OnBnClickedOk()
+void DialogRegistration::OnBnClickedOk()
 {
 	CString Login;
 	std::string AnciLogin;
@@ -86,11 +89,6 @@ void DialogLogin::OnBnClickedOk()
 		{
 		case LoginResponse::Success:
 			CDialogEx::OnOK();
-			return;
-			break;
-
-		case LoginResponse::AccInUse:
-			MessageBox(L"Account already in online", L"Error");
 			return;
 			break;
 

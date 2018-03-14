@@ -1,20 +1,20 @@
-#if !defined(LOGINREQUES_H)
+#if !defined(REGISTRATIONREQUES_H)
 /* ========================================================================
    $File: $
    $Date: $
    $Revision: $
    ======================================================================== */
-#define LOGINREQUES_H
+#define REGISTRATIONREQUES_H
 
 #include <string>
 
 #include <Protocol\BaseHeader.h>
 
-class LoginRequest: public BaseHeader
+class RegistrationRequest: public BaseHeader
 {
 public:
-    LoginRequest(const std::string& Login, const std::string& PasswordHash);
-	LoginRequest();
+    RegistrationRequest(const std::string& Login, const std::string& PasswordHash);
+	RegistrationRequest();
 
     //              Overrided
     uint32_t ToBuffer(Byte* Buffer)const override;
@@ -28,7 +28,7 @@ public:
         return _PasswordHash;
     }
 
-    bool operator==(const LoginRequest& rv)const {
+    bool operator==(const RegistrationRequest& rv)const {
         if (BaseHeader::operator==(rv)) {
             return _Login == rv._Login &&
 				_PasswordHash == rv._PasswordHash;
@@ -41,7 +41,7 @@ protected:
 #pragma warning( push )
 #pragma warning( disable : 4200 )
 
-    struct LoginRequestDesc{
+    struct RegistrationRequestDesc{
         BaseHeaderDesc Header;
         uint32_t LoginSize;
 		Byte Data[0];
@@ -51,9 +51,9 @@ protected:
 
     uint32_t CalculateSize() const;
 	//     check
-	uint32_t LoginRequestCheck(const LoginRequestDesc* Buffer, const size_t size)const;
+	uint32_t RegistrationRequestCheck(const RegistrationRequestDesc* Buffer, const size_t size)const;
 private:
-    //LoginRequestDesc LRData;
+    //RegistrationRequestDesc LRData;
     std::string _Login;
     std::string _PasswordHash;
 };

@@ -27,6 +27,7 @@ public:
 	bool Connect(const std::string& Address, unsigned short port);
 
 	int TryLogin(const std::string& Login, const std::string& Pass);
+	int Registration(const std::string& Login, const std::string& Pass);
 
 	// throw Disconnect
 	bool Ready();

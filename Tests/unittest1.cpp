@@ -126,6 +126,13 @@ namespace Tests
 		{
 			TestPacket<LastMessageResponse>(1u,2u);
 		}
-
+		TEST_METHOD(RegistrationRequest_)
+		{
+			TestPacket<RegistrationRequest>("Hello", "0e0175ca988a2e82f09f2b42d98be0848325fc8f5e1ae9b2487188659ffd1887");
+		}
+		TEST_METHOD(RegistrationResponse_)
+		{
+			TestPacket<RegistrationResponse>(3u);
+		}
 	};
 }

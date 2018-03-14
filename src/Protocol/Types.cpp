@@ -20,8 +20,10 @@ static const std::map<uint32_t, ConstructFunc> TypeHandlers = {
 			{ Types::LoginRequest, ConstructTransferable<LoginRequest> },
 			{ Types::LoginRequest, ConstructTransferable<LoginRequest> },
 			{ Types::LoginResponse, ConstructTransferable<LoginResponse> },
-			{ Types::Logout, ConstructTransferable<Logout> }
-			};
+			{ Types::Logout, ConstructTransferable<Logout> },
+			{ Types::RegistrationRequest, ConstructTransferable<RegistrationRequest> },
+			{ Types::RegistrationResponse, ConstructTransferable<RegistrationResponse> },
+		};
 
 
 

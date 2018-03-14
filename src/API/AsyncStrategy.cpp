@@ -98,6 +98,7 @@ void AsyncStrategy::_SolveProblem(const boost::system::error_code& err_code)
 		// connection dropped
 		_Disconnect();
 		_Dropped = true;
+		Connect(ep);
 	}break;
 
 		
@@ -243,6 +244,7 @@ bool AsyncStrategy::Connect(const boost::asio::ip::tcp::endpoint& endpoint)
 
 	_BindMessage();
 	_Connected = true;
+	_Dropped = true;
 
 	return true;
 }
@@ -250,8 +252,8 @@ bool AsyncStrategy::Connect(const boost::asio::ip::tcp::endpoint& endpoint)
 
 bool AsyncStrategy::Ready()
 {
-	if (_Dropped)
-		throw  __ConnectionDropped{};
+	//if (_Dropped)
+	//	throw  __ConnectionDropped{};
 
 	return query.ready();
 }

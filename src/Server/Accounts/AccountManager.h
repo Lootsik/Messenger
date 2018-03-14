@@ -6,11 +6,19 @@
 
 #include <Protocol\Types\LoginRequest.h>
 #include <Protocol\Types\LoginResponse.h>
+#include <Protocol\Types\RegistrationRequest.h>
+#include <Protocol\Types\RegistrationResponse.h>
+
 
 class AccountManager
 {
 public:
 	AccountManager();
+
+
+
+	RegistrationResponse Registration(const RegistrationRequest& Request);
+
 
 
 	LoginResponse Login(const LoginRequest& AuthData);
@@ -29,7 +37,6 @@ public:
 	bool UserOnline(ID_t ID);
 
 	
-	bool AddUser(const std::string& Login, const std::string& Password);
 
 	// maximum sizes of login and pass
 	static const unsigned LoginMax = Storing::LoginSizeMax;

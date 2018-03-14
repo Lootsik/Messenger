@@ -30,7 +30,9 @@ MessengerEngine::MessengerEngine(Network* server)
 	:_Server{ server }, _MessageManager{ _AccountManager }
 	, UnauthorizedOperations
 	{
-		{ Types::LoginRequest, &MessengerEngine::OnLogin }
+		{ Types::LoginRequest, &MessengerEngine::OnLogin },
+		{ Types::RegistrationRequest, &MessengerEngine::OnRegistration },
+
 	}
 	, AuthorizedOperations
 	{
@@ -139,6 +141,20 @@ void MessengerEngine::OnLogin(PConnection& connection, TransferredData* Request)
 	LogLogin(connection, Response);
 #endif
 }
+
+
+
+
+void MessengerEngine::OnRegistration(PConnection& connection, TransferredData* Data)
+{
+	RegistrationResponse Response = _AccountManager.Registration(*static_cast<RegistrationRequest*>(Data));
+	SendResponce(connection, Response);
+}
+
+
+
+
+
 
 void MessengerEngine::OnLogout(PConnection& connection, TransferredData* Packet)
 {

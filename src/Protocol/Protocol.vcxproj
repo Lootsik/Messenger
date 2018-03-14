@@ -21,6 +21,8 @@
   <ItemGroup>
     <ClInclude Include="BaseHeader.h" />
     <ClInclude Include="GlobalInfo.h" />
+    <ClInclude Include="Types\RegistrationResponse.h" />
+    <ClInclude Include="Types\RegistrationRequest.h" />
     <ClInclude Include="Types\LastMessageResponse.h" />
     <ClInclude Include="Types\LoginRequest.h" />
     <ClInclude Include="Types\LoginResponse.h" />
@@ -35,6 +37,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BaseHeader.cpp" />
+    <ClCompile Include="Types\RegistrationResponse.cpp" />
+    <ClCompile Include="Types\RegistrationRequest.cpp" />
     <ClCompile Include="Types.cpp" />
     <ClCompile Include="Types\LastMessageResponse.cpp" />
     <ClCompile Include="Types\LoginRequest.cpp" />

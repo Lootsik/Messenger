@@ -41,10 +41,19 @@ LoginResponse AccountManager::Login( const LoginRequest& AuthData )
 	return LoginResponse{ LoginResponse::Success, id };
 }
 
-// TODO: write
-bool AccountManager::AddUser(const std::string& Login, const std::string& Password)
+
+RegistrationResponse AccountManager::Registration(const RegistrationRequest& Request)
 {
-	return IsAllowedLogin(Login);
+	if( ! IsAllowedLogin(Request.GetLogin()) )
+		return { RegistrationResponse::NotAllowedLogin };
+
+	if (_AccountStorage.IsExist(Request.GetLogin()))
+		return { RegistrationResponse::LoginUsed };
+
+	if (_AccountStorage.NewUser(Request.GetLogin(), Request.GetPasswordHash()))
+		return { RegistrationResponse::Success };
+	else 
+		return { RegistrationResponse::Denied };
 }
 
 

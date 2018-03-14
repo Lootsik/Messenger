@@ -14,6 +14,8 @@
     <ClInclude Include="Types\MessageRequest.h" />
     <ClInclude Include="Types\UserInfo.h" />
     <ClInclude Include="UserInfoRules.h" />
+    <ClInclude Include="Types\RegistrationRequest.h" />
+    <ClInclude Include="Types\RegistrationResponse.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BaseHeader.cpp" />
@@ -26,5 +28,7 @@
     <ClCompile Include="Types\UserInfo.cpp" />
     <ClCompile Include="UserInfoRules.cpp" />
     <ClCompile Include="Types.cpp" />
+    <ClCompile Include="Types\RegistrationRequest.cpp" />
+    <ClCompile Include="Types\RegistrationResponse.cpp" />
   </ItemGroup>
 </Project>

@@ -167,7 +167,7 @@ int MessengerAPI::TryLogin(const std::string& Login, const std::string& Pass)
 			}
 			catch (const Disconnect&)
 			{
-				return TryLogin(Login, hash);
+				int a = 3;
 			}
 		}
 	}
@@ -175,8 +175,48 @@ int MessengerAPI::TryLogin(const std::string& Login, const std::string& Pass)
 	{
 		throw;
 	}
-	//TODO: add 
 	return -1;
+}
+
+int MessengerAPI::Registration(const std::string& Login, const std::string& Pass)
+{
+	std::string hash = PasswordHash(Pass);
+
+	RegistrationRequest Request{ Login, hash };
+
+	_Data->Network->Send(Request);
+	try {
+		for (int i = 0; i < 15; ++i)
+		{
+			try {
+				if (Ready())
+				{
+					auto ptrPacket = GetPacket();
+					const TransferredData* Packet = ptrPacket.get();
+					if (Packet->GetType() == Types::LoginResponse)
+					{
+						const LoginResponse* Response = (const LoginResponse*)Packet;
+						if (Response->GetValue()  == LoginResponse::Success)
+							_Authorized = true;
+
+						return Response->GetValue();
+					}
+
+				}
+				Sleep(200);
+			}
+			catch (const Disconnect&)
+			{
+				return Registration(Login, Pass);
+			}
+		}
+	}
+	catch (const Disconnect&)
+	{
+		throw;
+	}
+	return -1;
+
 }
 
 bool MessengerAPI::Ready() 

@@ -3,7 +3,6 @@
    $File: $
    $Date: $
    $Revision: $
-   $Notice: (C) Copyright 2014 by Molly Rocket, Inc. All Rights Reserved. $
    ======================================================================== */
 
 #define LOGOUT_H
