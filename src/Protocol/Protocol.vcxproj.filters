@@ -6,7 +6,6 @@
     <ClInclude Include="Types.h" />
     <ClInclude Include="TransferredData.h" />
     <ClInclude Include="GlobalInfo.h" />
-    <ClInclude Include="LoginRules.h" />
     <ClInclude Include="Types\LastMessageResponse.h" />
     <ClInclude Include="Types\LoginRequest.h" />
     <ClInclude Include="Types\LoginResponse.h" />
@@ -14,10 +13,10 @@
     <ClInclude Include="Types\Message.h" />
     <ClInclude Include="Types\MessageRequest.h" />
     <ClInclude Include="Types\UserInfo.h" />
+    <ClInclude Include="UserInfoRules.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BaseHeader.cpp" />
-    <ClCompile Include="LoginRules.cpp" />
     <ClCompile Include="Types\LastMessageResponse.cpp" />
     <ClCompile Include="Types\LoginRequest.cpp" />
     <ClCompile Include="Types\LoginResponse.cpp" />
@@ -25,5 +24,6 @@
     <ClCompile Include="Types\Message.cpp" />
     <ClCompile Include="Types\MessageRequest.cpp" />
     <ClCompile Include="Types\UserInfo.cpp" />
+    <ClCompile Include="UserInfoRules.cpp" />
   </ItemGroup>
 </Project>

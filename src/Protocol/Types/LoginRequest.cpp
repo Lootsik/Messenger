@@ -10,8 +10,8 @@
 
 #include "LoginRequest.h"
 
-LoginRequest::LoginRequest(const std::string& Login, const std::string& Password)
-        :BaseHeader(Types::LoginRequest,sizeof(LoginRequestDesc)),_Login{Login},_Password{Password}
+LoginRequest::LoginRequest(const std::string& Login, const std::string& PasswordHash)
+        :BaseHeader(Types::LoginRequest,sizeof(LoginRequestDesc)),_Login{Login}, _PasswordHash{ PasswordHash }
 {
     SetFrameSize(CalculateSize());
 }
@@ -29,7 +29,7 @@ uint32_t LoginRequest::LoginRequestCheck( const LoginRequestDesc* Buffer, const 
         return Result;
 
     if( Buffer->Header.FrameSize !=
-            Buffer->LoginSize + Buffer->PasswordSize +
+            Buffer->LoginSize  + Storing::PasswordHashSize +
                  sizeof( LoginRequestDesc ))
         Result = SerializationError::InvalidData;
 
@@ -39,7 +39,7 @@ uint32_t LoginRequest::LoginRequestCheck( const LoginRequestDesc* Buffer, const 
 uint32_t LoginRequest::CalculateSize() const
 {
     uint32_t res = sizeof(LoginRequestDesc);
-    res += static_cast<uint32_t>( _Login.size() + _Password.size());
+    res += static_cast<uint32_t>( _Login.size() + Storing::PasswordHashSize);
 	return res;
 }
 
@@ -52,10 +52,9 @@ uint32_t LoginRequest::ToBuffer(Byte* Buffer)const
     LoginRequestDesc* AuthData = (LoginRequestDesc*)Buffer;
 
     AuthData->LoginSize = static_cast<uint32_t>(_Login.size());
-    AuthData->PasswordSize = static_cast<uint32_t>(_Password.size());
 
     memcpy(AuthData->Data, _Login.c_str(), AuthData->LoginSize );
-    memcpy(AuthData->Data + AuthData->LoginSize , _Password.c_str(), AuthData->PasswordSize );
+    memcpy(AuthData->Data + AuthData->LoginSize , _PasswordHash.c_str(), Storing::PasswordHashSize);
     return SerializationError::Ok;
 }
 
@@ -71,9 +70,9 @@ uint32_t LoginRequest::FromBuffer(const Byte* Buffer, size_t Capacity)
         return err;
 
     uint32_t LoginSize = AuthData->LoginSize;
-    uint32_t PasswordSize = AuthData->PasswordSize;
+  
     _Login = std::string{ AuthData->Data , AuthData->Data + LoginSize };
-    _Password = std::string{AuthData->Data + LoginSize, AuthData->Data + LoginSize + PasswordSize };
+    _PasswordHash = std::string{AuthData->Data + LoginSize, AuthData->Data + LoginSize + Storing::PasswordHashSize };
 
     return SerializationError::Ok;
 }

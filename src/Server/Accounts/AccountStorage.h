@@ -24,7 +24,7 @@ public:
 
 
     //adding new user 
-    bool NewUser(const std::string& login, const std::string& password);
+    bool NewUser(const std::string& login, const std::string& password_hash);
     
 
 	// TODO: add some info to return value
@@ -39,11 +39,11 @@ public:
 	bool IsExist(const std::string& login);
     
 	
-	
+
 	// check, that is login corresponded to pass,
 	// if yes, returns id of such user, if not - INVALID_ ID
-    size_t VerifyUser(const std::string& login, const std::string& password);
-    
+	size_t VerifyUser(const std::string& login, const std::string& password_hash);
+
 	
 	
 	// returns ID of user with this login,
@@ -70,6 +70,8 @@ public:
 
 
 private:
+
+
 	// initializating of prepared statement
     bool CreatePrepared();
 

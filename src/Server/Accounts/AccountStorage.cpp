@@ -19,7 +19,7 @@ bool AccountStorage::CreatePrepared()
         _Prepared_NewUser = Conn.prepareStatement("CALL NewUser(?,?);");
         _Prepared_DeleteUser = Conn.prepareStatement("CALL DeleteUser(?);");
         _Prepared_IsExist = Conn.prepareStatement("SELECT id FROM " + std::string{ _UsersTable }+" WHERE Login = ?;");
-        _Prepared_IsCorrect = Conn.prepareStatement("SELECT id FROM " + _UsersTable + " WHERE Login = ? AND Password = ?;");
+        _Prepared_IsCorrect = Conn.prepareStatement("SELECT id FROM " + _UsersTable + " WHERE Login = ? AND PasswordHash = ?;");
         _Prepared_GetId = Conn.prepareStatement("SELECT GetId(?);");
         _Prepared_GetLogin = Conn.prepareStatement("SELECT GetLogin(?);");
     }
@@ -40,13 +40,13 @@ AccountStorage::~AccountStorage()
     delete _Prepared_GetLogin;
 }
     
-bool AccountStorage::NewUser(const std::string& login, const std::string& password)
+bool AccountStorage::NewUser(const std::string& login, const std::string& passwordHash)
 {
     try
     {
         _Prepared_NewUser->clearParameters();
         _Prepared_NewUser->setString(1, login);
-        _Prepared_NewUser->setString(2, password);
+        _Prepared_NewUser->setString(2, passwordHash);
         
         _Prepared_NewUser->execute();
     }
@@ -98,7 +98,7 @@ bool AccountStorage::IsExist(const std::string& login)
 }
     
 
-size_t AccountStorage::VerifyUser(const std::string& login, const std::string& password)
+size_t AccountStorage::VerifyUser(const std::string& login, const std::string& password_hash)
 {
     boost::scoped_ptr<sql::ResultSet> _Result;
 
@@ -106,7 +106,7 @@ size_t AccountStorage::VerifyUser(const std::string& login, const std::string& p
     {
         _Prepared_IsCorrect->clearParameters();
         _Prepared_IsCorrect->setString(1, login);
-        _Prepared_IsCorrect->setString(2, password);
+        _Prepared_IsCorrect->setString(2, password_hash);
 
         _Result.reset( _Prepared_IsCorrect->executeQuery());
     }

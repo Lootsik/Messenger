@@ -4,7 +4,10 @@
 misc
 old
 mysqlcppconn.dll
+EnvServer
+EnvClient
 *.exe
+
 
 # User-specific files
 *.suo

@@ -12,6 +12,7 @@
 #include <API\PacketAnalyzer.h>
 
 #include <Protocol\Types.h>
+#include <Protocol\UserInfoRules.h>
 
 using namespace boost::asio;
 
@@ -140,7 +141,10 @@ bool MessengerAPI::Connect(const std::string& Address, unsigned short port)
 
 int MessengerAPI::TryLogin(const std::string& Login, const std::string& Pass)
 {
-	LoginRequest Request{ Login, Pass };
+	std::string hash = PasswordHash(Pass);
+
+	LoginRequest Request{ Login, hash };
+
 	_Data->Network->Send(Request);
 	try {
 		for (int i = 0; i < 15; ++i)
@@ -164,7 +168,7 @@ int MessengerAPI::TryLogin(const std::string& Login, const std::string& Pass)
 			}
 			catch (const Disconnect&)
 			{
-				return TryLogin(Login, Pass);
+				return TryLogin(Login, hash);
 			}
 		}
 	}

@@ -14,7 +14,7 @@
 class LoginRequest: public BaseHeader
 {
 public:
-    LoginRequest(const std::string& Login, const std::string& Password);
+    LoginRequest(const std::string& Login, const std::string& PasswordHash);
 	LoginRequest();
 
     //              Overrided
@@ -25,14 +25,14 @@ public:
     const std::string& GetLogin()const{
         return _Login;
     }
-    const std::string& GetPassword()const{
-        return _Password;
+    const std::string& GetPasswordHash()const{
+        return _PasswordHash;
     }
 
     bool operator==(const LoginRequest& rv)const {
         if (BaseHeader::operator==(rv)) {
             return _Login == rv._Login &&
-                _Password == rv._Password;
+				_PasswordHash == rv._PasswordHash;
             }
         return false;
     }
@@ -45,7 +45,6 @@ protected:
     struct LoginRequestDesc{
         BaseHeaderDesc Header;
         uint32_t LoginSize;
-        uint32_t PasswordSize;
 		Byte Data[0];
 	};
 
@@ -57,6 +56,6 @@ protected:
 private:
     //LoginRequestDesc LRData;
     std::string _Login;
-    std::string _Password;
+    std::string _PasswordHash;
 };
 #endif

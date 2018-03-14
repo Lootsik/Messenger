@@ -3,7 +3,6 @@
 
 #include <Protocol\Types.h>
 
-
 #include <thread>
 
 #include <API/Query.h>
@@ -28,7 +27,7 @@ void TestPacket(Args... args)
 namespace Tests
 {		
 
-	TEST_CLASS(QueryTest)
+	TEST_CLASS(misc)
 	{
 	public:
 		TEST_METHOD(AsyncQuery)
@@ -98,7 +97,7 @@ namespace Tests
 		
 		TEST_METHOD(LoginRequest_)
 		{
-			TestPacket<LoginRequest>("Hello", "world");
+			TestPacket<LoginRequest>("Hello", "0e0175ca988a2e82f09f2b42d98be0848325fc8f5e1ae9b2487188659ffd1887");
 		}
 		TEST_METHOD(LastMessageResponse_)
 		{

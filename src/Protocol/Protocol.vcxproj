@@ -24,7 +24,7 @@
     <ClInclude Include="Types\LastMessageResponse.h" />
     <ClInclude Include="Types\LoginRequest.h" />
     <ClInclude Include="Types\LoginResponse.h" />
-    <ClInclude Include="LoginRules.h" />
+    <ClInclude Include="UserInfoRules.h" />
     <ClInclude Include="Types\Logout.h" />
     <ClInclude Include="Types\MessageRequest.h" />
     <ClInclude Include="Types\Message.h" />
@@ -38,7 +38,7 @@
     <ClCompile Include="Types\LastMessageResponse.cpp" />
     <ClCompile Include="Types\LoginRequest.cpp" />
     <ClCompile Include="Types\LoginResponse.cpp" />
-    <ClCompile Include="LoginRules.cpp" />
+    <ClCompile Include="UserInfoRules.cpp" />
     <ClCompile Include="Types\Logout.cpp" />
     <ClCompile Include="Types\MessageRequest.cpp" />
     <ClCompile Include="Types\Message.cpp" />
@@ -99,22 +99,22 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)build\$(Platform)_$(Configuration)\$(ProjectName)\</OutDir>
-    <IntDir>$(SolutionDir)build\$(Platform)_$(Configuration)\$(ProjectName)\intermadiate\</IntDir>
+    <IntDir>$(SolutionDir)build\$(Platform)_$(Configuration)\$(ProjectName)\intermediate\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)build\$(Platform)_$(Configuration)\$(ProjectName)\</OutDir>
-    <IntDir>$(SolutionDir)build\$(Platform)_$(Configuration)\$(ProjectName)\intermadiate\</IntDir>
+    <IntDir>$(SolutionDir)build\$(Platform)_$(Configuration)\$(ProjectName)\intermediate\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)build\$(Platform)_$(Configuration)\$(ProjectName)\</OutDir>
-    <IntDir>$(SolutionDir)build\$(Platform)_$(Configuration)\$(ProjectName)\intermadiate\</IntDir>
+    <IntDir>$(SolutionDir)build\$(Platform)_$(Configuration)\$(ProjectName)\intermediate\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)build\$(Platform)_$(Configuration)\$(ProjectName)\</OutDir>
-    <IntDir>$(SolutionDir)build\$(Platform)_$(Configuration)\$(ProjectName)\intermadiate\</IntDir>
+    <IntDir>$(SolutionDir)build\$(Platform)_$(Configuration)\$(ProjectName)\intermediate\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -140,12 +140,19 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)src\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)src\;E:\Lib\openssl\inc32</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <Lib>
+      <AdditionalDependencies>libeay32.lib;ssleay32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>E:\Lib\openssl\out32dll;</AdditionalLibraryDirectories>
+    </Lib>
+    <ProjectReference>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -175,7 +182,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)src\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)src\;E:\Lib\openssl\inc32</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

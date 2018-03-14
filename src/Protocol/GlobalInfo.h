@@ -3,6 +3,8 @@
 #include <string>
 #include <algorithm>
 
+#include <openssl/sha.h>
+
 typedef uint8_t Byte;
 typedef std::wstring MessageContent;
 
@@ -16,6 +18,7 @@ namespace Storing
 	const unsigned LoginSizeMax = 250;
 	// removed soon
 	const unsigned PasswordSizeMax = 250;
+	const unsigned PasswordHashSize = SHA256_DIGEST_LENGTH * 2;
 
 	const unsigned MessageSizeMax = 500;
 }

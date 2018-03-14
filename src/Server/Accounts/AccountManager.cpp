@@ -1,4 +1,4 @@
-#include <Protocol\LoginRules.h>
+#include <Protocol\UserInfoRules.h>
 
 #include "AccountManager.h"
 
@@ -10,10 +10,10 @@ AccountManager::AccountManager(){}
 ID_t AccountManager::VerifyAccount(const LoginRequest& AuthData)
 {
 	if (BytesContain(AuthData.GetLogin()) > LoginMax ||
-			BytesContain(AuthData.GetPassword()) > PasswordMax)
+			BytesContain(AuthData.GetPasswordHash()) > Storing::PasswordHashSize)
 		return INVALID_ID;
 
-	size_t id = _AccountStorage.VerifyUser(AuthData.GetLogin(), AuthData.GetPassword());
+	size_t id = _AccountStorage.VerifyUser(AuthData.GetLogin(), AuthData.GetPasswordHash());
 	
 	return static_cast<uint32_t>(id);
 }
@@ -23,7 +23,7 @@ ID_t AccountManager::VerifyAccount(const LoginRequest& AuthData)
 LoginResponse AccountManager::Login( const LoginRequest& AuthData )
 {
 	if (BytesContain(AuthData.GetLogin()) > LoginMax ||
-			BytesContain(AuthData.GetPassword()) > PasswordMax)
+			BytesContain(AuthData.GetPasswordHash()) != Storing::PasswordHashSize)
 		return { LoginResponse::Wrong };
 
 	ID_t id = VerifyAccount(AuthData);
