@@ -24,12 +24,35 @@ void TestPacket(Args... args)
 	Assert::IsTrue(mes1 == mes2, L"Not equal");
 }
 
+template<typename T, typename... Args>
+void TestFormBuffer(Args... args)
+{
+	T mes1{ args... };
+	Byte Buff[512];
+	mes1.ToBuffer(Buff);
+
+	TransferredData* Td;
+	if (Types::FromBuffer(Buff, mes1.NeededSize(), Td))
+		Assert::IsTrue(false);
+
+
+
+	Assert::IsTrue(mes1 == *static_cast<T*>(mes2), L"Not equal");
+}
+
+
+
+
 namespace Tests
 {		
 
 	TEST_CLASS(misc)
 	{
 	public:
+		TEST_METHOD(FromBuffer)
+		{
+			TestPacket<LoginRequest>("Hello", "0e0175ca988a2e82f09f2b42d98be0848325fc8f5e1ae9b2487188659ffd1887");
+		}
 		TEST_METHOD(AsyncQuery)
 		{
 			Query<std::string> query;

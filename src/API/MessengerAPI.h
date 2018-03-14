@@ -30,7 +30,7 @@ public:
 
 	// throw Disconnect
 	bool Ready();
-	std::shared_ptr<BaseHeader>  GetPacket();
+	std::shared_ptr<TransferredData>  GetPacket();
 
 
 

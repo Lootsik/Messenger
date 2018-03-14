@@ -6,13 +6,13 @@
 #include <Accounts\AccountManager.h>
 #include <Messages\MessageManager.h>
 #include <Protocol\GlobalInfo.h>
-#include <Protocol\Types\MessageRequest.h>
+#include <Protocol\Types.h>
 
 
 class Network;
 
 class MessengerEngine;
-using MemFn = std::function<void(MessengerEngine*, PConnection&)>;
+using MemFn = std::function<void(MessengerEngine*, PConnection&, TransferredData*)>;
 
 //class Message;
 class MessengerEngine
@@ -23,18 +23,18 @@ public:
 	AccountManager& Accounts(){	return _AccountManager;}
 	
 	void AnalyzePacket(PConnection Connection);
-	void ForceLogout(PConnection& connection) { OnLogout(connection); }
+	void ForceLogout(PConnection& connection);
 
 private:
-	void _AutorizededProcess(PConnection& Connection);
+	void _AutorizededProcess(PConnection& Connection, TransferredData* Data);
 
 
-	void OnLogin(PConnection& Connection);
-	void OnLogout(PConnection& Connection);
-	void OnUserInfo(PConnection& Connection);
+	void OnLogin(PConnection& Connection, TransferredData* Data);
+	void OnLogout(PConnection& Connection, TransferredData* Data);
+	void OnUserInfo(PConnection& Connection, TransferredData* Data);
 
-	void OnMessage(PConnection& Connection);
-	void OnMessageRequest(PConnection& Connection);
+	void OnMessage(PConnection& Connection, TransferredData* Data);
+	void OnMessageRequest(PConnection& Connection, TransferredData* Data);
 
 
 	void OnMessageRequest_M(PConnection& connection, MessageRequest& Request);
@@ -47,7 +47,7 @@ private:
 	//packet already in Connection Writebuff
 	//TODO: rewrite to abstract type
 	template<typename T>
-	bool _MakePacket(PConnection& connection,const T& Item)
+	bool __MakePacket(PConnection& connection,const T& Item)
 	{
 		uint32_t err = Item.ToBuffer(connection->WriteBuffer().c_array());
 		if ( err )
@@ -56,6 +56,7 @@ private:
 		connection->SetBytesToWrite( Item.NeededSize() );
 		return true;
 	}
+	bool _MakePacket(PConnection& connection, const TransferredData& Item);
 	void _Send(PConnection& connection);
 
 

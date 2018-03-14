@@ -25,5 +25,6 @@
     <ClCompile Include="Types\MessageRequest.cpp" />
     <ClCompile Include="Types\UserInfo.cpp" />
     <ClCompile Include="UserInfoRules.cpp" />
+    <ClCompile Include="Types.cpp" />
   </ItemGroup>
 </Project>

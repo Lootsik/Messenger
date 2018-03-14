@@ -21,11 +21,9 @@
   <ItemGroup>
     <ClCompile Include="MessengerAPI.cpp" />
     <ClCompile Include="AsyncStrategy.cpp" />
-    <ClCompile Include="PacketAnalyzer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="NetworkStrategy.h" />
-    <ClInclude Include="PacketAnalyzer.h" />
     <ClInclude Include="Query.h" />
     <ClInclude Include="MessengerAPI.h" />
     <ClInclude Include="AsyncStrategy.h" />

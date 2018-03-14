@@ -3,10 +3,11 @@
 
 misc
 old
-mysqlcppconn.dll
 EnvServer
 EnvClient
+EnvTest
 *.exe
+*.dll
 
 
 # User-specific files

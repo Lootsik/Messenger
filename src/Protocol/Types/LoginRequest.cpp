@@ -45,6 +45,9 @@ uint32_t LoginRequest::CalculateSize() const
 
 uint32_t LoginRequest::ToBuffer(Byte* Buffer)const
 {
+	if (_PasswordHash.size() != Storing::PasswordHashSize)
+		return SerializationError::InvalidData;
+
 	uint32_t err = BaseHeader::ToBuffer(Buffer);
     if( err )
         return err;

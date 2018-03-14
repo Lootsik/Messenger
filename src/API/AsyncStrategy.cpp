@@ -3,6 +3,8 @@
 #include <Protocol\BaseHeader.h>
 #include <Protocol\GlobalInfo.h>
 #include <Protocol\TransferredData.h>
+#include <Protocol\Types.h>
+#include <Protocol\SerializationError.h>
 
 #include "AsyncStrategy.h"
 
@@ -31,8 +33,8 @@ static size_t BytesToReceive(size_t FrameSize)
 	****************************************
 */
 
-AsyncStrategy::AsyncStrategy(PacketAnalyzer analyzer, MessengerAPI& api)
-	:Analyzer{ analyzer }, API{api},
+AsyncStrategy::AsyncStrategy( MessengerAPI& api)
+				: API{api},
 	Worker{ [&]() {
 				_BindTimer();
 				service.run();
@@ -65,18 +67,18 @@ void AsyncStrategy::Release()
 
 void AsyncStrategy::_CheckPacket(const Byte* packet, size_t size)
 {
-	auto Data = Analyzer.Analyze(packet, size);
-	// deserialization fail
-	if (Data == nullptr)
+	TransferredData* Transferred{};
+	if (Types::FromBuffer(packet, size, Transferred) != SerializationError::Ok)
 		return;
 
+
 	// if false, user need to see this
-	if (! API.Process(Data))
+	if (! API.Process(Transferred))
 	{
-		query.push_back(Data);
+		query.push_back(Transferred);
 	}
 	else {
-		delete Data;
+		delete Transferred;
 	}
 }
 
@@ -195,7 +197,7 @@ void AsyncStrategy::_AcceptMessageRemainder(const boost::system::error_code& err
 	_BindMessage();
 }
 
-BaseHeader* AsyncStrategy::GetPacket()
+TransferredData* AsyncStrategy::GetPacket()
 {
 	try
 	{
@@ -273,7 +275,7 @@ bool AsyncStrategy::Send(const TransferredData& Data)
 		try {
 			Connect(ep);
 		}
-		catch (NetworkTrouble){
+		catch (__ConnectionRefused){
 			if (_Dropped)
 				return false;
 			else

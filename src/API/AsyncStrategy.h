@@ -8,30 +8,28 @@
 #include <Protocol\GlobalInfo.h>
 #include <Protocol\BaseHeader.h>
 
-#include <API\PacketAnalyzer.h>
 #include <API\MessengerAPI.h>
 #include <API\NetworkStrategy.h>
 #include <API\Query.h>
 
-using PacketQuery = Query<BaseHeader*>;
+using PacketQuery = Query<TransferredData*>;
 
 class AsyncStrategy :
 	public NetworkStrategy
 {
 public:
 
-	AsyncStrategy(PacketAnalyzer analyzer, MessengerAPI& api);
+	AsyncStrategy( MessengerAPI& api);
 	virtual ~AsyncStrategy();
 
 	bool Connect(const std::string& Address, unsigned short port) override;
 
 	bool Ready() override;
-	BaseHeader* GetPacket() override;
+	TransferredData* GetPacket() override;
 
 
 	bool Send(const TransferredData& Data) override;
 	void Release() override;
-	//bool Connected 
 
 	class NetworkTrouble {
 	public:
@@ -74,7 +72,6 @@ private:
 		Data 
 	*/
 	PacketQuery query;
-	PacketAnalyzer Analyzer;
 
 	boost::array <Byte, PacketMaxSize> WriteBuff;
 	boost::array <Byte, PacketMaxSize> ReadBuff;

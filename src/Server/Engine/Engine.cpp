@@ -15,6 +15,7 @@
 
 using namespace Logger;
 
+
 //TODO: remove this
 static void LogLogin(const PConnection& connection, const LoginResponse& Result)
 {
@@ -50,43 +51,50 @@ MessengerEngine::MessengerEngine(Network* server)
 //basic check and call function to process unauthorized request
 void MessengerEngine::AnalyzePacket(PConnection connection)
 {
-	
-	if (!BaseHeader::MinimumCheck(connection->BytesToRead())){
+	TransferredData* Data;
+	if (Types::FromBuffer(connection->Packet(), connection->BytesToRead(), Data) !=
+														SerializationError::Ok)
+	{
 #if _LOGGING_ 
-		Log(Mistake, "[%s] - Packet wrong marking. Size %Iu bytes",
-						connection->ConnectionString().c_str(), connection->BytesToRead());
+		Log(Mistake, "[%s] - Wrong packet. Size %Iu bytes",
+			connection->ConnectionString().c_str(), connection->BytesToRead());
 #endif
+
 		return;
 	}
+
 
 	if (connection->Account().Online())
 	{
-		_AutorizededProcess(connection);
+		_AutorizededProcess(connection, Data);
+		delete Data;
 		return;
 	}
 
-	auto ProcessFunc = UnauthorizedOperations.find(
-			BaseHeader::BufferType(connection->Packet()));
+	auto ProcessFunc = UnauthorizedOperations.find(Data->GetType());
 
 	//wrong type
 	if (ProcessFunc == UnauthorizedOperations.end())
 	{
 		//TODO: add string to describe types of packet 
+#if _LOGGING_ 
 		Log(Mistake, "[%s] Wrong packet type forom unauthorized packet type #",
 							connection->ConnectionString().c_str());
+#endif
 
 		return;
 	}
 
-	ProcessFunc->second(this, connection);
+	ProcessFunc->second(this, connection, Data);
+
+	delete Data;
 }
 
 
 //find and call function to process 
-void MessengerEngine::_AutorizededProcess(PConnection& connection)
+void MessengerEngine::_AutorizededProcess(PConnection& connection, TransferredData* Data)
 {
-	auto ProcessFunc = AuthorizedOperations.find(
-		BaseHeader::BufferType(connection->Packet()));
+	auto ProcessFunc = AuthorizedOperations.find(Data->GetType());
 
 	//wrong type
 	if (ProcessFunc == AuthorizedOperations.end())
@@ -98,7 +106,7 @@ void MessengerEngine::_AutorizededProcess(PConnection& connection)
 		return;
 	}
 
-	ProcessFunc->second(this, connection);
+	ProcessFunc->second(this, connection,Data);
 }
 
 
@@ -109,19 +117,9 @@ void MessengerEngine::_AutorizededProcess(PConnection& connection)
 */
 	
 
-void MessengerEngine::OnLogin(PConnection& connection)
+void MessengerEngine::OnLogin(PConnection& connection, TransferredData* Request)
 {
-	LoginRequest Request;
-
-	uint32_t err = Request.FromBuffer(connection->Packet(), connection->BytesToRead());
-	if(err){
-		Log(Mistake, "[%s] Error when unpacking login request",
-			connection->ConnectionString().c_str());
-
-		return;
-	}
-
-	LoginResponse Response = _AccountManager.Login(Request);
+	LoginResponse Response = _AccountManager.Login(*static_cast<LoginRequest*>(Request));
 
 	SendResponce(connection, Response);
 
@@ -142,7 +140,7 @@ void MessengerEngine::OnLogin(PConnection& connection)
 #endif
 }
 
-void MessengerEngine::OnLogout(PConnection& connection)
+void MessengerEngine::OnLogout(PConnection& connection, TransferredData* Packet)
 {
 	_AccountManager.Logout(connection->Account().ID());
 	connection->Account().Reset();
@@ -155,6 +153,17 @@ void MessengerEngine::_Send(PConnection& Connection)
 	_Server->Send(Connection);
 }
 
+bool MessengerEngine::_MakePacket(PConnection& connection, const TransferredData& Item)
+{
+	uint32_t err = Item.ToBuffer(connection->WriteBuffer().c_array());
+	if (err)
+		return false;
+
+	connection->SetBytesToWrite(Item.NeededSize());
+	return true;
+}
+
+
 void MessengerEngine::SendResponce(PConnection& connection, const TransferredData& Result)
 {
 	if (!_MakePacket(connection, Result))
@@ -166,52 +175,34 @@ void MessengerEngine::SendResponce(PConnection& connection, const TransferredDat
 	_Send(connection);
 }
 
-void MessengerEngine::OnUserInfo(PConnection& connection)
+void MessengerEngine::OnUserInfo(PConnection& connection, TransferredData* User)
 {
-	UserInfo Users;
-
-	uint32_t err = Users.FromBuffer(connection->Packet(), connection->BytesToRead());
-	if (err) {
-		Log(Mistake, "[%s] Error when unpacking User info",
-			connection->ConnectionString().c_str());
-		return;
-	}
-
-	std::string login = _AccountManager.FindLogin(Users.GetId());
+	std::string login = _AccountManager.FindLogin(static_cast<UserInfo*>(User)->GetId());
 	//there is no user with such id
 	//if (login == "")
 		//return;
 
-	UserInfo ReturnInfo{ Users.GetId(), login };
+	UserInfo ReturnInfo{ static_cast<UserInfo*>(User)->GetId(), login };
 
 	SendResponce(connection, ReturnInfo);
 }
 
 
-void MessengerEngine::OnMessage(PConnection& connection)
+void MessengerEngine::OnMessage(PConnection& connection, TransferredData* mess)
 {
-	Message message;
-	int err = message.FromBuffer(connection->Packet(),
-						connection->BytesToRead());
-	if (err) {
-		Log(Mistake, "[%s] Error when unpacking Mesage",
-			connection->ConnectionString().c_str());
-
-		return;
-	}
-
-	if (message.Sender() != connection->Account().ID())
+	auto message = static_cast<Message*>(mess);
+	if (message->Sender() != connection->Account().ID())
 	{
 		Log(Mistake, "Sended message not from %s", connection->ConnectionString().c_str());
 	}
 
-	_MessageManager.PostMessageUser(message.Sender(), message.Receiver(), message.Content());
-	auto NewMess =_MessageManager.GetMessageUser(message.Sender(), message.Receiver(), 
-						_MessageManager.GetLastMessageID(message.Sender(), message.Receiver(), message.Sender()).GetMessageId());
+	_MessageManager.PostMessageUser(message->Sender(), message->Receiver(), message->Content());
+	auto NewMess =_MessageManager.GetMessageUser(message->Sender(), message->Receiver(), 
+						_MessageManager.GetLastMessageID(message->Sender(), message->Receiver(), message->Sender()).GetMessageId());
 	// send to sender
 	SendResponce(connection, NewMess);
 
-	auto User = _Server->FindConnected(message.Receiver());
+	auto User = _Server->FindConnected(message->Receiver());
 	if (User == nullptr)
 		return;
 
@@ -220,26 +211,20 @@ void MessengerEngine::OnMessage(PConnection& connection)
 }
 
 // parse packet 
-void MessengerEngine::OnMessageRequest(PConnection& connection)
+void MessengerEngine::OnMessageRequest(PConnection& connection, TransferredData* request)
 {
-	MessageRequest Request;
-	int err = Request.FromBuffer(connection->Packet(),
-							connection->BytesToRead());
-	if (err) {
-		return;
-	}
-
+	auto Request = static_cast<MessageRequest*>(request);
 	//TODO: divide message request 
-	switch (Request.GetRequestType())
+	switch (Request->GetRequestType())
 	{
 	case MessageRequest::Message:
 	{
-		OnMessageRequest_M(connection, Request);
+		OnMessageRequest_M(connection, *Request);
 	}break;
 
 	case MessageRequest::LastMessageID:
 	{
-		OnLastMessage(connection, Request);
+		OnLastMessage(connection, *Request);
 	}break;
 
 	default:
@@ -270,4 +255,10 @@ void MessengerEngine::OnLastMessage(PConnection& connection, MessageRequest& Req
 	Log(Action, "[%s] - Last message sended", connection->ConnectionString().c_str());
 #endif // _LOGGING_
 	SendResponce(connection, Response);
+}
+
+
+void MessengerEngine::ForceLogout(PConnection& connection)
+{
+	OnLogout(connection,nullptr); 
 }

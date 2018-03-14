@@ -12,6 +12,8 @@
 
 namespace Types
 {
+uint32_t FromBuffer(const Byte* Buffer, const size_t Capacity, TransferredData*& Transferable);
+
 	enum Types {
 		NotType = 0,
 		PrevOperationDenied,

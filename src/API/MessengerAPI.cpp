@@ -9,7 +9,6 @@
 
 #include <API\AsyncStrategy.h>
 #include <API\NetworkStrategy.h>
-#include <API\PacketAnalyzer.h>
 
 #include <Protocol\Types.h>
 #include <Protocol\UserInfoRules.h>
@@ -30,7 +29,7 @@ MessengerAPI::MessengerAPI()
 {
 	try {
 		_Data = new APIData;
-		_Data->Network = new AsyncStrategy(PacketAnalyzer{},*this);
+		_Data->Network = new AsyncStrategy(*this);
 	}
 	catch (...)
 	{
@@ -193,9 +192,9 @@ bool MessengerAPI::Ready()
 
 
 
-std::shared_ptr<BaseHeader> MessengerAPI::GetPacket()
+std::shared_ptr<TransferredData> MessengerAPI::GetPacket()
 {
-	return std::shared_ptr<BaseHeader>{ _Data->Network->GetPacket() };
+	return std::shared_ptr<TransferredData>{ _Data->Network->GetPacket() };
 }
 
 void MessengerAPI::Quit()
